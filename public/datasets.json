@@ -1,0 +1,63 @@
+[
+{
+    "id": 101,
+    "name": "Climate-ERA5-Subset",
+    "description": "ERA5 2m temperature over Europe for 2018-01, hourly, 0.25° grid.",
+    "links": [
+        "https://app.box.com/s/abcd1234efgh5678"
+    ],
+    "size": "2.1 GB",
+    "tags": ["climate", "netCDF", "float32"],
+    "source_issue": "https://github.com/guoxiliu/Z-Hub/issues/101",
+    "submitted_by": "alice"
+},
+  {
+    "id": 102,
+    "name": "CFD-ScalarField-512^3",
+    "description": "Steady-state CFD scalar field snapshots at 512^3 resolution (10 timesteps).",
+    "links": [
+      "https://s3.amazonaws.com/example-bucket/cfd/scalar-512_t000.npz",
+      "https://s3.amazonaws.com/example-bucket/cfd/scalar-512_t009.npz"
+    ],
+    "size": "850 MB",
+    "tags": ["cfd", "numpy", "float64"],
+    "source_issue": "https://github.com/guoxiliu/Z-Hub/issues/102",
+    "submitted_by": "bob"
+  },
+  {
+    "id": 103,
+    "name": "Seismic-3D-Volume",
+    "description": "Synthetic seismic 3D cube for compression benchmarking (SEG-Y export included).",
+    "links": [
+      "https://figshare.com/s/abcd1234efgh5678"
+    ],
+    "size": "3.7 GB",
+    "tags": ["seismic", "SEG-Y", "int16"],
+    "source_issue": "https://github.com/guoxiliu/Z-Hub/issues/103",
+    "submitted_by": "carol"
+  },
+  {
+    "id": 104,
+    "name": "Microscopy-EM-Stack",
+    "description": "Electron microscopy tilt-series aligned stack (1024x1024x400).",
+    "links": [
+      "https://osf.io/download/xyz12/"
+    ],
+    "size": "1.4 GB",
+    "tags": ["microscopy", "tiff", "uint16"],
+    "source_issue": "https://github.com/guoxiliu/Z-Hub/issues/104",
+    "submitted_by": "dana"
+  },
+  {
+    "id": 105,
+    "name": "Weather-Radar-CAPPI",
+    "description": "Composite reflectivity CAPPI volume for a severe weather day, 1 km grid.",
+    "links": [
+      "https://drive.google.com/uc?id=1AbcDeFgHiJkLmNoP&export=download"
+    ],
+    "size": "620 MB",
+    "tags": ["radar", "HDF5", "float32"],
+    "source_issue": "https://github.com/guoxiliu/Z-Hub/issues/105",
+    "submitted_by": "eric"
+  }
+]

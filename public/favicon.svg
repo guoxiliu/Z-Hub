@@ -1,0 +1,23 @@
+<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="120" cy="120" r="120" fill="#42b983"/>
+
+  <!-- Top stroke of Z -->
+  <line x1="60" y1="60" x2="180" y2="60"
+        stroke="white" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Bottom stroke of Z -->
+  <line x1="60" y1="180" x2="180" y2="180"
+        stroke="white" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Diagonal made of rings (replaces solid stroke) -->
+  <g fill="none" stroke="white" stroke-width="6">
+    <circle cx="165" cy="75" r="10"/>
+    <circle cx="150" cy="90" r="10"/>
+    <circle cx="135" cy="105" r="10"/>
+    <circle cx="120" cy="120" r="10"/>
+    <circle cx="105" cy="135" r="10"/>
+    <circle cx="90" cy="150" r="10"/>
+    <circle cx="75" cy="165" r="10"/>
+  </g>
+</svg>

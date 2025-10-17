@@ -1,0 +1,52 @@
+name: "Dataset submission"
+description: "Submit a dataset to be listed on Z-Hub"
+title: "Dataset: <name>"
+labels: ["dataset"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Dataset name
+      description: The display name for your dataset.
+      placeholder: e.g., Climate-ERA5-Subset
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A short description of the dataset and its purpose.
+      placeholder: What is this dataset? What variables/shapes? Any notes for compressor testing?
+    validations:
+      required: true
+  - type: textarea
+    id: links
+    attributes:
+      label: Data URL(s)
+      description: One or more links where the data can be downloaded (one per line). Host on Zenodo, Figshare, OSF, S3, etc.
+      placeholder: |
+        https://zenodo.org/record/...
+        https://s3.amazonaws.com/bucket/key
+    validations:
+      required: true
+  - type: input
+    id: size
+    attributes:
+      label: Size
+      description: Approximate dataset size (e.g., 2.1 GB)
+      placeholder: e.g., 2.1 GB
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated tags.
+      placeholder: climate, netCDF, float32
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I confirm I have rights to share these download links.
+          required: true
+        - label: I understand files are not stored in this repository; only links and metadata are listed.
+          required: true

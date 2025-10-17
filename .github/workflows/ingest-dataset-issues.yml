@@ -1,0 +1,69 @@
+name: Ingest dataset issues
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  ingest:
+    if: contains(github.event.issue.labels.*.name, 'dataset')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract fields
+        id: extract
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue
+            const body = issue.body || ''
+            function getField(id, label){
+              const pattern = new RegExp(`(?<=^### ${label}\n)[\s\S]*?(?=\n### |$)`, 'm')
+              const m = body.match(pattern)
+              return m ? m[0].trim() : ''
+            }
+            const rec = {
+              id: issue.number,
+              name: getField('name', 'Dataset name') || issue.title.replace(/^Dataset:\s*/,'').trim(),
+              description: getField('description', 'Description'),
+              links: getField('links', 'Data URL(s)').split(/\s+/).filter(Boolean),
+              size: getField('size', 'Size'),
+              tags: getField('tags', 'Tags').split(/[,\s]+/).filter(Boolean),
+              source_issue: issue.html_url,
+              submitted_by: issue.user && issue.user.login
+            }
+            core.setOutput('record', JSON.stringify(rec))
+
+      - name: Update datasets.json
+        id: update
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = 'public/datasets.json';
+          const rec = JSON.parse(process.env.REC);
+          let arr = [];
+          if (fs.existsSync(path)) {
+            arr = JSON.parse(fs.readFileSync(path, 'utf8'));
+          }
+          const idx = arr.findIndex(x => x.id === rec.id);
+          if (idx >= 0) arr[idx] = rec; else arr.unshift(rec);
+          fs.writeFileSync(path, JSON.stringify(arr, null, 2));
+          "
+        env:
+          REC: ${{ steps.extract.outputs.record }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore(datasets): ingest #${{ github.event.issue.number }}"
+          title: "Ingest dataset #${{ github.event.issue.number }}"
+          body: "Automated update of public/datasets.json from dataset issue."
+          branch: "ingest/dataset-${{ github.event.issue.number }}"
+          base: ${{ github.ref_name }}
