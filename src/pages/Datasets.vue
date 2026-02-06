@@ -262,6 +262,31 @@ function hostname(lnk) {
           <div class="accordion-body">
             <div v-if="sdrError" class="alert alert-warning" role="alert">{{ sdrError }}</div>
 
+            <!-- Important Note about SDRBench Usage -->
+            <div class="alert alert-info mb-4" role="alert">
+              <h6 class="alert-heading fw-bold mb-3">Important: When publishing results from one or more datasets presented in this webpage, please:</h6>
+              <ul class="mb-0">
+                <li class="mb-2">
+                  <strong>Cite:</strong> SDRBench: <a href="https://sdrbench.github.io" target="_blank" rel="noopener" class="alert-link">https://sdrbench.github.io</a>
+                </li>
+                <li class="mb-2">
+                  <strong>Please also cite:</strong> K. Zhao, S. Di, X. Liang, S. Li, D. Tao, J. Bessac, Z. Chen, and F. Cappello, "SDRBench: Scientific Data Reduction Benchmark for Lossy Compressors", International Workshop on Big Data Reduction (IWBDR2020), in conjunction with IEEE Bigdata20.
+                </li>
+                <li class="mb-2">
+                  <strong>Acknowledge:</strong> the source of the dataset you used, the DOE NNSA ECP project, and the ECP CODAR project.
+                </li>
+                <li class="mb-2">
+                  <strong>Check:</strong> the condition of publications (some dataset sources request prior check)
+                </li>
+                <li class="mb-2">
+                  <strong>Contact:</strong> the compressor authors to get the correct compressor configuration according to each dataset and each comparison metrics.
+                </li>
+                <li>
+                  <strong>Dimension:</strong> the order of the dimensions shown in the 'Format' column of the table is in row-major order (aka. C order), which is consistent with well-known I/O libraries such as HDF5. For example, for the CESM-ATM dataset (1800 × 3600), 1800 is higher dimension (changing slower) and 3600 is lower dimension (changing faster). For most compressors (such as SZ, ZFP and FPZIP), the dimensions should be given in the reverse order (such as <code>-2 3600 1800</code>) for their executables. If you are not sure about the order of dimension, one simple method is trying different dimension orders and selecting the results with highest compression ratios.
+                </li>
+              </ul>
+            </div>
+
             <!-- Original SDRBench table (sanitized) -->
             <div class="table-responsive mb-4">
               <table class="table table-bordered align-middle" style="min-width: 1000px;">
@@ -271,7 +296,6 @@ function hostname(lnk) {
                     <th class="text-center" style="width: 121px; color:#0070c0;">Type</th>
                     <th class="text-center" style="width: 297px; color:#0070c0;">Format</th>
                     <th class="text-center" style="width: 116px; color:#0070c0;">Size (data)</th>
-                    <th class="text-center" style="width: 234px; color:#0070c0;">Command Examples</th>
                     <th class="text-center" style="width: 89px; color:#0070c0;">Link</th>
                   </tr>
                 </thead>
@@ -280,6 +304,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">CESM-ATM</div>
+                      <div class="text-center small text-muted mb-2">High-resolution atmospheric data from climate simulations with multiple 2D/3D fields</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Mark Taylor (SNL)</em></div>
                     </td>
@@ -324,14 +349,6 @@ function hostname(lnk) {
                       <div class="text-center small">(cleared data zeroed all background data)</div>
                     </td>
                     <td>
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i CLDHGH_1_1800_3600.f32 -M REL -R 1E-2 -2 3600 1800</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i CLDHGH_1_1800_3600.f32 -2 3600 1800 -s CLDHGH_1_1800_3600.f32.sz -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i CLDHGH_1_1800_3600.f32 -z CLDHGH_1_1800_3600.f32.zfp -o CLDHGH_1_1800_3600.f32.zfp.out -2 3600 1800 -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i CLDHGH_1_1800_3600.f32 -d 3600 -d 1800 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="small text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL CESM-ATM raw-data-dir f32 3600 1800</div>
-                    </td>
-                    <td>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-1800x3600.tar.gz" target="_blank" rel="noopener">Dataset1 (raw)</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-cleared-1800x3600.tar.gz" target="_blank" rel="noopener">Dataset1 (cleared)</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-26x1800x3600.tar.gz" target="_blank" rel="noopener">Dataset2 (raw)</a></div>
@@ -345,6 +362,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">EXAALT</div>
+                      <div class="text-center small text-muted mb-2">Molecular dynamics simulation data with position and velocity fields</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>EXAALT team</em></div>
                       <div class="text-center small"><em>LA-UR-18-25670</em></div>
@@ -425,14 +443,6 @@ function hostname(lnk) {
                       <div class="text-center">Dataset3: 2.4 GB</div>
                     </td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i xx.f32 -M REL -R 1E-2 -1 2869440</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i xx.f32 -1 2869440 -s xx.f32.sz -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i xx.f32 -z xx.f32.zfp -o xx.f32.zfp.out -1 2869440 -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i xx.f32 -d 2869440 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL EXAALT raw-data-dir f32 2869440</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-2869440.tar.gz" target="_blank" rel="noopener">Dataset1</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-2869440-template_data.txt" target="_blank" rel="noopener">Metadata1</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-2869440-property.txt" target="_blank" rel="noopener">Property1</a></div>
@@ -449,6 +459,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">Hurricane ISABEL</div>
+                      <div class="text-center small text-muted mb-2">3D weather simulation data from Hurricane Isabel with multiple atmospheric variables</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em><a href="http://vis.computer.org/vis2004contest/data.html" target="_blank" rel="noopener">vis2004contest</a></em></div>
                     </td>
@@ -488,14 +499,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">1.25 GB</td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i Pf48.bin.f32 -M REL -R 1E-2 -3 500 500 100</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i Pf48.bin.f32 -3 500 500 100 -s Pf48.bin.f32.sz -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i Pf48.bin.f32 -3 500 500 100 -z Pf48.bin.f32.zfp -o Pf48.bin.f32.zfp.out -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i Pf48.bin.f32 -d 500 -d 500 -d 100 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL Hurricane raw-data-dir f32 500 500 100</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/SDRBENCH-Hurricane-ISABEL-100x500x500.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/SDRBENCH-Hurricane-ISABEL-100x500x500-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -506,6 +509,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">EXAFEL</div>
+                      <div class="text-center small text-muted mb-2">X-ray diffraction images from the LCLS light source instrument</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>LCLS</em></div>
                     </td>
@@ -537,14 +541,6 @@ function hostname(lnk) {
                       <div class="text-center">1 GB</div>
                     </td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i EXAFEL-LCLS-986x32x185x388.f32 -M REL -R 1E-2 -2 388 5837120</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i EXAFEL-LCLS-986x32x185x388.f32 -s EXAFEL-LCLS-986x32x185x388.f32.sz -2 388 5837120 -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -a 1E-2 -i EXAFEL-LCLS-986x32x185x388.f32 -z EXAFEL-LCLS-986x32x185x388.f32.zfp -o EXAFEL-LCLS-986x32x185x388.f32.zfp.out -2 388 5837120 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i EXAFEL-LCLS-986x32x185x388.f32 -d 5837120 -d 388 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL EXAFEL raw-data-dir f32 388 5837120</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/SDRBENCH-EXAFEL-10x32x185x388.tar.gz" target="_blank" rel="noopener">Dataset1</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/SDRBENCH-EXAFEL-986x32x185x388.tar.gz" target="_blank" rel="noopener">Dataset2</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
@@ -558,6 +554,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">HACC</div>
+                      <div class="text-center small text-muted mb-2">Large-scale cosmology particle simulation with spatial and velocity components</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>HACC team</em></div>
                       <div class="text-center small"><em>(ECP EXASKY)</em></div>
@@ -601,14 +598,6 @@ function hostname(lnk) {
                       <div class="text-center">5 GB</div>
                     </td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i xx.f32 -M ABS -A 0.003 -1 1073726487</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i xx.f32 -s xx.f32.sz -1 1073726487 -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i xx.f32 -z xx.f32.zfp -o xx.f32.zfp.out -a 0.003 -1 1073726487</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i xx.f32 -d 1073726487 -t float -o abs=3e-3 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f ABS HACC raw-data-dir f32 1073726487</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/EXASKY-HACC-data-big-size.tar.gz" target="_blank" rel="noopener">Dataset1</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/template_data_big-size.txt" target="_blank" rel="noopener">Metadata1</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/EXASKY-HACC-data-medium-size-property.txt" target="_blank" rel="noopener">Property1</a></div>
@@ -622,6 +611,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">NYX</div>
+                      <div class="text-center small text-muted mb-2">Adaptive mesh cosmology simulation combining hydrodynamics and N-body methods</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Lukic et al., MNRAS</em></div>
                     </td>
@@ -660,14 +650,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">2.7 GB</td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i temperature.f32 -M REL -R 1E-2 -3 512 512 512</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i temperature.f32 -s temperature.f32.sz -3 512 512 512 -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i temperature.f32 -z temperature.f32.zfp -o temperature.f32.zfp.out -3 512 512 512 -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i temperature.f32 -d 512 -d 512 -d 512 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL NYX raw-data-dir f32 512 512 512</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/SDRBENCH-EXASKY-NYX-512x512x512.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/SDRBENCH-EXASKY-NYX-512x512x512-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -678,6 +660,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">NWChem</div>
+                      <div class="text-center small text-muted mb-2">Two-electron repulsion integrals from quantum chemistry calculations</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Example molecular 2-electron integral values generated by libint</em></div>
                       <div class="text-center small"><em><a href="https://github.com/evaleev/libint" target="_blank" rel="noopener">github.com/evaleev/libint</a></em></div>
@@ -690,14 +673,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">16 GB</td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -d -i 631-tst.bin.d64 -M REL -R 1E-2 -1 102953248</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -d -i 631-tst.bin.d64 -s 631-tst.bin.d64.sz -1 102953248 -a</div>
-                      <div><strong>ZFP</strong>: zfp -d -i 631-tst.bin.d64 -z 631-tst.bin.d64.zfp -o 631-tst.bin.d64.zfp.out -a 1E-2 -1 102953248 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i 631-tst.bin.d64 -d 102953248 -t double -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -d REL NWCHEM raw-data-dir d64 102953248</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NWChem/SDRBENCH-NWChem-dataset.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NWChem/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NWChem/SDRBENCH-NWChem-dataset-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -708,6 +683,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">SCALE-LETKF</div>
+                      <div class="text-center small text-muted mb-2">Regional weather model data with ensemble Kalman filter assimilation</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>SCALE-RM weather model (RIKEN)</em></div>
                       <div class="text-center small"><em>Contact: Guo-yuan Lien</em></div>
@@ -747,14 +723,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">4.9 GB</td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -f -z -i T-98x1200x1200.f32 -M REL -R 1E-2 -3 1200 1200 98</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -f -x -i T-98x1200x1200.f32 -s T-98x1200x1200.f32.sz -3 1200 1200 98 -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i T-98x1200x1200.f32 -z T-98x1200x1200.f32.zfp -o T-98x1200x1200.f32.zfp.out -a 1E-2 -3 1200 1200 98 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i T-98x1200x1200.f32 -d 1200 -d 1200 -d 98 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL SCALE-LETKF raw-data-dir f32 1200 1200 98</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/SDRBENCH-SCALE-98x1200x1200.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/SDRBENCH-SCALE-98x1200x1200-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -765,6 +733,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">QMCPACK</div>
+                      <div class="text-center small text-muted mb-2">Quantum Monte Carlo electronic structure orbital data for many-body systems</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>QMCPACK performance test</em></div>
                       <div class="text-center small"><em>Contact: Ye Luo</em></div>
@@ -793,14 +762,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">1 GB</td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -f -i einspline_288_115_69_69.pre.f32 -M REL -R 1E-2 -3 69 69 33120</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -f -i einspline_288_115_69_69.pre.f32 -s einspline_288_115_69_69.pre.f32.sz -3 69 69 33120 -a</div>
-                      <div><strong>ZFP</strong>: zfp -f -i einspline_288_115_69_69.pre.f32 -z einspline_288_115_69_69.pre.f32.zfp -o einspline_288_115_69_69.pre.f32.zfp.out -a 1E-2 -3 69 69 33120</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i einspline_288_115_69_69.pre.f32 -d 69 -d 69 -d 33120 -t float -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL QMCPack raw-data-dir f32 69 69 33120</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/QMCPack/SDRBENCH-QMCPack.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/QMCPack/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/QMCPack/SDRBENCH-QMCPack-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -811,6 +772,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">Miranda</div>
+                      <div class="text-center small text-muted mb-2">Large-scale turbulence simulation with multiple hydrodynamic fields</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Hydrodynamics code for large turbulence simulations</em></div>
                       <div class="text-center small"><em>Contact: Peter Lindstrom</em></div>
@@ -854,14 +816,6 @@ function hostname(lnk) {
                       <div class="text-center">Big: 106 GB</div>
                     </td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -d -i density.d64 -M REL -R 1E-2 -3 384 384 256</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -d -i density.d64 -s density.d64.sz -3 384 384 256 -a</div>
-                      <div><strong>ZFP</strong>: zfp -d -3 384 384 256 -i density.d64 -z density.d64.zfp -o density.d64.zfp.out -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i density.d64 -d 384 -d 384 -d 256 -t double -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -d REL Miranda raw-data-dir d64 384 384 256</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><strong>Small (256x384x384)</strong></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/SDRBENCH-Miranda-256x384x384.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/template_data-miranda-256x384x384.txt" target="_blank" rel="noopener">Metadata</a></div>
@@ -877,6 +831,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">S3D</div>
+                      <div class="text-center small text-muted mb-2">Direct numerical simulation of turbulent combustion with detailed chemistry</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Kolla, Hemanth</em></div>
                     </td>
@@ -916,14 +871,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">44 GB</td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -d -z -i stat_planar.1.1000E-03.field.d64 -M REL -R 1E-2 -3 500 500 500</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -d -x -i stat_planar.1.1000E-03.field.d64 -s stat_planar.1.1000E-03.field.d64 -3 500 500 500 -a</div>
-                      <div><strong>ZFP</strong>: zfp -d -3 500 500 500 -i stat_planar.1.1000E-03.field.d64 -z stat_planar.1.1000E-03.field.d64.zfp -o stat_planar.1.1000E-03.field.d64.zfp.out -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i stat_planar.1.1000E-03.field.d64 -d 500 -d 500 -d 500 -t double -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -f REL S3D raw-data-dir f32 500 500 500</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/SDRBENCH-S3D.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/template.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/SDRBENCH-S3D-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -934,6 +881,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">XGC</div>
+                      <div class="text-center small text-muted mb-2">Fusion plasma simulation on unstructured mesh using ADIOS format</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Princeton Plasma Physics Laboratory (PPPL)</em></div>
                       <div class="text-center small"><em><a href="https://jychoi-hpc.github.io/adios-python-docs/XGC-mesh-and-field-data.html" target="_blank" rel="noopener">XGC Docs</a></em></div>
@@ -948,10 +896,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">1.2 GB</td>
                     <td class="small">
-                      <div><strong>SZ/ZFP/LibPressio/Z-checker</strong>: N/A</div>
-                      <div class="text-muted">(the files are stored in .bp format, you need to install ADIOS to read them)</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/XGC/xgc.3d.tar.gz" target="_blank" rel="noopener">Dataset (Adios2)</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/XGC/xgc.zip" target="_blank" rel="noopener">Dataset (binary)</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/XGC/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
@@ -962,6 +906,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">NSTX GPI</div>
+                      <div class="text-center small text-muted mb-2">High-speed imaging of fusion plasma turbulence (time-series movie data)</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Michael Churchill, PPPL</em></div>
                       <div class="text-center small"><em>Copyright: Contact before publishing</em></div>
@@ -974,10 +919,6 @@ function hostname(lnk) {
                     </td>
                     <td class="text-center">4.1 GB</td>
                     <td class="small">
-                      <div><strong>SZ/ZFP/LibPressio/Z-checker</strong>: N/A</div>
-                      <div class="text-muted">(the files are stored in .bp format, you need to install ADIOS to read them)</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NSTX_GPI/nstx_data_ornl_demo.bp" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NSTX_GPI/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                     </td>
@@ -987,6 +928,7 @@ function hostname(lnk) {
                   <tr>
                     <td>
                       <div class="fw-semibold text-center">Brown Samples</div>
+                      <div class="text-center small text-muted mb-2">Synthetic data generated with controlled regularity for compression testing</div>
                       <div class="text-center small"><em>Source:</em></div>
                       <div class="text-center small"><em>Brown University</em></div>
                     </td>
@@ -1030,14 +972,6 @@ function hostname(lnk) {
                       <div class="text-center">256 MB</div>
                     </td>
                     <td class="small">
-                      <div><strong>SZ (Compress)</strong>: sz -z -d -i sample_r_B_0.5_26.d64 -M REL -R 1E-2 -1 33554433</div>
-                      <div><strong>SZ (Decompress)</strong>: sz -x -d -i sample_r_B_0.5_26.d64 -s sample_r_B_0.5_26.d64.sz -1 33554433 -a</div>
-                      <div><strong>ZFP</strong>: zfp -d -1 33554433 -i sample_r_B_0.5_26.d64 -z sample_r_B_0.5_26.d64.zfp -o sample_r_B_0.5_26.d64.zfp.out -a 1E-2 -s</div>
-                      <div><strong>LibPressio</strong>: pressio -b compressor=$COMP -i sample_r_B_0.5_26.d64 -d 33554433 -t double -o rel=1e-2 -m time -m size -M all</div>
-                      <div class="text-muted">where $COMP can be sz, zfp, sz3, mgard, etc…</div>
-                      <div><strong>Z-checker-installer</strong>: ./runZCCase.sh -d REL Brown-samples raw-data-dir d64 33554433</div>
-                    </td>
-                    <td class="small">
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/brown_synth/SDRBENCH-BROWN-33554433.tar.gz" target="_blank" rel="noopener">Dataset</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/brown_synth/template_data.txt" target="_blank" rel="noopener">Metadata</a></div>
                       <div class="text-center"><a href="https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/brown_synth/SDRBENCH-BROWN-33554433-property.txt" target="_blank" rel="noopener">Property</a></div>
@@ -1045,6 +979,55 @@ function hostname(lnk) {
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- Unified Command Examples Section -->
+            <div class="mt-4 p-4 bg-light rounded">
+              <h5 class="mb-3">General Command Examples</h5>
+              <p class="text-muted mb-3">
+                Below are generic command templates for compressing SDRBench datasets. Replace placeholders like <code>filename</code>, dimensions (<code>-1</code>, <code>-2</code>, <code>-3</code>), and error bounds based on your specific dataset.
+              </p>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-semibold">SZ Compression</h6>
+                  <div class="bg-white p-3 rounded border">
+                    <div class="mb-2"><strong>Compress (relative error):</strong></div>
+                    <code class="d-block mb-2 text-wrap">sz -z -f -i &lt;filename&gt;.f32 -M REL -R 1E-2 -[1|2|3] &lt;dims&gt;</code>
+                    <div class="mb-2 mt-3"><strong>Decompress:</strong></div>
+                    <code class="d-block text-wrap">sz -x -f -i &lt;filename&gt;.f32 -s &lt;filename&gt;.f32.sz -[1|2|3] &lt;dims&gt; -a</code>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-semibold">ZFP Compression</h6>
+                  <div class="bg-white p-3 rounded border">
+                    <div class="mb-2"><strong>Compress & decompress:</strong></div>
+                    <code class="d-block text-wrap">zfp -f -i &lt;filename&gt;.f32 -z &lt;filename&gt;.f32.zfp -o &lt;filename&gt;.f32.zfp.out -[1|2|3] &lt;dims&gt; -a 1E-2 -s</code>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-semibold">LibPressio</h6>
+                  <div class="bg-white p-3 rounded border">
+                    <div class="mb-2"><strong>Generic usage:</strong></div>
+                    <code class="d-block text-wrap">pressio -b compressor=$COMP -i &lt;filename&gt;.f32 -d &lt;dim1&gt; -d &lt;dim2&gt; ... -t float -o rel=1e-2 -m time -m size -M all</code>
+                    <div class="small text-muted mt-2">where $COMP can be sz, zfp, sz3, mgard, etc.</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-semibold">Z-checker-installer</h6>
+                  <div class="bg-white p-3 rounded border">
+                    <div class="mb-2"><strong>Run compression case:</strong></div>
+                    <code class="d-block text-wrap">./runZCCase.sh -f REL &lt;dataset-name&gt; &lt;raw-data-dir&gt; f32 &lt;dims&gt;</code>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert-info mt-3 mb-0">
+                <strong>Note:</strong> Consult each dataset's metadata file for specific dimensions, data types (f32/d64), and recommended error bounds. Some datasets (XGC, NSTX GPI) use ADIOS format and require specialized tools.
+              </div>
             </div>
           </div>
         </div>
