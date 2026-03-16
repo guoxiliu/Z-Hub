@@ -1,0 +1,1047 @@
+[
+  {
+    "id": "lorenzo-predictor",
+    "name": "Lorenzo Predictor",
+    "category": "Predictor",
+    "description": "Linear predictor that estimates data values based on neighboring values in 1D, 2D, or 3D grids. Uses weighted sum of adjacent values to predict current value, creating residuals for subsequent encoding. Includes variants: mean-integrated (with mean correction from neighboring regions) and second-order (using second derivatives for curved patterns).",
+    "features": [
+      "Multi-dimensional support (1D/2D/3D)",
+      "Low computational cost",
+      "Effective for spatially correlated data",
+      "Mean-integrated variant for local variations",
+      "Second-order variant for curved patterns",
+      "Various extensions (dual-quantization, zigzag encoding)"
+    ],
+    "papers": [
+      {
+        "title": "Significantly Improving Lossy Compression for Scientific Data Sets Based on Multidimensional Prediction and Error-Controlled Quantization",
+        "authors": "D. Tao, S. Di, Z. Chen and F. Cappello",
+        "doi": "10.1109/IPDPS.2017.115",
+        "year": 2017,
+        "note": "SZ 1.4 algorithm - Fundamental Lorenzo predictor formula"
+      }
+    ],
+    "tags": ["prediction", "linear", "spatial", "low-cost", "mean-integrated", "second-order"]
+  },
+  {
+    "id": "huffman-encoding",
+    "name": "Huffman Encoding",
+    "category": "Encoder",
+    "description": "Variable-length entropy coding algorithm that assigns shorter codes to more frequent symbols. Builds a binary tree based on symbol frequencies for optimal prefix-free coding.",
+    "features": [
+      "Lossless encoding",
+      "Optimal for known distributions",
+      "Fast decoding",
+      "Widely supported standard"
+    ],
+    "papers": [
+      {
+        "title": "A Method for the Construction of Minimum-Redundancy Codes",
+        "authors": "Huffman D.A.",
+        "year": 1952
+      }
+    ],
+    "tags": ["entropy-coding", "lossless", "variable-length", "standard"]
+  },
+  {
+    "id": "linear-quantization",
+    "name": "Linear Quantization",
+    "category": "Quantizer",
+    "description": "Uniform quantization that divides value range into equal-sized bins. Maps continuous values to discrete levels with predictable error bounds and compression ratios.",
+    "features": [
+      "Uniform error distribution",
+      "Simple implementation",
+      "Predictable compression ratio",
+      "Hardware-friendly"
+    ],
+    "papers": [
+      {
+        "title": "Quantization",
+        "note": "Standard technique in signal processing literature",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["quantization", "lossy", "uniform", "simple"]
+  },
+  {
+    "id": "dct-transform",
+    "name": "Discrete Cosine Transform (DCT)",
+    "category": "Transformer",
+    "description": "Frequency-domain transform that represents data as sum of cosine waves. Concentrates energy in low-frequency coefficients, enabling effective compression of smooth data.",
+    "features": [
+      "Energy compaction for smooth signals",
+      "Frequency-domain representation",
+      "Separable for multi-dimensional data",
+      "Block-based processing (8x8, 16x16)"
+    ],
+    "papers": [
+      {
+        "title": "A Fast Cosine Transform in One and Two Dimensions",
+        "authors": "Makhoul J.",
+        "year": 1980,
+        "note": "Original DCT algorithm paper"
+      }
+    ],
+    "tags": ["transform", "frequency-domain", "lossy", "block-based"]
+  },
+  {
+    "id": "bit-grooming",
+    "name": "Bit Grooming",
+    "category": "Quantizer",
+    "description": "Bitwise quantization that zeroes least-significant bits in floating-point mantissa to improve compressibility while preserving significant digits (NSD mode).",
+    "features": [
+      "Preserves significant digits",
+      "Simple bitwise operation",
+      "Improves lossless compression ratios",
+      "Minimal computational cost"
+    ],
+    "papers": [
+      {
+        "title": "Bit Grooming: Statistically accurate precision-preserving quantization with compression",
+        "authors": "Zender C.S.",
+        "doi": "10.5194/gmd-9-3199-2016",
+        "year": 2016
+      }
+    ],
+    "tags": ["preprocessing", "bitwise", "significant-digits", "simple"]
+  },
+  {
+    "id": "arithmetic-coding",
+    "name": "Arithmetic Coding",
+    "category": "Encoder",
+    "description": "Entropy coding that represents entire message as single number in [0,1) interval. Achieves compression closer to theoretical entropy limit than Huffman coding.",
+    "features": [
+      "Near-optimal compression",
+      "Adaptive to data statistics",
+      "Fractional bit encoding",
+      "Higher complexity than Huffman"
+    ],
+    "papers": [
+      {
+        "title": "Arithmetic Coding for Data Compression",
+        "authors": "Witten I.H., Neal R.M., Cleary J.G.",
+        "year": 1987
+      }
+    ],
+    "tags": ["entropy-coding", "lossless", "optimal", "adaptive"]
+  },
+  {
+    "id": "wavelet-transform",
+    "name": "Wavelet Transform",
+    "category": "Transformer",
+    "description": "Multi-resolution transform that decomposes data into frequency subbands at different scales. Enables progressive compression and good for non-stationary signals.",
+    "features": [
+      "Multi-resolution analysis",
+      "Good for non-smooth data",
+      "Progressive reconstruction",
+      "Various wavelet families (Haar, Daubechies, CDF)"
+    ],
+    "papers": [
+      {
+        "title": "A theory for multiresolution signal decomposition: the wavelet representation",
+        "authors": "Mallat S.G.",
+        "year": 1989
+      }
+    ],
+    "tags": ["transform", "multi-resolution", "progressive", "adaptive"]
+  },
+  {
+    "id": "multilevel-decomposition",
+    "name": "Multilevel Decomposition",
+    "category": "Transformer",
+    "description": "Hierarchical decomposition based on multigrid methods that represents data at multiple levels of resolution. Creates a hierarchy of coefficients where each level captures different scales of variation in the data. Used in MGARD for adaptive reduction with error control.",
+    "features": [
+      "Hierarchical multi-resolution representation",
+      "Multigrid-based methodology",
+      "Supports multi-dimensional, single-dimensional, or hybrid modes",
+      "Progressive data refinement",
+      "Error-controlled at each level",
+      "Enables adaptive compression strategies"
+    ],
+    "papers": [
+      {
+        "title": "MGARD+: Optimizing Multilevel Methods for Error-bounded Scientific Data Reduction",
+        "authors": "Xin Liang et al.",
+        "year": 2021,
+        "note": "IEEE Transactions on Computers"
+      },
+      {
+        "title": "Multilevel Techniques for Compression and Reduction of Scientific Data—The Multivariate Case",
+        "authors": "Mark Ainsworth et al.",
+        "year": 2019,
+        "note": "SIAM Journal on Scientific Computing"
+      }
+    ],
+    "tags": ["transform", "multilevel", "multigrid", "hierarchical", "progressive", "scientific"]
+  },
+  {
+    "id": "regression-predictor",
+    "name": "Regression Predictor",
+    "category": "Predictor",
+    "description": "Polynomial or linear regression-based predictor that fits local data patterns. More sophisticated than Lorenzo, can capture trends and gradients.",
+    "features": [
+      "Polynomial fitting (linear, quadratic, cubic)",
+      "Adaptive block sizing",
+      "Better for trending data",
+      "Higher computational cost than Lorenzo"
+    ],
+    "papers": [
+      {
+        "title": "Significantly Improving Lossy Compression for Scientific Data Sets Based on Multidimensional Prediction and Error-Controlled Quantization",
+        "authors": "Tao D., Di S., Chen Z., Cappello F.",
+        "doi": "10.1109/IPDPS.2017.115",
+        "year": 2017,
+        "note": "Introduces polynomial regression predictors as extension to Lorenzo"
+      }
+    ],
+    "tags": ["prediction", "polynomial", "adaptive", "trending"]
+  },
+  {
+    "id": "delta-encoding",
+    "name": "Delta Encoding (DIFF)",
+    "category": "Predictor",
+    "description": "Simple first-order predictor that computes differences between consecutive values (also called difference sequence). Effective for monotonic or slowly varying data.",
+    "features": [
+      "Minimal computational cost",
+      "Effective for smooth temporal data",
+      "Simple subtraction operation",
+      "Can be combined with other techniques"
+    ],
+    "papers": [
+      {
+        "title": "Delta Encoding",
+        "note": "Classic technique in data compression",
+        "year": "Classical"
+      },
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: DIFF",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "prediction", "delta", "first-order", "temporal"]
+  },
+  {
+    "id": "run-length-encoding",
+    "name": "Run-Length Encoding (RLE)",
+    "category": "Encoder",
+    "description": "Lossless compression that replaces sequences of repeated values with (value, count) pairs. Most effective for data with long runs of identical values.",
+    "features": [
+      "Simple and fast",
+      "Lossless compression",
+      "Best for repetitive data",
+      "Often used as preprocessing step"
+    ],
+    "papers": [
+      {
+        "title": "Run-Length Encoding",
+        "note": "Foundational compression technique",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["encoding", "lossless", "simple", "repetitive"]
+  },
+  {
+    "id": "tcms-mutator",
+    "name": "Twos-Complement to Magnitude-Sign (TCMS)",
+    "category": "Mutator",
+    "description": "Converts each value from twos-complement to magnitude-sign representation. Produces more leading zero bits, improving compressibility for subsequent stages.",
+    "features": [
+      "Independent per-value transformation",
+      "Increases leading zero bits",
+      "No compression by itself",
+      "Fast bitwise operation"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: TCMS",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "bitwise", "preprocessing", "representation"]
+  },
+  {
+    "id": "bit-shuffle",
+    "name": "Bit Shuffle (Transpose)",
+    "category": "Shuffler",
+    "description": "Transposes bits across values by collecting most significant bits together, then second most significant bits, and so on. Improves compressibility when values share similar bit patterns.",
+    "features": [
+      "Bit-level transposition",
+      "No computation on values",
+      "Improves compressibility for correlated bit positions",
+      "Reversible transformation"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: BIT",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "shuffling", "bit-transpose", "reordering"]
+  },
+  {
+    "id": "tuple-shuffle",
+    "name": "Tuple Shuffle",
+    "category": "Shuffler",
+    "description": "Rearranges k-tuples by grouping all first elements, then all second elements, etc. Benefits compression when values within the same dimension correlate more than across tuples.",
+    "features": [
+      "Configurable tuple size",
+      "Dimension-based reordering",
+      "Useful for multi-component data (x,y,z coordinates)",
+      "No data loss"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: TUPLk",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "shuffling", "tuple", "multi-dimensional"]
+  },
+  {
+    "id": "diffms-predictor",
+    "name": "Difference with Magnitude-Sign (DIFFMS)",
+    "category": "Predictor",
+    "description": "Computes difference sequence like DIFF but outputs in sign-magnitude format. Produces more leading zero bits for better compressibility.",
+    "features": [
+      "Difference encoding with format conversion",
+      "Increases leading zero bits",
+      "Better compression than standard DIFF",
+      "Combines prediction with representation change"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: DIFFMS",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "prediction", "delta", "magnitude-sign"]
+  },
+  {
+    "id": "clog-reducer",
+    "name": "Compressed Leading-Zero Groups (CLOG)",
+    "category": "Encoder",
+    "description": "Breaks data into subchunks and records the count of leading zero bits for each. Stores only the remaining significant bits, compressing values with many leading zeros.",
+    "features": [
+      "Subchunk-based processing (32 per chunk)",
+      "Leading zero bit elimination",
+      "Actual data reduction",
+      "Efficient for values with common high-order bits"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: CLOG",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "encoding", "leading-zeros", "compression"]
+  },
+  {
+    "id": "hclog-reducer",
+    "name": "Hybrid CLOG (HCLOG)",
+    "category": "Encoder",
+    "description": "Enhanced CLOG that applies TCMS transformation to values with no leading zeros before compression. Combines representation change with bit elimination.",
+    "features": [
+      "Adaptive TCMS application",
+      "Better than CLOG for mixed data",
+      "Hybrid approach",
+      "Handles diverse bit patterns"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: HCLOG",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "encoding", "hybrid", "adaptive"]
+  },
+  {
+    "id": "rre-reducer",
+    "name": "Run Repetition Encoding (RRE)",
+    "category": "Encoder",
+    "description": "Creates bitmap indicating repeated words. Outputs non-repeating words and recursively compressed bitmap. Efficient for data with repeated values.",
+    "features": [
+      "Bitmap-based encoding",
+      "Recursive bitmap compression",
+      "Handles arbitrary repetitions",
+      "Lossless compression"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: RRE",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "encoding", "run-length", "bitmap"]
+  },
+  {
+    "id": "rze-reducer",
+    "name": "Run Zero Encoding (RZE)",
+    "category": "Encoder",
+    "description": "Creates bitmap indicating zero words. Outputs non-zero words and recursively compressed bitmap. Specialized for sparse data with many zeros.",
+    "features": [
+      "Zero-specific encoding",
+      "Bitmap-based compression",
+      "Recursive bitmap handling",
+      "Excellent for sparse data"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: RZE",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "encoding", "sparse", "zero-compression"]
+  },
+  {
+    "id": "quant-abs",
+    "name": "Absolute Error Quantization",
+    "category": "Quantizer",
+    "description": "Quantizes floating-point values based on point-wise absolute error bound. Guarantees decompressed value V' satisfies V - EB ≤ V' ≤ V + EB.",
+    "features": [
+      "Absolute error bound guarantee",
+      "Supports 32-bit and 64-bit floats",
+      "Handles INFs and NaNs",
+      "Optional lossless threshold"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework modules: QUANT_ABS_0, QUANT_ABS_R",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "quantization", "lossy", "absolute-error"]
+  },
+  {
+    "id": "quant-rel",
+    "name": "Relative Error Quantization",
+    "category": "Quantizer",
+    "description": "Quantizes floating-point values based on point-wise relative error bound. Guarantees |V| / (1 + EB) ≤ |V'| ≤ |V| * (1 + EB) with same sign.",
+    "features": [
+      "Relative error bound guarantee",
+      "Sign preservation",
+      "Supports 32-bit and 64-bit floats",
+      "Adaptive to value magnitude"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework modules: QUANT_REL_0, QUANT_REL_R",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "quantization", "lossy", "relative-error"]
+  },
+  {
+    "id": "quant-r2r",
+    "name": "Range-to-Range Quantization",
+    "category": "Quantizer",
+    "description": "Quantizes based on data range. Error bound is multiplied by (max - min) of input values, adapting to actual data distribution.",
+    "features": [
+      "Data-range adaptive",
+      "Multiplies error bound by value range",
+      "Better for varying data scales",
+      "Supports 32-bit and 64-bit floats"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: QUANT_R2R",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "quantization", "lossy", "range-based"]
+  },
+  {
+    "id": "dbefs-mutator",
+    "name": "De-Bias Exponent Field Shuffle (DBEFS)",
+    "category": "Mutator",
+    "description": "De-biases IEEE-754 floating-point exponent and reorders fields to exponent-fraction-sign order. Improves compressibility by grouping similar field types.",
+    "features": [
+      "Exponent de-biasing",
+      "Field reordering (EFS order)",
+      "IEEE-754 specific",
+      "Reversible transformation"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: DBEFS",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "floating-point", "field-reordering", "ieee754"]
+  },
+  {
+    "id": "dbesf-mutator",
+    "name": "De-Bias Exponent Sign-Fraction (DBESF)",
+    "category": "Mutator",
+    "description": "De-biases IEEE-754 floating-point exponent and reorders fields to exponent-sign-fraction order. Alternative field arrangement for compression.",
+    "features": [
+      "Exponent de-biasing",
+      "Field reordering (ESF order)",
+      "IEEE-754 specific",
+      "Different ordering than DBEFS"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: DBESF",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "floating-point", "field-reordering", "ieee754"]
+  },
+  {
+    "id": "maxabs-verifier",
+    "name": "Maximum Absolute Error Verifier",
+    "category": "Verifier",
+    "description": "Verifies decompressed data against point-wise absolute error bound. Passes only if every output value is within specified tolerance.",
+    "features": [
+      "Point-wise error checking",
+      "Absolute error bound verification",
+      "Quality assurance for lossy compression",
+      "Configurable tolerance"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: MAXABS",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "verification", "error-checking", "quality"]
+  },
+  {
+    "id": "maxrel-verifier",
+    "name": "Maximum Relative Error Verifier",
+    "category": "Verifier",
+    "description": "Verifies decompressed data against point-wise relative error bound. Ensures all values meet relative accuracy requirements.",
+    "features": [
+      "Relative error verification",
+      "Point-wise checking",
+      "Adaptive to value magnitude",
+      "Lossy compression validation"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: MAXREL",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "verification", "relative-error", "validation"]
+  },
+  {
+    "id": "psnr-verifier",
+    "name": "PSNR Verifier",
+    "category": "Verifier",
+    "description": "Verifies Peak Signal-to-Noise Ratio meets minimum threshold. Passes if PSNR is above specified lower bound.",
+    "features": [
+      "PSNR-based quality metric",
+      "Global error measure",
+      "Common image/video quality metric",
+      "Threshold-based validation"
+    ],
+    "papers": [
+      {
+        "title": "LC Framework Documentation",
+        "note": "LC framework module: PSNR",
+        "year": 2024
+      }
+    ],
+    "tags": ["lc-framework", "verification", "psnr", "quality-metric"]
+  },
+  {
+    "id": "curve-fitting",
+    "name": "Curve Fitting / Regression",
+    "category": "Predictor",
+    "description": "Fits polynomial curves to data blocks using regression. Supports flat (constant), linear, and quadratic fitting. Block-wise variants adapt polynomial order per block. Original SZ 1.0 prediction method.",
+    "features": [
+      "Multiple fitting orders (0/1/2)",
+      "Block-based operation",
+      "Captures smooth trends",
+      "Adaptive polynomial selection",
+      "Block-wise regression variants",
+      "Parallel-friendly"
+    ],
+    "papers": [
+      {
+        "title": "Fast Error-Bounded Lossy HPC Data Compression with SZ",
+        "authors": "Di S., Cappello F.",
+        "doi": "10.1109/IPDPS.2016.11",
+        "year": 2016,
+        "note": "SZ 1.0 - Original curve fitting approach"
+      }
+    ],
+    "tags": ["prediction", "polynomial", "curve-fitting", "regression", "sz"]
+  },
+
+  {
+    "id": "interpolation",
+    "name": "Interpolation",
+    "category": "Predictor",
+    "description": "Predicts values between known data points using various techniques. Includes spline (smooth polynomial curves), linear, cubic, and multi-level (hierarchical resolution) variants. Cubic B-splines use piecewise parametric polynomial curves of degree 3, producing smooth second-order differentiable curves at knot locations - particularly effective on sorted monotonic data.",
+    "features": [
+      "Smooth curve fitting",
+      "Multiple variants (spline, linear, cubic, B-spline)",
+      "Multi-level hierarchical approach",
+      "Good for smooth scientific data",
+      "Continuous derivatives",
+      "Progressive refinement",
+      "Cubic B-splines: fast interpolation, piecewise representation",
+      "Effective on monotonic sorted data"
+    ],
+    "papers": [
+      {
+        "title": "Interpolation Methods",
+        "note": "Standard prediction techniques including spline and multi-level variants",
+        "year": "Classical"
+      },
+      {
+        "title": "ISABELA for Effective In Situ Compression of Scientific Data",
+        "authors": "S. Lakshminarasimhan, N. Shah, S. Ethier, S-H. Ku, C.S Chang, S. Klasky, R. Latham, R. Ross, N.F. Samatova",
+        "year": 2013,
+        "note": "Cubic B-splines curve fitting for compression"
+      }
+    ],
+    "tags": ["prediction", "interpolation", "spline", "b-spline", "multi-resolution", "hierarchical"]
+  },
+
+  {
+    "id": "neural-network-prediction",
+    "name": "Neural Network Prediction",
+    "category": "Predictor",
+    "description": "Uses trained neural networks to predict data values. Learns complex patterns from training data for sophisticated prediction.",
+    "features": [
+      "Deep learning-based",
+      "Learns complex patterns",
+      "Requires training phase",
+      "High accuracy potential"
+    ],
+    "papers": [
+      {
+        "title": "Neural Network Based Lossy Compression",
+        "note": "ML-based prediction approach",
+        "year": 2021
+      }
+    ],
+    "tags": ["prediction", "neural-network", "machine-learning", "deep-learning"]
+  },
+  {
+    "id": "normalization",
+    "name": "Data Normalization",
+    "category": "Mutator",
+    "description": "Scales data to standard range (e.g., [0,1] or [-1,1]). Improves compressibility and numerical stability.",
+    "features": [
+      "Range standardization",
+      "Improves numerical stability",
+      "Reversible transformation",
+      "Various scaling methods (min-max, z-score)"
+    ],
+    "papers": [
+      {
+        "title": "Data Normalization Techniques",
+        "note": "Standard preprocessing method",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["preprocessing", "normalization", "scaling", "standardization"]
+  },
+  {
+    "id": "log-transform",
+    "name": "Logarithmic Transform",
+    "category": "Mutator",
+    "description": "Applies logarithmic transformation to compress dynamic range. Effective for data spanning multiple orders of magnitude.",
+    "features": [
+      "Dynamic range compression",
+      "Handles wide value ranges",
+      "Makes multiplicative patterns additive",
+      "Reversible via exponentiation"
+    ],
+    "papers": [
+      {
+        "title": "Log Transform",
+        "note": "Mathematical transformation technique",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["transform", "logarithmic", "dynamic-range", "preprocessing"]
+  },
+  {
+    "id": "truncation",
+    "name": "Bit Truncation",
+    "category": "Quantizer",
+    "description": "Removes least significant bits from floating-point mantissa. Simple lossy quantization by dropping precision bits.",
+    "features": [
+      "Simple bit removal",
+      "Predictable error bounds",
+      "Fast operation",
+      "Configurable truncation level"
+    ],
+    "papers": [
+      {
+        "title": "Bit Truncation Methods",
+        "note": "Simple precision reduction",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["quantization", "lossy", "bit-level", "truncation"]
+  },
+  {
+    "id": "vector-quantization",
+    "name": "Vector Quantization",
+    "category": "Quantizer",
+    "description": "Quantizes vectors rather than scalars. Uses codebook of representative vectors for block-based compression.",
+    "features": [
+      "Block/vector-based",
+      "Codebook training",
+      "Better than scalar quantization",
+      "Used in image/video compression"
+    ],
+    "papers": [
+      {
+        "title": "Vector Quantization",
+        "authors": "Gray R.M.",
+        "year": 1984,
+        "note": "Foundational VQ paper"
+      }
+    ],
+    "tags": ["quantization", "vector", "codebook", "block-based"]
+  },
+  {
+    "id": "downsampling",
+    "name": "Downsampling / Pooling",
+    "category": "Transformer",
+    "description": "Reduces resolution by aggregating blocks of values. Variants include average pooling, max pooling, selective (sparsity-aware), and strided downsampling. Reconstructs via interpolation.",
+    "features": [
+      "Resolution reduction",
+      "Multiple strategies (average, max, selective)",
+      "Feature preservation",
+      "Block-based aggregation",
+      "Lossy dimension reduction",
+      "Interpolation-based reconstruction",
+      "Common in neural networks and image processing"
+    ],
+    "papers": [
+      {
+        "title": "Downsampling and Pooling Techniques",
+        "note": "Resolution reduction and aggregation methods",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["transform", "downsampling", "pooling", "resolution", "aggregation", "lossy"]
+  },
+  {
+    "id": "tucker-decomposition",
+    "name": "Tucker Decomposition (SVD)",
+    "category": "Transformer",
+    "description": "Tensor decomposition using singular value decomposition. Approximates high-dimensional data with lower-rank representation.",
+    "features": [
+      "Multi-dimensional tensor factorization",
+      "Rank reduction",
+      "Captures principal components",
+      "Good for structured data"
+    ],
+    "papers": [
+      {
+        "title": "Tucker Decomposition",
+        "note": "Tensor factorization method",
+        "year": 1966
+      }
+    ],
+    "tags": ["transform", "tensor", "svd", "decomposition"]
+  },
+  {
+    "id": "burrows-wheeler",
+    "name": "Burrows-Wheeler Transform (BWT)",
+    "category": "Transformer",
+    "description": "Rearranges characters to group similar contexts together. Improves compressibility for subsequent encoding (used in bzip2).",
+    "features": [
+      "Context grouping",
+      "Reversible permutation",
+      "Improves run-length potential",
+      "Text-friendly but works on any data"
+    ],
+    "papers": [
+      {
+        "title": "A Block-sorting Lossless Data Compression Algorithm",
+        "authors": "Burrows M., Wheeler D.J.",
+        "year": 1994,
+        "note": "Original BWT paper"
+      }
+    ],
+    "tags": ["transform", "permutation", "bzip2", "context"]
+  },
+  {
+    "id": "move-to-front",
+    "name": "Move-to-Front Transform",
+    "category": "Shuffler",
+    "description": "Maintains list of symbols and moves recently used symbols to front. Produces small values for repeated symbols, improving compression.",
+    "features": [
+      "Adaptive symbol ordering",
+      "Exploits locality of reference",
+      "Produces small numbers for repeated access",
+      "Used with BWT in bzip2"
+    ],
+    "papers": [
+      {
+        "title": "Move-to-Front Transform",
+        "note": "Adaptive list encoding method",
+        "year": 1994
+      }
+    ],
+    "tags": ["shuffling", "adaptive", "bzip2", "locality"]
+  },
+  {
+    "id": "ans-encoding",
+    "name": "Asymmetric Numeral Systems (ANS)",
+    "category": "Encoder",
+    "description": "Modern entropy coding combining speed of Huffman with compression of arithmetic coding. Used in Zstandard (FSE variant).",
+    "features": [
+      "Near-optimal compression",
+      "Faster than arithmetic coding",
+      "Finite State Entropy (FSE) variant",
+      "Table-based decoding"
+    ],
+    "papers": [
+      {
+        "title": "Asymmetric Numeral Systems",
+        "authors": "Duda J.",
+        "year": 2009,
+        "note": "Modern entropy coding method"
+      },
+      {
+        "title": "Finite State Entropy",
+        "note": "Zstandard's FSE implementation",
+        "year": 2013
+      }
+    ],
+    "tags": ["entropy-coding", "lossless", "ans", "zstd", "fse"]
+  },
+  {
+    "id": "lz77",
+    "name": "LZ77 (Lempel-Ziv 1977)",
+    "category": "Encoder",
+    "description": "Dictionary-based compression using sliding window. Replaces repeated sequences with back-references. Used in gzip, DEFLATE, Zstandard.",
+    "features": [
+      "Sliding window dictionary",
+      "Back-reference encoding",
+      "Universal lossless compression",
+      "Basis for many compressors"
+    ],
+    "papers": [
+      {
+        "title": "A Universal Algorithm for Sequential Data Compression",
+        "authors": "Ziv J., Lempel A.",
+        "year": 1977,
+        "note": "Original LZ77 paper"
+      },
+      {
+        "title": "SZ-PM: Parallel Lossy Compressor with Lazy String-Match",
+        "note": "LZ77 for scientific data",
+        "year": 2017
+      }
+    ],
+    "tags": ["dictionary", "lossless", "sliding-window", "lz77", "deflate"]
+  },
+  {
+    "id": "xor-encoding",
+    "name": "XOR Encoding",
+    "category": "Encoder",
+    "description": "XORs consecutive values to produce differences. Effective for time-series with small changes between values.",
+    "features": [
+      "Bitwise XOR operation",
+      "Fast computation",
+      "Good for timestamps and counters",
+      "Preserves bit-level patterns"
+    ],
+    "papers": [
+      {
+        "title": "XOR-based Compression",
+        "note": "Bitwise difference encoding",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["encoding", "xor", "bitwise", "time-series"]
+  },
+  {
+    "id": "dictionary-encoding",
+    "name": "Dictionary Encoding",
+    "category": "Encoder",
+    "description": "Maps frequently occurring patterns to short codes using dictionary/codebook. Used in FZ-GPU and similar compressors.",
+    "features": [
+      "Pattern-to-code mapping",
+      "Codebook-based",
+      "Good for repetitive data",
+      "Static or dynamic dictionaries"
+    ],
+    "papers": [
+      {
+        "title": "FZ-GPU: GPU-accelerated Lossy Compressor",
+        "note": "Dictionary-based GPU compression",
+        "year": 2020
+      }
+    ],
+    "tags": ["encoding", "dictionary", "codebook", "pattern-matching"]
+  },
+  {
+    "id": "bit-packing",
+    "name": "Bit Packing",
+    "category": "Encoder",
+    "description": "Packs multiple values into smaller bit widths without padding. Removes unused high-order bits for space efficiency.",
+    "features": [
+      "Variable bit width",
+      "No padding waste",
+      "Dense storage",
+      "Requires bit-level operations"
+    ],
+    "papers": [
+      {
+        "title": "Bit Packing Methods",
+        "note": "Efficient bit-level storage",
+        "year": "Classical"
+      }
+    ],
+    "tags": ["encoding", "bit-packing", "compact", "bit-level"]
+  },
+  {
+    "id": "speck-coding",
+    "name": "SPECK Coding",
+    "category": "Encoder",
+    "description": "SPECK repeatedly tests large rectangular regions of wavelet coefficients for significance at descending bitplane thresholds, splitting only those regions that contain large values, and refining discovered coefficients progressively.",
+    "features": [
+      "Scientific data focused",
+      "Multi-technique approach",
+      "Adaptive encoding",
+      "Optimized for HPC data"
+    ],
+    "papers": [
+      {
+        "title": "SPECK Compression",
+        "note": "Scientific data encoding method",
+        "year": 2018
+      }
+    ],
+    "tags": ["encoding", "scientific", "hpc", "adaptive"]
+  },
+  {
+    "id": "range-coding",
+    "name": "Range Coding",
+    "category": "Encoder",
+    "description": "Entropy coding similar to arithmetic coding but simpler. Maps input to subranges of [0,1) interval.",
+    "features": [
+      "Similar to arithmetic coding",
+      "Simpler implementation",
+      "Near-optimal compression",
+      "Integer-based operations"
+    ],
+    "papers": [
+      {
+        "title": "Range Encoding",
+        "note": "Simplified arithmetic coding variant",
+        "year": 1979
+      }
+    ],
+    "tags": ["entropy-coding", "lossless", "range", "optimal"]
+  },
+  {
+    "id": "sorting-transform",
+    "name": "Sorting Transform",
+    "category": "Transformer",
+    "description": "Pre-conditioning transform that sorts data values in increasing order. Converts irregular spatial distributions into smooth monotonic curves, making subsequent curve fitting more accurate. Particularly effective for scientific data with high spatial irregularity.",
+    "features": [
+      "Converts irregular data to monotonic curves",
+      "Improves curve fitting accuracy",
+      "Guarantees slowest rate of change",
+      "Low computational overhead",
+      "Reversible with index storage"
+    ],
+    "papers": [
+      {
+        "title": "ISABELA for Effective In Situ Compression of Scientific Data",
+        "authors": "S. Lakshminarasimhan, N. Shah, S. Ethier, S-H. Ku, C.S Chang, S. Klasky, R. Latham, R. Ross, N.F. Samatova",
+        "year": 2013,
+        "note": "Sorting-based pre-conditioning for compression"
+      }
+    ],
+    "tags": ["transform", "sorting", "pre-conditioning", "scientific", "in-situ"]
+  },
+  {
+    "id": "windowing",
+    "name": "Windowing",
+    "category": "Transformer",
+    "description": "Divides input data stream into fixed-size windows or blocks for independent processing. Enables parallel processing, controlled memory usage, and localized error bounds. Common window sizes range from 256 to 4096 elements.",
+    "features": [
+      "Fixed-size block processing",
+      "Enables parallelization",
+      "Bounded memory requirements",
+      "Independent block compression",
+      "Configurable window size"
+    ],
+    "papers": [
+      {
+        "title": "ISABELA for Effective In Situ Compression of Scientific Data",
+        "authors": "S. Lakshminarasimhan, N. Shah, S. Ethier, S-H. Ku, C.S Chang, S. Klasky, R. Latham, R. Ross, N.F. Samatova",
+        "year": 2013,
+        "note": "Windowing with 1024 element blocks"
+      }
+    ],
+    "tags": ["transform", "blocking", "windowing", "parallel", "streaming"]
+  },
+  {
+    "id": "block-floating-point",
+    "name": "Block-Floating-Point Transform",
+    "category": "Transformer",
+    "description": "Represents a block of floating-point values with a single shared exponent and individual mantissas. Efficiently encodes zero blocks with a single bit. Reduces redundancy by factoring out the common exponent component across spatially correlated values.",
+    "features": [
+      "Single exponent per block",
+      "Efficient zero block encoding (1 bit)",
+      "Reduces exponent redundancy",
+      "Effective for spatially correlated data",
+      "Preserves relative precision within blocks"
+    ],
+    "papers": [
+      {
+        "title": "Fixed-Rate Compressed Floating-Point Arrays",
+        "authors": "P. Lindstrom, M. Isenburg",
+        "doi": "10.1109/TVCG.2014.346",
+        "year": 2014,
+        "note": "ZFP compression algorithm"
+      }
+    ],
+    "tags": ["transform", "floating-point", "block-based", "exponent-sharing"]
+  },
+  {
+    "id": "zigzag-ordering",
+    "name": "Zigzag Ordering",
+    "category": "Shuffler",
+    "description": "Reorders multi-dimensional coefficients (typically from frequency transforms like DCT) in a zigzag pattern from low to high frequency. Creates roughly monotonically decreasing magnitude sequence, improving subsequent encoding efficiency.",
+    "features": [
+      "Low-to-high frequency ordering",
+      "Creates monotonically decreasing magnitudes",
+      "Improves encoding efficiency",
+      "Standard in image/video compression",
+      "Works with multi-dimensional blocks"
+    ],
+    "papers": [
+      {
+        "title": "Fixed-Rate Compressed Floating-Point Arrays",
+        "authors": "P. Lindstrom, M. Isenburg",
+        "doi": "10.1109/TVCG.2014.346",
+        "year": 2014,
+        "note": "Zigzag ordering of DCT coefficients in ZFP"
+      }
+    ],
+    "tags": ["shuffling", "reordering", "frequency-domain", "dct"]
+  }
+]
