@@ -1,0 +1,308 @@
+[
+  {
+    "name": "CESM-ATM",
+    "source": "Mark Taylor (SNL)",
+    "type": "Climate simulation",
+    "format": "Dataset1: 79 fields: 2D, 1800 &times; 3600;\n Dataset2: 1 field: 3D, 26 &times; 1800 &times; 3600.\n Both are single precision, binary",
+    "entropy": { "avg8": 6.5, "min8": 1.5, "max8": 7.8, "avg32": 19.8, "min32": 2.3, "max32": 22.6 },
+    "sizes": ["Dataset1 (raw): 1.47 GB", "Dataset1 (cleared): 1.47 GB", "Dataset2: 17 GB"],
+    "sizeNote": "(cleared data zeroed all background data)",
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i CLDHGH_1_1800_3600.f32 -M REL -R 1E-2 -2 3600 1800" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i CLDHGH_1_1800_3600.f32 -2 3600 1800 -s CLDHGH_1_1800_3600.f32.sz -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i CLDHGH_1_1800_3600.f32 -z CLDHGH_1_1800_3600.f32.zfp -o CLDHGH_1_1800_3600.f32.zfp.out -2 3600 1800 -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i CLDHGH_1_1800_3600.f32 -d 3600 -d 1800 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL CESM-ATM raw-data-dir f32 3600 1800" }
+    ],
+    "links": [
+      { "label": "Dataset1 (raw)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-1800x3600.tar.gz" },
+      { "label": "Dataset1 (cleared)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-cleared-1800x3600.tar.gz" },
+      { "label": "Dataset2 (raw)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-26x1800x3600.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/template_data.txt" },
+      { "label": "Dataset1 property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-cleared-1800x3600-property.txt" },
+      { "label": "Dataset2 property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-26x1800x3600-property.txt" }
+    ]
+  },
+  {
+    "name": "EXAALT",
+    "source": "EXAALT team",
+    "disclaimer": "This dataset has been approved for unlimited release by Los Alamos National Laboratory and has been assigned LA-UR-18-25670.",
+    "type": "Molecular dynamics simulation",
+    "format": "6 fields: x,y,z,vx,vy,vz.\n Each field stored separately.\n Single precision, binary, little-endian",
+    "entropyMulti": [
+      { "label": "Data1", "avg8": 7.3, "min8": 7, "max8": 7.4, "avg32": 19.9, "min32": 18.4, "max32": 20.4 },
+      { "label": "Data2", "avg8": 6.7, "min8": 6, "max8": 7.1, "avg32": 15.4, "min32": 9.40, "max32": 20.1 },
+      { "label": "Data3", "avg8": 6.9, "min8": 6.8, "max8": 7.2, "avg32": 16.3, "min32": 15.6, "max32": 17.6 }
+    ],
+    "sizes": ["Dataset1: 60 MB", "Dataset2: 973 MB", "Dataset3: 2.4 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i xx.f32 -M REL -R 1E-2 -1 2869440" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i xx.f32 -1 2869440 -s xx.f32.sz -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i xx.f32 -z xx.f32.zfp -o xx.f32.zfp.out -1 2869440 -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i xx.f32 -d 2869440 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL EXAALT raw-data-dir f32 2869440" }
+    ],
+    "links": [
+      { "label": "Dataset1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-2869440.tar.gz" },
+      { "label": "Metadata1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-2869440-template_data.txt" },
+      { "label": "Property1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-2869440-property.txt" },
+      { "label": "Dataset2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-exaalt-copper.tar.gz" },
+      { "label": "Metadata2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-exaalt-copper-template_data.txt" },
+      { "label": "Property2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-copper-property.txt" },
+      { "label": "Dataset3", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-exaalt-helium.tar.gz" },
+      { "label": "Metadata3", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-exaalt-helium-template_data.txt" },
+      { "label": "Property3", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAALT/SDRBENCH-EXAALT-helium-property.txt" }
+    ]
+  },
+  {
+    "name": "Hurricane ISABEL",
+    "source": "http://vis.computer.org/vis2004contest/data.html",
+    "type": "Weather simulation",
+    "format": "13 fields: 3D, 100&times;500&times;500\n Single-precision, binary\n (cleared dataset by replacing background by 0)",
+    "entropy": { "avg8": 5.9, "min8": 0.7, "max8": 7.5, "avg32": 18.9, "min32": 1.3, "max32": 24.2 },
+    "sizes": ["1.25 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i Pf48.bin.f32 -M REL -R 1E-2 -3 500 500 100" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i Pf48.bin.f32 -3 500 500 100 -s Pf48.bin.f32.sz -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i Pf48.bin.f32 -3 500 500 100 -z Pf48.bin.f32.zfp -o Pf48.bin.f32.zfp.out -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i Pf48.bin.f32 -d 500 -d 500 -d 100 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL Hurricane raw-data-dir f32 500 500 100" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/SDRBENCH-Hurricane-ISABEL-100x500x500.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/SDRBENCH-Hurricane-ISABEL-100x500x500-property.txt" }
+    ]
+  },
+  {
+    "name": "EXAFEL",
+    "source": "LCLS",
+    "type": "Images from the LCLS instrument",
+    "format": "1 field: 2D.\n Single precision\n HDF5 and binary",
+    "entropy": { "avg8": 7.4, "min8": 7.4, "max8": 7.4, "avg32": 25.7, "min32": 25.7, "max32": 25.7 },
+    "sizes": ["51 MB", "8.5 GB", "1 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i EXAFEL-LCLS-986x32x185x388.f32 -M REL -R 1E-2 -2 388 5837120" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i EXAFEL-LCLS-986x32x185x388.f32 -s EXAFEL-LCLS-986x32x185x388.f32.sz -2 388 5837120 -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -a 1E-2 -i EXAFEL-LCLS-986x32x185x388.f32 -z EXAFEL-LCLS-986x32x185x388.f32.zfp -o EXAFEL-LCLS-986x32x185x388.f32.zfp.out -2 388 5837120 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i EXAFEL-LCLS-986x32x185x388.f32 -d 5837120 -d 388 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL EXAFEL raw-data-dir f32 388 5837120" }
+    ],
+    "links": [
+      { "label": "Dataset1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/SDRBENCH-EXAFEL-10x32x185x388.tar.gz" },
+      { "label": "Dataset2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/SDRBENCH-EXAFEL-986x32x185x388.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/SDRBENCH-EXAFEL-986x32x185x388-property.txt" },
+      { "label": "Dataset3", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/SDRBENCH-EXAFEL-130x1480x1552.tar.gz" },
+      { "label": "Metadata3", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXAFEL/template_data-exafel-130x1480x1552.txt" }
+    ]
+  },
+  {
+    "name": "HACC",
+    "source": "HACC team (ECP EXASKY)",
+    "type": "Cosmology:\n particle simulation",
+    "format": "1 snapshot: 6 fields (x,y,z,vx,vy,vz)\n Each field stored separately.\n Single precision, binary, little-endian",
+    "entropy": { "avg8": 7.2, "min8": 7.1, "max8": 7.4, "avg32": 25.3, "min32": 24.7, "max32": 25.9 },
+    "sizes": ["19 GB", "5 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i xx.f32 -M ABS -A 0.003 -1 1073726487" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i xx.f32 -s xx.f32.sz -1 1073726487 -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i xx.f32 -z xx.f32.zfp -o xx.f32.zfp.out -a 0.003 -1 1073726487" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i xx.f32 -d 1073726487 -t float -o abs=3e-3 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f ABS HACC raw-data-dir f32 1073726487" }
+    ],
+    "links": [
+      { "label": "Dataset1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/EXASKY-HACC-data-big-size.tar.gz" },
+      { "label": "Metadata1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/template_data_big-size.txt" },
+      { "label": "Property1", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/EXASKY-HACC-data-medium-size-property.txt" },
+      { "label": "Dataset2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/EXASKY-HACC-data-medium-size.tar.gz" },
+      { "label": "Metadata2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/template_data_medium-size.txt" },
+      { "label": "Property2", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/HACC/EXASKY-HACC-data-big-size-property.txt" }
+    ]
+  },
+  {
+    "name": "NYX",
+    "source": "Lukic et al. \"The Lyman α forest in optically thin hydrodynamical simulations\", Monthly Notices of Royal Astronomical Society",
+    "type": "Cosmology:\n Adaptive mesh hydrodynamics + N-body cosmological simulation",
+    "format": "6 fields, 3D, 512 &times; 512 &times; 512\n Single precision\n Binary, little-endian",
+    "entropy": { "avg8": 7.2, "min8": 7.0, "max8": 7.4, "avg32": 25.1, "min32": 24, "max32": 25.9 },
+    "sizes": ["2.7 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i temperature.f32 -M REL -R 1E-2 -3 512 512 512" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i temperature.f32 -s temperature.f32.sz -3 512 512 512 -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i temperature.f32 -z temperature.f32.zfp -o temperature.f32.zfp.out -3 512 512 512 -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i temperature.f32 -d 512 -d 512 -d 512 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL NYX raw-data-dir f32 512 512 512" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/SDRBENCH-EXASKY-NYX-512x512x512.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/SDRBENCH-EXASKY-NYX-512x512x512-property.txt" }
+    ]
+  },
+  {
+    "name": "NWChem",
+    "source": "Example molecular 2-electron integral values generated by libint, a library developed by the Valeev research group at Virginia Tech.  See https://github.com/evaleev/libint \nLibint is an integral evaluation option in NWChemEx.",
+    "type": "Two-electron repulsion integrals computed over Gaussian-type orbital basis sets",
+    "format": "3 fields, 1D\n Double precision\n Binary, little-endian",
+    "sizes": ["16 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -d -i 631-tst.bin.d64 -M REL -R 1E-2 -1 102953248" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -d -i 631-tst.bin.d64 -s 631-tst.bin.d64.sz -1 102953248 -a" },
+      { "tool": "ZFP", "cmd": "zfp -d -i 631-tst.bin.d64 -z 631-tst.bin.d64.zfp -o 631-tst.bin.d64.zfp.out -a 1E-2 -1 102953248 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i 631-tst.bin.d64 -d 102953248 -t double -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -d REL NWCHEM raw-data-dir d64 102953248" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NWChem/SDRBENCH-NWChem-dataset.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NWChem/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NWChem/SDRBENCH-NWChem-dataset-property.txt" }
+    ]
+  },
+  {
+    "name": "SCALE-LETKF",
+    "source": "simulation data are generated by The Local Ensemble Transform Kalman Filter (LETKF) data assimilation package for the SCALE-RM weather model (provided by RIKEN)",
+    "contact": "Guo-yuan Lien\n (guoyuan.lien@gmail.com)",
+    "type": "Climate simulation",
+    "format": "13 fields, 3D, 98&times;1200&times;1200\n Single precision\n Binary, little-endian",
+    "entropy": { "avg8": 6.7, "min8": 4.6, "max8": 7.4, "avg32": 21.7, "min32": 10.2, "max32": 26.1 },
+    "sizes": ["4.9 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -f -z -i T-98x1200x1200.f32 -M REL -R 1E-2 -3 1200 1200 98" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -f -x -i T-98x1200x1200.f32 -s T-98x1200x1200.f32.sz -3 1200 1200 98 -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i T-98x1200x1200.f32 -z T-98x1200x1200.f32.zfp -o T-98x1200x1200.f32.zfp.out -a 1E-2 -3 1200 1200 98 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i T-98x1200x1200.f32 -d 1200 -d 1200 -d 98 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL SCALE-LETKF raw-data-dir f32 1200 1200 98" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/SDRBENCH-SCALE-98x1200x1200.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/SDRBENCH-SCALE-98x1200x1200-property.txt" }
+    ]
+  },
+  {
+    "name": "QMCPACK",
+    "source": "QMCPACK performance test",
+    "contact": "Ye Luo\n (yeluo@anl.gov)",
+    "type": "Many-body ab initio Quantum Monte Carlo (electronic structure of atoms, molecules, and solids)",
+    "format": "1 field, 288 orbitals, 3D\n 69 &times; 69 &times; 115\n Single precision\n Binary, little-endian",
+    "entropy": { "avg8": 7.6, "min8": 7.6, "max8": 7.6, "avg32": 26.1, "min32": 26.1, "max32": 26.1 },
+    "sizes": ["1 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -f -i einspline_288_115_69_69.pre.f32 -M REL -R 1E-2 -3 69 69 33120" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -f -i einspline_288_115_69_69.pre.f32 -s einspline_288_115_69_69.pre.f32.sz -3 69 69 33120 -a" },
+      { "tool": "ZFP", "cmd": "zfp -f -i einspline_288_115_69_69.pre.f32 -z einspline_288_115_69_69.pre.f32.zfp -o einspline_288_115_69_69.pre.f32.zfp.out -a 1E-2 -3 69 69 33120" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i einspline_288_115_69_69.pre.f32 -d 69 -d 69 -d 33120 -t float -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL QMCPack raw-data-dir f32 69 69 33120" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/QMCPack/SDRBENCH-QMCPack.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/QMCPack/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/QMCPack/SDRBENCH-QMCPack-property.txt" }
+    ]
+  },
+  {
+    "name": "Miranda",
+    "source": "Hydrodynamics code for large turbulence simulations",
+    "contact": "Peter Lindstrom\n (lindstrom2@llnl.gov)",
+    "type": "Hydrodynamics code for large turbulence simulations",
+    "format": "3D, totally 7 fields, 256&times;384&times;384\n Double precision\n Binary, little-endian",
+    "entropy": { "avg8": 7.1, "min8": 3.62, "max8": 7.7, "avg32": 22.5, "min32": 7.2, "max32": 25.1 },
+    "sizes": ["Small: 1.87 GB", "Big: 106 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -d -i density.d64 -M REL -R 1E-2 -3 384 384 256" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -d -i density.d64 -s density.d64.sz -3 384 384 256 -a" },
+      { "tool": "ZFP", "cmd": "zfp -d -3 384 384 256 -i density.d64 -z density.d64.zfp -o density.d64.zfp.out -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i density.d64 -d 384 -d 384 -d 256 -t double -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -d REL Miranda raw-data-dir d64 384 384 256" }
+    ],
+    "links": [
+      { "label": "Small Dataset (256x384x384)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/SDRBENCH-Miranda-256x384x384.tar.gz" },
+      { "label": "Small Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/template_data-miranda-256x384x384.txt" },
+      { "label": "Small Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/SDRBENCH-Miranda-256x384x384-property.txt" },
+      { "label": "Big Dataset (3072x3072x3072)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/SDRBENCH-Miranda-3072x3072x3072.tar.gz" },
+      { "label": "Big Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/template_data-miranda-3072x3072x3072.txt" },
+      { "label": "Big Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/SDRBENCH-Miranda-3072x3072x3072-property.txt" }
+    ]
+  },
+  {
+    "name": "S3D",
+    "source": "Kolla, Hemanth\n (hnkolla@sandia.gov)",
+    "type": "Combustion simulation",
+    "format": "11 fields, 3D, 500&times;500&times;500\n Double precision\n Binary, little-endian",
+    "entropy": { "avg8": 7.6, "min8": 7.6, "max8": 7.6, "avg32": 21.9, "min32": 21.8, "max32": 22 },
+    "sizes": ["44 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -d -z -i stat_planar.1.1000E-03.field.d64 -M REL -R 1E-2 -3 500 500 500" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -d -x -i stat_planar.1.1000E-03.field.d64 -s stat_planar.1.1000E-03.field.d64 -3 500 500 500 -a" },
+      { "tool": "ZFP", "cmd": "zfp -d -3 500 500 500 -i stat_planar.1.1000E-03.field.d64 -z stat_planar.1.1000E-03.field.d64.zfp -o stat_planar.1.1000E-03.field.d64.zfp.out -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i stat_planar.1.1000E-03.field.d64 -d 500 -d 500 -d 500 -t double -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -f REL S3D raw-data-dir f32 500 500 500" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/SDRBENCH-S3D.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/template.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/SDRBENCH-S3D-property.txt" }
+    ]
+  },
+  {
+    "name": "XGC",
+    "source": "Princeton Plasma Physics Laboratory (PPPL)\n https://jychoi-hpc.github.io/adios-python-docs/XGC-mesh-and-field-data.html",
+    "type": "Fusion Simulation",
+    "format": "9 timesteps, 3D, unstructured mesh (the mesh data is in the archive),\n 20694&times;512, double precision,\n Binary, little-endian",
+    "sizes": ["1.2 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "N/A"},
+      { "tool": "SZ (Decompress)", "cmd": "N/A"},
+      { "tool": "ZFP", "cmd": "N/A"},
+      { "tool": "LibPressio", "cmd": "N/A"},
+      { "tool": "Z-checker-installer", "cmd": "N/A"},
+      { "note" : "(the files are stored in .bp format, you need to install ADIOS to read them)" }
+    ],
+    "links": [
+      { "label": "Dataset (Adios2)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/XGC/xgc.3d.tar.gz" },
+      { "label": "Dataset (binary)", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/XGC/xgc.zip" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/XGC/template_data.txt" }
+    ]
+  },
+  {
+    "name": "NSTX GPI",
+    "source": "Michael Churchill, Princeton Plasma Physics Laboratory (PPPL)",
+    "disclaimer": "Copyright: Free to use but need to check with Michael Churchil (rchurchi@pppl.gov) before publishing results.",
+    "type": "Fusion Gas Puff Image (GPI) data",
+    "format": "369,357 steps, 2D time-series data (movie), 80&times;64 image\n Double precision, \n Binary, little-endian",
+    "sizes": ["4.1 GB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "N/A"},
+      { "tool": "SZ (Decompress)", "cmd": "N/A"},
+      { "tool": "ZFP", "cmd": "N/A"},
+      { "tool": "LibPressio", "cmd": "N/A"},
+      { "tool": "Z-checker-installer", "cmd": "N/A"},
+      { "note" : "(the files are stored in .bp format, you need to install ADIOS to read them)" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NSTX_GPI/nstx_data_ornl_demo.bp" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/NSTX_GPI/template_data.txt" }
+    ]
+  },
+  {
+    "name": "Brown Samples",
+    "source": "Brown University",
+    "type": "Synthetic, generated to specified regularity",
+    "format": "1D, Double precision\n Binary, little-endian\n (3 datasets with 3 different regularity)",
+    "entropy": { "avg8": 7.5, "min8": 7.5, "max8": 7.6, "avg32": 23, "min32": 23, "max32": 23 },
+    "sizes": ["256 MB", "256 MB", "256 MB"],
+    "commands": [
+      { "tool": "SZ (Compress)", "cmd": "sz -z -d -i sample_r_B_0.5_26.d64 -M REL -R 1E-2 -1 33554433" },
+      { "tool": "SZ (Decompress)", "cmd": "sz -x -d -i sample_r_B_0.5_26.d64 -s sample_r_B_0.5_26.d64.sz -1 33554433 -a" },
+      { "tool": "ZFP", "cmd": "zfp -d -1 33554433 -i sample_r_B_0.5_26.d64 -z sample_r_B_0.5_26.d64.zfp -o sample_r_B_0.5_26.d64.zfp.out -a 1E-2 -s" },
+      { "tool": "LibPressio", "cmd": "pressio -b compressor=$COMP -i sample_r_B_0.5_26.d64 -d 33554433 -t double -o rel=1e-2 -m time -m size -M all" },
+      { "tool": "Z-checker-installer", "cmd": "./runZCCase.sh -d REL Brown-samples raw-data-dir d64 33554433" }
+    ],
+    "links": [
+      { "label": "Dataset", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/brown_synth/SDRBENCH-BROWN-33554433.tar.gz" },
+      { "label": "Metadata", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/brown_synth/template_data.txt" },
+      { "label": "Property", "url": "https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/brown_synth/SDRBENCH-BROWN-33554433-property.txt" }
+    ]
+  }
+]
