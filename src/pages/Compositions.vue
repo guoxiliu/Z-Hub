@@ -1,10 +1,50 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+import PipelineStageBadge from '../components/PipelineStageBadge.vue';
 
+const route = useRoute();
 const compositions = ref([]);
 const searchQuery = ref('');
 const selectedCategory = ref('All');
+
+// composition id -> active variant id ('default' or a composition.variants[].id)
+const activeVariantId = ref({});
+
+const activeVariant = (comp) => {
+  const id = activeVariantId.value[comp.id];
+  if (!id || id === 'default') return null;
+  return comp.variants?.find(v => v.id === id) || null;
+};
+
+const isActiveVariant = (comp, id) => (activeVariantId.value[comp.id] || 'default') === id;
+
+const setVariant = (comp, id) => {
+  activeVariantId.value[comp.id] = id;
+};
+
+const displayedPipeline = (comp) => activeVariant(comp)?.pipeline || comp.pipeline;
+
+const displayedReproduce = (comp) => activeVariant(comp)?.reproduce || comp.reproduce;
+
+// Stages on the primary sequential flow (no lane, or explicitly "main").
+const mainLaneStages = (pipeline) => pipeline.filter(s => !s.lane || s.lane === 'main');
+
+// Side branches (e.g. "outlier", "roi") that run parallel to the main flow,
+// keyed by lane name, in original pipeline order.
+const sideLanes = (pipeline) => {
+  const lanes = {};
+  for (const stage of pipeline) {
+    if (stage.lane && stage.lane !== 'main') {
+      (lanes[stage.lane] ||= []).push(stage);
+    }
+  }
+  return lanes;
+};
+
+// Long-form implementation/fidelity notes, kept out of the compact stage badges.
+const pipelineDetails = (pipeline) =>
+  pipeline.filter(s => s.details).map(s => ({ name: s.name, details: s.details }));
 
 const categories = computed(() => {
   const cats = new Set(compositions.value.map(c => c.category));
@@ -35,6 +75,26 @@ const filteredCompositions = computed(() => {
   return filtered;
 });
 
+// Composition ids can contain dots (e.g. "sz-1.0"), which document.querySelector
+// would misparse as a class selector after the "#" -- use getElementById instead.
+//
+// `id` is optional: pass it explicitly for an unconditional scroll (e.g. a
+// stage-badge click, which must work even when the target hash is already
+// the current URL and so wouldn't fire the route.hash watcher below).
+// Without it, falls back to the current route.hash.
+const scrollToHash = (id) => {
+  const targetId = id || (route.hash ? decodeURIComponent(route.hash.slice(1)) : null);
+  if (!targetId) return;
+  setTimeout(() => {
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.classList.add('highlight-card');
+      setTimeout(() => element.classList.remove('highlight-card'), 2000);
+    }
+  }, 300);
+};
+
 const loadCompositions = async () => {
   try {
     const response = await fetch(import.meta.env.BASE_URL + 'compositions.json');
@@ -42,7 +102,13 @@ const loadCompositions = async () => {
   } catch (error) {
     console.error('Failed to load compositions:', error);
   }
+
+  scrollToHash();
 };
+
+// Cross-page arrivals (e.g. a Modules.vue "Appears in" link) change
+// route.hash, which this catches.
+watch(() => route.hash, () => scrollToHash());
 
 const getCategoryColor = (category) => {
   const colors = {
@@ -94,10 +160,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Compositions List -->
-    <div class="row">
-      <div v-for="composition in filteredCompositions" :key="composition.id" class="col-md-12 mb-4">
-        <div class="card h-100">
+    <!-- Compositions Grid -->
+    <div class="row row-cols-1 row-cols-lg-2 g-4">
+      <div v-for="composition in filteredCompositions" :key="composition.id" class="col">
+        <div :id="composition.id" class="card h-100">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
@@ -138,26 +204,75 @@ onMounted(() => {
             <!-- Pipeline Visualization -->
             <div class="mb-3">
               <h6 class="text-muted mb-2">Pipeline:</h6>
-              <div class="d-flex flex-wrap align-items-center gap-2">
-                <template v-for="(stage, index) in composition.pipeline" :key="index">
-                  <div class="pipeline-stage">
-                    <div class="badge bg-light text-dark border px-3 py-2">
-                      <RouterLink
-                        v-if="stage.module"
-                        :to="`/modules#${stage.module}`"
-                        class="text-decoration-none text-dark"
-                      >
-                        <strong>{{ stage.name }}</strong>
-                      </RouterLink>
-                      <strong v-else>{{ stage.name }}</strong>
-                      <span v-if="stage.optional" class="text-muted ms-1">(optional)</span>
-                      <div class="small text-muted mt-1">{{ stage.description }}</div>
-                      <div v-if="stage.note" class="small fst-italic mt-1">{{ stage.note }}</div>
-                    </div>
-                  </div>
-                  <span v-if="index < composition.pipeline.length - 1" class="text-muted">→</span>
-                </template>
+
+              <!-- Config/build-time variant switcher (e.g. cuSZp2 outlier/plain, cuSZ-Hi CR/TP) -->
+              <div v-if="composition.variants && composition.variants.length" class="mb-2">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button
+                    type="button"
+                    :class="['btn', isActiveVariant(composition, 'default') ? 'btn-primary' : 'btn-outline-primary']"
+                    @click="setVariant(composition, 'default')"
+                  >
+                    {{ composition.pipelineName || composition.name }}
+                  </button>
+                  <button
+                    v-for="v in composition.variants"
+                    :key="v.id"
+                    type="button"
+                    :class="['btn', isActiveVariant(composition, v.id) ? 'btn-primary' : 'btn-outline-primary']"
+                    @click="setVariant(composition, v.id)"
+                  >
+                    {{ v.name }}
+                  </button>
+                </div>
+                <div v-if="activeVariant(composition)?.description" class="small text-muted fst-italic mt-1">
+                  {{ activeVariant(composition).description }}
+                </div>
               </div>
+
+              <!-- Lanes: main flow, plus any side branches (outlier handling, ROI, ...) alongside it -->
+              <div class="d-flex flex-row flex-wrap align-items-start gap-3">
+                <!-- Main flow -->
+                <div class="pipeline-lane">
+                  <template
+                    v-for="(stage, index) in mainLaneStages(displayedPipeline(composition))"
+                    :key="`main-${index}`"
+                  >
+                    <div class="pipeline-stage">
+                      <PipelineStageBadge :stage="stage" @navigate-composition="scrollToHash" />
+                    </div>
+                    <div
+                      v-if="index < mainLaneStages(displayedPipeline(composition)).length - 1"
+                      class="lane-arrow text-muted"
+                    >↓</div>
+                  </template>
+                </div>
+
+                <!-- Side lanes -->
+                <div
+                  v-for="(laneStages, laneName) in sideLanes(displayedPipeline(composition))"
+                  :key="laneName"
+                  class="pipeline-lane side-lane ps-3 border-start"
+                >
+                  <div class="small text-muted fw-semibold mb-2 text-uppercase">↳ {{ laneName }} path</div>
+                  <template v-for="(stage, index) in laneStages" :key="`${laneName}-${index}`">
+                    <div class="pipeline-stage">
+                      <PipelineStageBadge :stage="stage" @navigate-composition="scrollToHash" />
+                    </div>
+                    <div v-if="index < laneStages.length - 1" class="lane-arrow text-muted">↓</div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Implementation Notes: longer curator/fidelity notes, kept out of the compact pipeline badges -->
+            <div v-if="pipelineDetails(displayedPipeline(composition)).length > 0" class="mb-3">
+              <h6 class="text-muted mb-2">Implementation Notes:</h6>
+              <ul class="small mb-0 ps-3">
+                <li v-for="(d, idx) in pipelineDetails(displayedPipeline(composition))" :key="idx">
+                  <strong>{{ d.name }}:</strong> {{ d.details }}
+                </li>
+              </ul>
             </div>
 
             <!-- Used In -->
@@ -166,11 +281,27 @@ onMounted(() => {
               <span class="small">{{ composition.usedIn.join(', ') }}</span>
             </div>
 
-            <!-- GitHub Link -->
-            <div v-if="composition.github" class="mb-3">
-              <a :href="composition.github" target="_blank" class="btn btn-sm btn-outline-dark">
+            <!-- GitHub Link / Reproduce Preset -->
+            <div v-if="composition.github || displayedReproduce(composition)" class="mb-3">
+              <a
+                v-if="composition.github"
+                :href="composition.github"
+                target="_blank"
+                class="btn btn-sm btn-outline-dark me-2"
+              >
                 <i class="bi bi-github"></i> View Implementation
               </a>
+              <a
+                v-if="displayedReproduce(composition)"
+                :href="displayedReproduce(composition).url"
+                target="_blank"
+                class="btn btn-sm btn-outline-primary"
+              >
+                View FZGPUModules Preset
+              </a>
+              <div v-if="displayedReproduce(composition)?.note" class="small text-muted fst-italic mt-1">
+                {{ displayedReproduce(composition).note }}
+              </div>
             </div>
 
             <!-- Papers -->
@@ -191,6 +322,9 @@ onMounted(() => {
                     <span v-if="paper.year"> ({{ paper.year }})</span>
                     <a v-if="paper.doi" :href="`https://doi.org/${paper.doi}`" target="_blank" class="ms-1">
                       [DOI]
+                    </a>
+                    <a v-if="paper.url" :href="paper.url" target="_blank" class="ms-1">
+                      [Link]
                     </a>
                     <span v-if="paper.note" class="text-muted"> - {{ paper.note }}</span>
                   </li>
@@ -217,13 +351,43 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.highlight-card {
+  animation: highlight 1s ease-in-out;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.5) !important;
+}
+
+@keyframes highlight {
+  0%, 100% {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.5);
+  }
+}
+
+.pipeline-lane {
+  flex: 1 1 220px;
+  min-width: 200px;
+  max-width: 100%;
+}
+
 .pipeline-stage {
-  display: inline-block;
+  width: 100%;
+}
+
+.lane-arrow {
+  text-align: center;
+  line-height: 1.2;
+  padding: 0.1rem 0;
+}
+
+.side-lane {
+  border-color: var(--bs-secondary-color, #adb5bd) !important;
 }
 
 .pipeline-stage .badge {
-  min-width: 150px;
-  text-align: center;
+  width: 100%;
+  text-align: left;
   white-space: normal;
 }
 
