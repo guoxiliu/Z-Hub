@@ -27,6 +27,11 @@ const displayedPipeline = (comp) => activeVariant(comp)?.pipeline || comp.pipeli
 
 const displayedReproduce = (comp) => activeVariant(comp)?.reproduce || comp.reproduce;
 
+// CPU counterpart to reproduce: a link to the composition's FZ Module Library
+// (SZ3) algorithm page. Follows the active SZ3 branch when the variant sets its
+// own (default SZ3 -> ALGO_INTERP_LORENZO, SVD branch -> ALGO_SVD, ...).
+const displayedFzAlgorithm = (comp) => activeVariant(comp)?.fzAlgorithm || comp.fzAlgorithm;
+
 // Stages on the primary sequential flow (no lane, or explicitly "main").
 const mainLaneStages = (pipeline) => pipeline.filter(s => !s.lane || s.lane === 'main');
 
@@ -160,6 +165,18 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end mb-4">
+      <a
+        href="https://github.com/skyler-ruiter/Z-Hub/issues/new?template=composition_submission.yml"
+        target="_blank"
+        rel="noopener"
+        class="btn btn-primary"
+      >
+        Submit a Composition
+      </a>
+    </div>
+
     <!-- Compositions Grid -->
     <div class="row row-cols-1 row-cols-lg-2 g-4">
       <div v-for="composition in filteredCompositions" :key="composition.id" class="col">
@@ -281,8 +298,8 @@ onMounted(() => {
               <span class="small">{{ composition.usedIn.join(', ') }}</span>
             </div>
 
-            <!-- GitHub Link / Reproduce Preset -->
-            <div v-if="composition.github || displayedReproduce(composition)" class="mb-3">
+            <!-- GitHub Link / Reproduce Preset (GPU) / FZ Module Library page (CPU) -->
+            <div v-if="composition.github || displayedReproduce(composition) || displayedFzAlgorithm(composition)" class="mb-3">
               <a
                 v-if="composition.github"
                 :href="composition.github"
@@ -295,12 +312,24 @@ onMounted(() => {
                 v-if="displayedReproduce(composition)"
                 :href="displayedReproduce(composition).url"
                 target="_blank"
-                class="btn btn-sm btn-outline-primary"
+                class="btn btn-sm btn-outline-primary me-2"
               >
                 View FZGPUModules Preset
               </a>
+              <a
+                v-if="displayedFzAlgorithm(composition)"
+                :href="displayedFzAlgorithm(composition).url"
+                target="_blank"
+                class="btn btn-sm btn-outline-primary"
+                :title="`FZ Module Library: ${displayedFzAlgorithm(composition).algorithm}`"
+              >
+                <i class="bi bi-book"></i> View in FZ Module Library
+              </a>
               <div v-if="displayedReproduce(composition)?.note" class="small text-muted fst-italic mt-1">
                 {{ displayedReproduce(composition).note }}
+              </div>
+              <div v-if="displayedFzAlgorithm(composition)?.note" class="small text-muted fst-italic mt-1">
+                {{ displayedFzAlgorithm(composition).note }}
               </div>
             </div>
 

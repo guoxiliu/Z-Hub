@@ -168,6 +168,17 @@
         "variant": "tiled (cuSZp3-style)",
         "url": "https://szcompressor.org/FZGPUModules/stage_tiled_lorenzo.html",
         "doi": "10.1145/3712285.3759817"
+      },
+      {
+        "library": "FZ Module Library",
+        "stage": "BlockwiseDecomposition",
+        "algorithm": "lorenzo",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html",
+        "variant": "blockwise, w/ regression fallback"
       }
     ],
     "verification": {
@@ -216,7 +227,19 @@
       }
     ],
     "referenceOnly": false,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "BlockwiseDecomposition",
+        "algorithm": "regression",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html",
+        "variant": "blockwise fallback predictor"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -271,6 +294,16 @@
         "variant": "spline (cuSZ-Hi-style)",
         "url": "https://szcompressor.org/FZGPUModules/stage_ginterp.html",
         "doi": "10.1145/3712285.3759798"
+      },
+      {
+        "library": "FZ Module Library",
+        "stage": "InterpolationDecomposition",
+        "algorithm": "interpolation-spline",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
       }
     ],
     "verification": {
@@ -463,7 +496,18 @@
       }
     ],
     "referenceOnly": true,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "SVDDecomposition",
+        "algorithm": "tucker",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": true,
+        "url": "https://szcompressor.org/SZ3/modules/SVDDecomposition.html"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -476,7 +520,7 @@
     "id": "multilevel-decomposition",
     "name": "Multilevel Decomposition",
     "category": "Transform",
-    "description": "Hierarchical decomposition based on multigrid methods that represents data at multiple levels of resolution. Creates a hierarchy of coefficients where each level captures different scales of variation in the data. Used in MGARD for adaptive reduction with error control.",
+    "description": "Hierarchical decomposition based on multigrid methods that represents data at multiple levels of resolution. Creates a hierarchy of coefficients where each level captures different scales of variation in the data. Used in MGARD (its flagship component) for adaptive reduction with error control: the multilevel structure enables error bounds in the L-infinity or L2 norm and supports progressive, adaptable retrieval at multiple resolution levels. Works best on smooth continuous fields such as PDE solutions, where it delivers strong rate-distortion performance.",
     "features": [
       "Hierarchical multi-resolution representation",
       "Multigrid-based methodology",
@@ -510,7 +554,19 @@
       }
     ],
     "referenceOnly": false,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "MGARDDecomposition",
+        "algorithm": "multilevel-decomposition",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/ALGO_MGARD.html",
+        "variant": "MGARD multigrid (MGARDx)"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -544,7 +600,18 @@
       }
     ],
     "referenceOnly": false,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "BitTruncationQuantizer",
+        "algorithm": "truncation",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": true,
+        "url": "https://szcompressor.org/SZ3/modules/BitTruncationQuantizer.html"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -656,6 +723,17 @@
         "lossy": true,
         "variant": "direct-value (ABS/NOA/REL)",
         "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
+      },
+      {
+        "library": "FZ Module Library",
+        "stage": "QuadraticLevelQuantizer",
+        "algorithm": "quant",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": true,
+        "url": "https://szcompressor.org/SZ3/modules/QuadraticLevelQuantizer.html",
+        "variant": "nonlinear levels (quadratic LUT, experimental)"
       }
     ],
     "verification": {
@@ -692,7 +770,18 @@
       }
     ],
     "referenceOnly": false,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "LinearQuantizer",
+        "algorithm": "linear-quant",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": true,
+        "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -897,6 +986,45 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": "merged from dbefs-mutator (EFS) + dbesf-mutator (ESF), 2026-07-05"
+    }
+  },
+  {
+    "id": "fixed-point-conversion",
+    "name": "Fixed-Point Conversion",
+    "category": "Mutator",
+    "description": "Converts floating-point values to a fixed-point integer representation (a deterministic ldexp-style scale) for bit-exact, platform-independent reproducibility. Unlike error-bound quantization, this is a lossless representation change within the chosen fixed-point range, not a binning step tied to an error tolerance.",
+    "features": [
+      "Deterministic float-to-integer representation",
+      "Bit-exact reproducibility across platforms/compilers",
+      "No error bound involved -- exact within representable range",
+      "Feeds integer-oriented downstream stages"
+    ],
+    "tags": [
+      "representation",
+      "reproducibility",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [],
+    "referenceOnly": false,
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "FixedPointQuantizer",
+        "algorithm": "fixed-point",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/FixedPointQuantizer.html"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module created 2026-07-13 from FZ Module Library's catalog (FixedPointQuantizer page); no exact prior Z-Hub module matched."
     }
   },
   {
@@ -1338,6 +1466,17 @@
         "hardware": "gpu",
         "lossy": false,
         "url": "https://szcompressor.org/FZGPUModules/stage_rle.html"
+      },
+      {
+        "library": "FZ Module Library",
+        "stage": "BitplaneRLEEncoder",
+        "algorithm": "rle",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/BitplaneRLEEncoder.html",
+        "variant": "bitplane-scoped, raw fallback"
       }
     ],
     "verification": {
@@ -1481,6 +1620,51 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "bitplane-packing",
+    "name": "Bitplane Packing",
+    "category": "Encoder",
+    "description": "Packs quantized integer values MSB-to-LSB into separate per-bit-significance streams (bitplanes), enabling progressive/refinable decoding -- higher-order planes can be decoded first for a coarse reconstruction, with lower-order planes added incrementally. Applies no compression by itself; downstream stages (RLE, entropy coding) exploit the resulting sparsity, especially in high-order planes.",
+    "features": [
+      "MSB-to-LSB bitplane decomposition",
+      "Enables progressive / refinable decoding",
+      "No compression on its own -- reshapes data for downstream coders",
+      "Distinct from bit-packing's fixed-width repack and truncation's mantissa discard"
+    ],
+    "tags": [
+      "bitplane",
+      "progressive",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Progressive/Adaptable Retrieval via Multigrid Decomposition (PMGARD)",
+        "note": "Cited by FZ Module Library as relying on MSB-to-LSB bitplane order for progressive retrieval",
+        "year": 2021
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "BitplaneEncoder",
+        "algorithm": "bitplane-pack",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/BitplaneEncoder.html"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module created 2026-07-13 from FZ Module Library's catalog (BitplaneEncoder page); no exact prior Z-Hub module matched."
     }
   },
   {
@@ -1633,6 +1817,27 @@
         "lossy": false,
         "url": "https://szcompressor.org/FZGPUModules/stage_huffman.html",
         "doi": "10.1145/3410463.3414624"
+      },
+      {
+        "library": "FZ Module Library",
+        "stage": "HuffmanEncoder",
+        "algorithm": "huffman",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
+      },
+      {
+        "library": "FZ Module Library",
+        "stage": "HuffmanEncoderV2",
+        "algorithm": "huffman",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoderV2.html",
+        "variant": "V2 (MD-tuned bin distributions)"
       }
     ],
     "verification": {
@@ -1669,7 +1874,18 @@
       }
     ],
     "referenceOnly": false,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "ArithmeticEncoder",
+        "algorithm": "arithmetic",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/ArithmeticEncoder.html"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -1809,7 +2025,18 @@
       }
     ],
     "referenceOnly": false,
-    "implementations": [],
+    "implementations": [
+      {
+        "library": "FZ Module Library",
+        "stage": "SPERREncoder",
+        "algorithm": "speck",
+        "relationship": "original",
+        "license": "BSD-3-Clause",
+        "hardware": "cpu",
+        "lossy": false,
+        "url": "https://szcompressor.org/SZ3/modules/SPERREncoder.html"
+      }
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",

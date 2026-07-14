@@ -1,0 +1,103 @@
+name: "Composition submission"
+description: "Propose a compression composition (a concrete, published pipeline) to be listed on Z-Hub"
+title: "Composition: <name>"
+labels: ["composition"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a composition! A Z-Hub **composition** is a
+        concrete, published, paper-anchored pipeline — a specific compressor
+        that combines several general **modules** in order (e.g. SZ3, SPERR,
+        cuSZp). If you're instead describing a single general technique, use
+        the **module** submission form instead.
+
+        A maintainer will review this, map the pipeline stages onto Z-Hub's
+        module ids and the composition schema (`docs/compositions.md` +
+        `docs/compositions.schema.json`), seed the verification/implementation
+        fields, and open the PR — you don't need to write JSON yourself.
+  - type: input
+    id: name
+    attributes:
+      label: Composition name
+      placeholder: e.g., SZ3, SPERR, cuSZp2
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Hardware tier
+      options:
+        - CPU
+        - GPU
+        - Mixed
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: compressionType
+    attributes:
+      label: Compression type
+      options:
+        - Lossy
+        - Lossless
+        - Hybrid
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is this compressor, and what is it good for? What distinguishes it from its predecessors/relatives?
+    validations:
+      required: true
+  - type: textarea
+    id: pipeline
+    attributes:
+      label: Pipeline stages (in order)
+      description: >
+        One stage per line, in order, naming the technique for each
+        (e.g. "Lorenzo predictor" / "error-controlled quantization" /
+        "Huffman encoding" / "Zstandard"). Note any adaptive/either-or choices
+        (e.g. "predictor: Lorenzo OR interpolation, chosen per block"). The
+        maintainer maps each to a general module id.
+      placeholder: |
+        Interpolation or Lorenzo predictor (auto-selected)
+        Error-controlled quantization
+        Huffman encoding
+        Zstandard (optional)
+    validations:
+      required: true
+  - type: input
+    id: github
+    attributes:
+      label: Source repository
+      description: Link to the implementation (GitHub, etc.), if public.
+      placeholder: https://github.com/...
+  - type: input
+    id: reference
+    attributes:
+      label: Reproducible reference (optional)
+      description: >
+        A link that reproduces or documents this pipeline — an FZGPUModules
+        preset (GPU) or an FZ Module Library / SZ3 algorithm page (CPU), if one
+        exists.
+      placeholder: https://szcompressor.org/SZ3/modules/ALGO_*.html
+  - type: textarea
+    id: papers
+    attributes:
+      label: Papers
+      description: Title, authors, year, and a DOI or URL if available (one per line).
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Notable capabilities (optional)
+      description: >
+        Qualitative strengths worth surfacing (e.g. "progressive
+        decompression", "region-of-interest preservation", "high throughput on
+        GPU"). Z-Hub records benchmarks qualitatively, not as numbers.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else the maintainer should know?

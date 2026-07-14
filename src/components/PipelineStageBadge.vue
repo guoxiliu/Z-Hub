@@ -63,6 +63,23 @@ const collapseId = `stage-more-info-${nextStageBadgeId++}`;
           </RouterLink>
           <span v-else class="fw-semibold">{{ alt.name }}</span>
           <span v-if="alt.variant" class="text-muted"> — {{ alt.variant }}</span>
+          <div v-if="alt.implementation" class="mt-1">
+            <a
+              v-if="alt.implementation.url"
+              :href="alt.implementation.url"
+              target="_blank"
+              rel="noopener"
+              class="badge bg-success-subtle text-success-emphasis border border-success-subtle text-decoration-none"
+            >
+              {{ alt.implementation.library }} · {{ alt.implementation.stage }}
+            </a>
+            <span
+              v-else
+              class="badge bg-success-subtle text-success-emphasis border border-success-subtle"
+            >
+              {{ alt.implementation.library }} · {{ alt.implementation.stage }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
