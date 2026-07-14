@@ -153,6 +153,17 @@ const categories = computed(() => {
   return ['all', ...Array.from(cats).sort()];
 });
 
+// What distinguishes each category, on the axis of "how a stage touches the
+// data" (see docs/vocabulary.md for the full rationale behind the split).
+const categoryDescriptions = {
+  Predictor: "Guesses each value from its neighbors, then keeps only the residual (actual minus predicted). Good predictions cluster residuals near zero, which compresses well downstream.",
+  Transform: "Mixes many values together with a cross-value mathematical transform (frequency, multi-resolution, tensor) to decorrelate them. Unlike a Mutator, it doesn't touch values independently.",
+  Quantizer: "Reduces per-value precision.",
+  Mutator: "Changes each value's representation independently of its neighbors (rescaling, format conversion). Doesn't look at other values and doesn't compress on its own.",
+  Shuffler: "Reorders values, or the bits/bytes within them, without doing any computation. Doesn't compress on its own, it just arranges data so a later stage compresses it better.",
+  Encoder: "The only category that actually reduces size, by exploiting redundancy.",
+};
+
 // Get category color
 function getCategoryColor(category) {
   const colors = {
@@ -228,10 +239,13 @@ function getCategoryColor(category) {
       </div>
 
       <div v-for="(categoryModules, category) in modulesByCategory" :key="category" class="mb-5">
-        <h3 class="mb-3">
+        <h3 class="mb-1">
           {{ category }}s
           <span class="badge bg-secondary ms-2">{{ categoryModules.length }}</span>
         </h3>
+        <p v-if="categoryDescriptions[category]" class="text-muted small mb-3">
+          {{ categoryDescriptions[category] }}
+        </p>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           <div v-for="module in categoryModules" :key="module.id" class="col">

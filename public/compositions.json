@@ -1974,9 +1974,19 @@
         "description": "Predictive interpolation coding"
       },
       {
-        "name": "Progressive Data Loading",
-        "description": "Stream-friendly compression",
-        "note": "Enables partial decompression"
+        "module": "quantizer",
+        "name": "Quantization",
+        "description": "Error-bounded quantization"
+      },
+      {
+        "module": "xor-encoding",
+        "name": "Predictive Bitplane Coding",
+        "description": "XOR based prediction between bitplanes"
+      },
+      {
+        "module": "negabinary",
+        "name": "Negabinary Encoding",
+        "description": "Negabinary representation for efficient storage"
       }
     ],
     "github": "https://github.com/szcompressor/IPComp",
@@ -1990,6 +2000,12 @@
     ],
     "usedIn": [
       "GPU streaming workloads"
+    ],
+    "capabilities": [
+      {
+        "name": "Progressive Decompression",
+        "description": "Supports partial decompression for streaming scenarios and incremental loading of data."
+      }
     ],
     "tags": [
       "lossy",
@@ -2016,27 +2032,45 @@
       {
         "module": "neural-network-prediction",
         "name": "Neural Network Prediction",
-        "description": "Deep learning-based value prediction"
+        "description": "Deep learning-based value prediction preceeded by data grid sparsification"
       },
       {
         "module": "interpolation",
         "name": "Interpolation",
-        "description": "Coupled interpolation for refinement"
+        "description": "Coupled interpolation for refinement using QoZ 1D spline and multi-dim spline"
       },
       {
         "module": "quantizer",
         "name": "Quantization",
         "description": "Error-bounded quantization"
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "Huffman Encoding",
+        "description": "Lossless entropy coding of the quantized codes"
+      },
+      {
+        "name": "Zstandard",
+        "description": "ZSTD post-compression",
+        "composition": "zstd"
       }
     ],
     "papers": [
       {
-        "title": "SRNN-SZ: Neural Network Lossy Compression",
-        "note": "ML-based prediction"
+        "title": "Scientific Error-bounded Lossy Compression with Super-resolution Neural Networks",
+        "authors": "J. Liu, et al.",
+        "year": 2023,
+        "doi": "10.1109/BigData59044.2023.10386682"
       }
     ],
     "usedIn": [
       "GPU machine learning workloads"
+    ],
+    "capabilities": [
+      {
+        "name": "Adaptive Selection",
+        "description": "Automatically selects interpolation between the QoZ 1D spline and multi-dimensional spline based on data characteristics."
+      }
     ],
     "tags": [
       "lossy",
@@ -2059,27 +2093,36 @@
     "name": "FRSZ2",
     "category": "GPU",
     "compressionType": "Lossy",
-    "description": "GPU compressor with exponent extraction, significand normalization, sign integration, and length-based truncation per block.",
+    "description": "GPU compressor using a block-floating-point representation (shared max exponent per block, sign-prefixed normalized significands) with a fixed per-block truncation length.",
     "pipeline": [
       {
+        "module": "block-floating-point",
+        "variant": "exponent extraction",
         "name": "Exponent Extraction",
-        "description": "Extract and find max exponent per block"
+        "description": "Extract each value's exponent and find the block's maximum exponent e_max"
       },
       {
-        "name": "Significand Processing",
-        "description": "Extract sign/significand, add implicit bit, normalize to max exponent"
+        "name": "Sign & Significand Extraction",
+        "description": "Extract the sign and significand of each value, restoring the usually-implicit leading 1 bit"
+      },
+      {
+        "module": "block-floating-point",
+        "variant": "mantissa alignment",
+        "name": "Significand Normalization",
+        "description": "Prefix each significand with k = e_max − e zero bits, aligning it to the block's shared maximum exponent"
       },
       {
         "name": "Sign Integration",
-        "description": "Place sign bit left of normalized significand"
+        "description": "Place the sign bit to the left of the normalized significand"
       },
       {
+        "module": "truncation",
         "name": "Truncation",
-        "description": "Cut representation to appropriate length"
+        "description": "Cut the signed, normalized representation down to a fixed length l, producing the stored code c"
       },
       {
         "name": "Storage",
-        "description": "Store E_max and compressed data per block"
+        "description": "Store e_max once and all per-value codes c for the block"
       }
     ],
     "papers": [
@@ -2091,7 +2134,7 @@
       }
     ],
     "usedIn": [
-      "GPU scientific computing"
+      "GMRES solver on GPUs"
     ],
     "tags": [
       "lossy",
@@ -2116,10 +2159,12 @@
     "description": "NVIDIA GPU-optimized lossless compressor using cascaded RLE-delta-bitpacking with multiple passes for maximum GPU efficiency.",
     "pipeline": [
       {
+        "module": "rle",
         "name": "Run-Length Encoding",
         "description": "Compress repeated values"
       },
       {
+        "module": "delta-encoding",
         "name": "Delta Coding",
         "description": "Encode differences"
       },
@@ -2135,13 +2180,6 @@
       }
     ],
     "github": "https://github.com/NVIDIA/nvcomp",
-    "papers": [
-      {
-        "title": "nvcomp: GPU Data Compression Library",
-        "authors": "NVIDIA",
-        "note": "GPU-optimized cascaded approach"
-      }
-    ],
     "usedIn": [
       "GPU workloads",
       "NVIDIA GPUs"
@@ -2167,20 +2205,18 @@
     "name": "PFPL",
     "category": "Mixed",
     "compressionType": "Lossy",
-    "description": "Cross-platform compressor using quantization (ABS/REL/NOA), delta coding with negabinary representation, bitshuffle, and recursive zero elimination.",
+    "description": "Cross-platform compressor using quantization, delta coding, bitshuffle, and recursive zero elimination. Flexible error bound support, and a portable efficient implementation on both GPU and CPU.",
     "pipeline": [
       {
         "module": "quantizer",
         "name": "Quantization",
         "description": "ABS/REL/NOA error bound modes with outlier handling",
-        "note": "Flexible error bound modes",
         "implementation": {
           "library": "FZGPUModules",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
-        },
-        "moreInfo": "FZGM's QuantizerStage quantizes values directly, not prediction residuals. ABS/NOA modes use a uniform step of 2\u00d7error_bound, with values that fall outside the quantization radius stored losslessly as (value, index) outlier pairs; REL mode instead encodes in log2-space for an exact per-element bound \u2014 PFPL's own contribution, since most error-bounded compressors only approximate REL."
+        }
       },
       {
         "module": "delta-encoding",
@@ -2191,9 +2227,7 @@
           "stage": "DifferenceStage",
           "card": "fzgm-diff",
           "url": "https://szcompressor.org/FZGPUModules/stage_diff.html"
-        },
-        "details": "Corrected 2026-07-06: FZGM's reproducible preset (examples/presets/pfpl.toml) uses a plain DifferenceStage here, not a negabinary/TCMS conversion.",
-        "moreInfo": "A first-order difference of quantized integer codes (element i minus element i\u22121) turns a slowly-varying code stream into small values clustered near zero, which compresses much better under the downstream bitshuffle + zero-elimination stages than the raw codes would \u2014 the same principle Lorenzo prediction uses, just without the inclusion-exclusion cross-term needed for multi-dimensional neighbors."
+        }
       },
       {
         "module": "bit-shuffle",
@@ -2204,22 +2238,19 @@
           "stage": "BitshuffleStage",
           "card": "fzgm-bitshuffle",
           "url": "https://szcompressor.org/FZGPUModules/stage_bitshuffle.html"
-        },
-        "moreInfo": "Given a chunk of N elements each W bits wide, the transpose produces W groups, each containing just the k-th bit of every element in the chunk \u2014 turning scattered bit-level redundancy into byte-aligned runs that a downstream repeat/zero-elimination stage can exploit. Output is the same size as the input; only the bit layout changes (MSB-first: bit-plane W\u22121 comes first)."
+        }
       },
       {
         "module": "repeat-elimination",
         "name": "Recursive Zero Elimination",
         "description": "Multi-level iterative removal of zero runs",
-        "note": "Multi-pass zero elimination; RZE in the LC framework",
         "variant": "zero-specialized (RZE)",
         "implementation": {
           "library": "FZGPUModules",
           "stage": "RZEStage",
           "card": "fzgm-rze",
           "url": "https://szcompressor.org/FZGPUModules/stage_rze.html"
-        },
-        "moreInfo": "Uses the same hierarchical bitmap scheme as RRE, but specialized for runs of zero words rather than arbitrary repeats: non-zero words are compacted out and flagged, and the flag bitmap itself is recursively re-compressed at 2048/256/32/4-byte levels."
+        }
       }
     ],
     "papers": [
@@ -2238,7 +2269,7 @@
       "lossy",
       "scientific",
       "portable",
-      "negabinary"
+      "lc-framework"
     ],
     "status": "active",
     "verification": {
@@ -2258,17 +2289,8 @@
     "name": "ISABELA",
     "category": "CPU",
     "compressionType": "Lossy",
-    "description": "In situ compression for scientific data using sorting-based pre-conditioning and cubic B-splines curve fitting. Transforms irregular spatial data into smooth monotonic curves for highly accurate approximation. Pipeline: linearization \u2192 windowing (1024 values) \u2192 sorting transform \u2192 B-spline compression \u2192 quantization.",
+    "description": "In situ compression for scientific data using sorting-based pre-conditioning and cubic B-splines curve fitting. Transforms irregular spatial data into smooth monotonic curves for highly accurate approximation. Preprocesses data by linearizing and windowing into 1024-element blocks.",
     "pipeline": [
-      {
-        "name": "Data Linearization",
-        "description": "Convert multi-dimensional data to linear representation"
-      },
-      {
-        "name": "Windowing",
-        "description": "Divide into 1024-element blocks",
-        "note": "Fixed window size for independent processing"
-      },
       {
         "module": "sorting",
         "name": "Sorting Pre-conditioner",
@@ -2322,12 +2344,11 @@
     "name": "ZFP",
     "category": "Mixed",
     "compressionType": "Lossy",
-    "description": "Fixed-rate compressed floating-point arrays using block-floating-point transform, DCT with lifting scheme, and embedded coding. Processes 4^d blocks (padding if needed), with efficient zero-block encoding. Pipeline: blocking \u2192 block-floating-point \u2192 DCT \u2192 zigzag ordering \u2192 negabinary \u2192 bitshuffle \u2192 RLE. Encodes bitplanes until accuracy/bitrate requirements met.",
+    "description": "Fixed-rate compressed floating-point arrays using block-floating-point transform, DCT with lifting scheme, and embedded coding. Processes 4^d blocks, with efficient zero-block encoding. Encodes bitplanes until accuracy/bitrate requirements met.",
     "pipeline": [
       {
         "name": "Block Partitioning",
-        "description": "Partition into 4^d blocks (16 for 2D, 64 for 3D)",
-        "note": "Pads data if needed to complete blocks"
+        "description": "Partition into 4^d blocks (16 for 2D, 64 for 3D)"
       },
       {
         "module": "block-floating-point",
@@ -2338,8 +2359,7 @@
       {
         "module": "dct-transform",
         "name": "Discrete Cosine Transform",
-        "description": "In-place DCT using lifting scheme implementation",
-        "note": "Orthogonal transform for decorrelation"
+        "description": "In-place DCT using lifting scheme implementation"
       },
       {
         "module": "zigzag-ordering",
@@ -2368,9 +2388,17 @@
     "papers": [
       {
         "title": "Fixed-Rate Compressed Floating-Point Arrays",
-        "authors": "P. Lindstrom, M. Isenburg",
-        "doi": "10.1109/TVCG.2014.346",
-        "year": 2014
+        "authors": "Peter Lindstrom",
+        "doi": "10.1109/TVCG.2014.2346458",
+        "year": 2014,
+        "note": "Main ZFP paper"
+      },
+      {
+        "title": "Error Analysis of ZFP Compression for Floating-Point Data",
+        "authors": "James Diffenderfer, Alyson Fox, Jeffrey Hittinger, Geoffrey Sanders, Peter Lindstrom",
+        "doi": "10.1137/18M1168832",
+        "year": 2019,
+        "note": "Paper on the current ZFP algorithm"
       }
     ],
     "usedIn": [
@@ -2390,6 +2418,10 @@
       {
         "name": "Progressive Decompression",
         "description": "Embedded coding with bitplane encoding allows progressive decoding by decoding bitplanes until accuracy/bitrate requirements are met"
+      },
+      {
+        "name": "Error Modes",
+        "description": "Supports fixed-rate, fixed-accuracy, and fixed-precision modes for flexible compression. GPU implementation only supports fixed-rate mode."
       }
     ],
     "status": "active",
@@ -2479,6 +2511,7 @@
         "variant": "HOSVD (Tucker)"
       },
       {
+        "module": "truncation",
         "name": "Bitplane Truncation",
         "description": "Truncate least significant bitplanes based on error threshold",
         "note": "Lossy step that removes low-importance bits"
@@ -2545,12 +2578,32 @@
     "name": "MDZ",
     "category": "CPU",
     "compressionType": "Lossy",
-    "description": "Multi-dimensional lossy compressor using adaptive prediction and error-controlled quantization. Also known as MMD-SZ. Has been integrated into SZ3.",
+    "description": "Error-bounded lossy compressor for molecular dynamics (MD) trajectory data, adaptively selecting between three snapshot-buffer prediction strategies based on spatial/temporal smoothness. Also known as MMD-SZ. Has been integrated into SZ3.",
     "pipeline": [
       {
-        "module": "lorenzo-predictor",
-        "name": "Multi-dimensional Prediction",
-        "description": "Adaptive multi-dimensional spatial prediction"
+        "name": "Adaptive Predictor Selection",
+        "description": "Choose one of three prediction strategies per buffer of snapshots, trading off spatial vs. temporal smoothness",
+        "note": "Selected at runtime based on the data's spatial/temporal smoothness pattern",
+        "moreInfo": "VQ predicts purely from spatial information, so every snapshot decompresses independently with no cross-snapshot dependency -- best for datasets with very low smoothness in the time dimension. VQT bootstraps the buffer with a VQ prediction on the first snapshot, then predicts every remaining snapshot from the corresponding point in the previous snapshot (an ordinary time-based predictor) -- designed for datasets with smooth time dimension that also have strong multi-peak-distribution patterns in space. MT bootstraps with a specialized 'initial-time-based' prediction on the first snapshot, then applies the same ordinary time-based predictor as VQT to the rest -- particularly effective on datasets with very high smoothness in the time dimension.",
+        "alternatives": [
+          {
+            "module": "vector-quantization",
+            "name": "VQ",
+            "description": "Predicts every snapshot from spatial information alone via codebook lookup, so any snapshot decompresses independently -- best for data with very low smoothness across time"
+          },
+          {
+            "module": "delta-encoding",
+            "variant": "temporal (previous snapshot), VQ-bootstrapped",
+            "name": "VQT",
+            "description": "VQ prediction bootstraps the first snapshot in the buffer; every remaining snapshot is predicted from the same point in the previous snapshot -- best for data smooth in time with strong multi-peak spatial distributions"
+          },
+          {
+            "module": "delta-encoding",
+            "variant": "temporal (previous snapshot), specialized bootstrap",
+            "name": "MT",
+            "description": "A specialized initial-time-based prediction bootstraps the first snapshot; every remaining snapshot uses the same ordinary time-based predictor as VQT -- best for data with very high smoothness in the time dimension"
+          }
+        ]
       },
       {
         "module": "quantizer",
@@ -2567,18 +2620,26 @@
     "note": "Has been integrated into SZ3",
     "papers": [
       {
-        "title": "MDZ: Multi-dimensional Lossy Compression",
-        "note": "Multi-dimensional optimization"
+        "title": "MDZ: An Efficient Error-bounded Lossy Compressor for Molecular Dynamics",
+        "authors": "K. Zhao, et al.",
+        "year": 2022,
+        "doi": "10.1109/ICDE53745.2022.00007"
       }
     ],
     "usedIn": [
       "Scientific HPC",
-      "Multi-dimensional data"
+      "Molecular dynamics simulations"
+    ],
+    "capabilities": [
+      {
+        "name": "Adaptive Selection",
+        "description": "Adaptively selects between three snapshot-buffer prediction strategies (VQ, VQT, MT) based on the data's spatial/temporal smoothness pattern"
+      }
     ],
     "tags": [
       "lossy",
       "scientific",
-      "multi-dimensional",
+      "molecular-dynamics",
       "sz"
     ],
     "status": "active",
@@ -2675,13 +2736,36 @@
         "title": "MGARD+: Optimizing Multilevel Methods for Error-bounded Scientific Data Reduction",
         "authors": "Xin Liang et al.",
         "year": 2021,
-        "note": "IEEE Transactions on Computers"
+        "doi": "10.1109/TC.2021.3092201",
+        "note": "Fundamental MGARD theory"
       },
       {
         "title": "Multilevel Techniques for Compression and Reduction of Scientific Data\u2014The Unstructured Case",
         "authors": "Mark Ainsworth et al.",
         "year": 2020,
-        "note": "SIAM Journal on Scientific Computing"
+        "doi": "10.1137/19M1267878",
+        "note": "Extends work to unstructured meshes and irregular grids"
+      },
+      {
+        "title": "Maintaining Trust in Reduction: Preserving the Accuracy of Quantities of Interest for Lossy Compression",
+        "authors": "Qian Gong et al.",
+        "year": 2021,
+        "doi": "10.1007/978-3-030-96498-6_2",
+        "note": "Grounds the QoI Preservation capability"
+      },
+      {
+        "title": "Region-adaptive, Error-controlled Scientific Data Compression using Multilevel Decomposition",
+        "authors": "Qian Gong et al.",
+        "year": 2022,
+        "doi": "10.1145/3538712.3538717",
+        "note": "RoI Support capability"
+      },
+      {
+        "title": "Error-controlled, Progressive, and Adaptable Retrieval of Scientific Data with Multilevel Decomposition",
+        "authors": "Xin Liang et al.",
+        "year": 2021,
+        "doi": "10.1145/3458817.3476179",
+        "note": "Progressive Decompression capability"
       }
     ],
     "usedIn": [
