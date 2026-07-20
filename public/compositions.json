@@ -53,9 +53,10 @@
   {
     "id": "deflate",
     "name": "DEFLATE",
+    "aliases": ["zlib", "gzip"],
     "category": "CPU",
     "compressionType": "Lossless",
-    "description": "Widely-used lossless compression combining LZ77 dictionary coding with Huffman entropy coding. Used in gzip, PNG, and ZIP formats.",
+    "description": "Widely-used lossless compression combining LZ77 dictionary coding with Huffman entropy coding. zlib and gzip both wrap the same DEFLATE bitstream in different container formats (zlib: 2-byte header + Adler-32 checksum; gzip: richer header + CRC-32), so the compression pipeline itself is identical between them.",
     "pipeline": [
       {
         "module": "lz77",
@@ -65,7 +66,8 @@
       {
         "module": "huffman-encoding",
         "name": "Huffman Encoding",
-        "description": "Entropy coding of LZ77 output"
+        "description": "Entropy coding of LZ77 output",
+        "note": "Per-block choice of static (predefined) or dynamic (block-specific) Huffman code tables"
       }
     ],
     "github": "https://github.com/madler/zlib",
@@ -75,6 +77,18 @@
         "authors": "Deutsch P.",
         "year": 1996,
         "note": "RFC 1951"
+      },
+      {
+        "title": "ZLIB Compressed Data Format Specification",
+        "authors": "Deutsch P., Gailly J-L.",
+        "year": 1996,
+        "note": "RFC 1950"
+      },
+      {
+        "title": "GZIP file format specification",
+        "authors": "Deutsch P.",
+        "year": 1996,
+        "note": "RFC 1952"
       }
     ],
     "usedIn": [
@@ -88,6 +102,147 @@
       "dictionary",
       "entropy-coding",
       "standard"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "lzma",
+    "name": "LZMA",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "description": "High-ratio lossless compressor combining an LZ77-family dictionary matcher with a large (up to 4 GB) sliding window and range coding driven by adaptive, bit-level context models, giving it substantially better ratios than DEFLATE at the cost of slower compression.",
+    "pipeline": [
+      {
+        "module": "lz77",
+        "name": "LZ77 (large-window)",
+        "description": "Sliding-window dictionary matcher with a configurable window up to 4 GB, versus DEFLATE's fixed 32 KB",
+        "note": "Match/literal choices are optimized via approximate dynamic programming rather than taken greedily"
+      },
+      {
+        "module": "range-coding",
+        "name": "Range Coding",
+        "description": "Encodes literal and match/distance bits under adaptive binary probability contexts, updated per bit as it is coded",
+        "note": "Separate context models per bitfield (literal bits, match-length bits, distance-slot bits) rather than one global model, so predictions stay correlated with recently seen values of that same field"
+      }
+    ],
+    "github": "https://www.7-zip.org/sdk.html",
+    "papers": [
+      {
+        "title": "LZMA SDK",
+        "authors": "Igor Pavlov",
+        "note": "Reference implementation and format description; LZMA has no formal peer-reviewed paper"
+      }
+    ],
+    "usedIn": [
+      "7-Zip",
+      ".xz archives",
+      "Squashfs",
+      "Package managers (APT, RPM, pacman)"
+    ],
+    "tags": [
+      "lossless",
+      "dictionary",
+      "entropy-coding",
+      "high-ratio"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "lz4",
+    "name": "LZ4",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "description": "Lossless dictionary compressor tuned purely for throughput: unlike DEFLATE/zstd/LZMA, it has no entropy-coding stage at all, trading compression ratio for compression/decompression speeds that can approach memcpy().",
+    "pipeline": [
+      {
+        "module": "lz77",
+        "name": "LZ77",
+        "description": "Hash-table-driven sliding-window match finder; encodes output as a sequence of tokens, each pairing a literal run with a following (offset, length) match copy",
+        "note": "No entropy-coding stage follows — literal bytes and match tokens are written with fixed-width fields, which is what makes both compression and decompression extremely fast"
+      }
+    ],
+    "github": "https://github.com/lz4/lz4",
+    "papers": [
+      {
+        "title": "LZ4 - Extremely Fast Compression algorithm",
+        "authors": "Yann Collet",
+        "note": "Reference implementation and format description; no formal peer-reviewed paper"
+      }
+    ],
+    "usedIn": [
+      "Linux kernel (zram, btrfs, squashfs)",
+      "Hadoop / Spark",
+      "Real-time logging and network protocols"
+    ],
+    "tags": [
+      "lossless",
+      "dictionary",
+      "fast",
+      "general-purpose"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "brotli",
+    "name": "Brotli",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "description": "General-purpose lossless compressor combining LZ77-style dictionary matching (with both a sliding window and a ~120 KB built-in static dictionary of common text/HTML substrings) with context-modeled Huffman entropy coding, where the Huffman table used for each symbol is selected based on recently-seen context rather than fixed for the whole block.",
+    "pipeline": [
+      {
+        "module": "lz77",
+        "name": "LZ77 + Static Dictionary",
+        "description": "Sliding-window dictionary matching, falling back to references into a ~120 KB built-in static dictionary of common substrings when no sliding-window match is found",
+        "note": "The static dictionary is what lets Brotli beat DEFLATE on small/text-like payloads where a sliding window alone has little to match against yet"
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "Context-Modeled Huffman Encoding",
+        "description": "Encodes literals and matches with dynamic Huffman tables selected per-symbol based on a context derived from recently coded values, rather than one fixed table per block",
+        "note": "This context selection (2nd-order for literals) is what distinguishes Brotli's entropy stage from DEFLATE's flat per-block Huffman"
+      }
+    ],
+    "github": "https://github.com/google/brotli",
+    "papers": [
+      {
+        "title": "Brotli: A General-Purpose Data Compressor",
+        "authors": "Jyrki Alakuijala, Andrea Farruggia, Paolo Ferragina, Evgenii Kliuchnikov, Robert Obryk, Zoltan Szabadka, Lode Vandevenne",
+        "doi": "10.1145/3231935",
+        "year": 2019,
+        "venue": "ACM Transactions on Information Systems"
+      }
+    ],
+    "usedIn": [
+      "HTTP compression (web browsers/servers)",
+      "Font compression (WOFF2)",
+      "Zarr / numcodecs"
+    ],
+    "tags": [
+      "lossless",
+      "dictionary",
+      "entropy-coding",
+      "general-purpose"
     ],
     "status": "active",
     "verification": {
@@ -145,6 +300,178 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "pcodec",
+    "name": "Pcodec (Pco)",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "description": "Lossless codec purpose-built for numerical (integer/float) sequences. Detects an approximate numeric structure per chunk (e.g. an integer multiplier/GCD, or an additive base), splits each value into 1-2 decorrelated \"latent\" integers along that structure, and entropy-codes the latents with an adaptive binning scheme that converges quickly to their true entropy.",
+    "pipeline": [
+      {
+        "name": "Mode Detection & Latent Splitting",
+        "description": "Identifies an approximate per-chunk numeric structure (a \"mode\": e.g. integer-multiplier/GCD, or additive offset) and splits each value into 1-2 latent integer variables under that structure",
+        "note": "E.g. under int-mult mode with GCD 777, a value x is split into latents l0, l1 such that x = 777 * l0 + l1"
+      },
+      {
+        "module": "delta-encoding",
+        "name": "Latent Delta Encoding",
+        "description": "Delta-encodes the latent streams to make them closer to independently and identically distributed, which the binning stage compresses more effectively"
+      },
+      {
+        "module": "adaptive-binning",
+        "name": "Adaptive Binning (ANS)",
+        "description": "Entropy-codes the (now-i.i.d.-ish) latents by adaptively grouping them into bins and ANS-coding the bin index, storing each value's offset within its bin as fixed-width bits"
+      }
+    ],
+    "github": "https://github.com/pcodec/pcodec",
+    "papers": [
+      {
+        "title": "Pcodec: Better Compression for Numerical Sequences",
+        "authors": "Martin Loncaric",
+        "year": 2025,
+        "doi": "10.48550/arXiv.2502.06112"
+      }
+    ],
+    "usedIn": [
+      "Zarr / numcodecs (numcodecs_wasm_pco, PCodec codec)",
+      "Columnar numeric data storage"
+    ],
+    "tags": [
+      "lossless",
+      "numeric",
+      "entropy-coding",
+      "columnar"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "spdp",
+    "name": "SPDP",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "description": "Automatically-synthesized lossless compressor for scientific floating-point data: the authors generated and benchmarked over 9 million candidate pipelines across 26 scientific datasets and selected the best-performing 4-stage combination, operating at word/byte granularity rather than modeling any specific data distribution.",
+    "pipeline": [
+      {
+        "module": "delta-encoding",
+        "name": "LNVs2 (Stride-2 Byte Delta)",
+        "description": "Subtracts each byte's value from the byte two positions back in the stream (a stride-2 last-value predictor), rather than the immediately preceding byte",
+        "note": "The stride of 2 was found by the automatic search to expose better correlations than the usual stride-1 delta on these datasets"
+      },
+      {
+        "module": "bit-shuffle",
+        "name": "DIM8 (Byte-Position Grouping)",
+        "description": "Groups bytes by their significance position across consecutive residuals (all most-significant bytes together, then all second-most-significant, and so on), the byte-granularity analog of bit-shuffle's bit-plane transpose",
+        "note": "Byte-level rather than bit-level grouping — reuses the bit-shuffle module's transpose concept at a coarser granularity"
+      },
+      {
+        "module": "delta-encoding",
+        "name": "LNVs1 (Grouped-Stream Delta)",
+        "description": "A second, stride-1 delta pass over the now byte-position-grouped stream from DIM8"
+      },
+      {
+        "module": "lz77",
+        "name": "LZa6",
+        "description": "A fast, low-overhead LZ77 variant tuned to encode the final residual stream",
+        "note": "Minimum match length and search effort tuned for speed over ratio, since most of the compression gain already came from the transform stages above"
+      }
+    ],
+    "papers": [
+      {
+        "title": "SPDP: An Automatically Synthesized Lossless Compression Algorithm for Floating-Point Data",
+        "authors": "Steven Claggett, Sahar Azimi, Martin Burtscher",
+        "doi": "10.1109/DCC.2018.00042",
+        "year": 2018,
+        "venue": "Data Compression Conference (DCC)"
+      }
+    ],
+    "usedIn": [
+      "Scientific floating-point datasets",
+      "Compared against in the Pcodec benchmark suite"
+    ],
+    "tags": [
+      "lossless",
+      "floating-point",
+      "scientific",
+      "byte-granularity"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "github link is a best-effort guess at Burtscher group's repo naming convention — not individually confirmed live."
+    }
+  },
+  {
+    "id": "turbopfor",
+    "name": "TurboPFor",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "description": "High-throughput SIMD implementation of the PFor/PForDelta family of integer-array compression schemes: values are frame-of-reference shifted per block (subtracting the block minimum) and bit-packed to the minimal width that block needs, with any out-of-range outliers patched in separately rather than forcing every value to fit the narrow width.",
+    "pipeline": [
+      {
+        "module": "delta-encoding",
+        "name": "Delta / Zigzag Preprocessing",
+        "description": "For sorted or delta-friendly integer sequences, delta- or delta-of-delta-encodes values (zigzag-mapped if signed) before frame-of-referencing",
+        "optional": true
+      },
+      {
+        "module": "adm",
+        "name": "Frame-of-Reference (Patched)",
+        "description": "Subtracts each block's minimum value so its elements fit in fewer bits, remapping them into a narrow, block-local code",
+        "note": "Uses the block minimum as the center rather than Adaptive Data Mapping's block mean, and patches out-of-range outliers ('exceptions') in separately at full width instead of forcing them into the narrow code — this patching is what makes it Patched Frame-of-Reference (PFOR)"
+      },
+      {
+        "module": "bit-packing",
+        "name": "SIMD Bit-Packing",
+        "description": "Packs each block's frame-of-reference codes to that block's minimal bit width using SIMD/AVX2 instructions for high-throughput encode/decode"
+      },
+      {
+        "name": "Zstandard (residual/exception stream)",
+        "description": "Benchmarked in the Pcodec paper paired with Zstd for the residual/exception stream",
+        "optional": true,
+        "composition": "zstd"
+      }
+    ],
+    "github": "https://github.com/powturbo/TurboPFor-Integer-Compression",
+    "papers": [
+      {
+        "title": "Super-Scalar RAM-CPU Cache Compression",
+        "authors": "Marcin Zukowski, Sándor Héman, Niels Nes, Peter Boncz",
+        "doi": "10.1109/ICDE.2006.150",
+        "year": 2006,
+        "venue": "ICDE 2006",
+        "note": "Introduces PFOR and PFOR-DELTA, the schemes TurboPFor is a SIMD-optimized implementation of; TurboPFor itself has no separate peer-reviewed paper"
+      }
+    ],
+    "usedIn": [
+      "Search engine posting lists",
+      "Columnar/analytical databases",
+      "Compared against in the Pcodec benchmark suite"
+    ],
+    "tags": [
+      "lossless",
+      "integer",
+      "simd",
+      "bit-packing"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Reuses the adm module (originally documented for MANS/ANS preprocessing) for the frame-of-reference concept rather than adding a near-duplicate module — see its note for the block-minimum-vs-mean distinction."
     }
   },
   {
@@ -251,6 +578,7 @@
     "id": "sz-1.0",
     "name": "SZ 1.0",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "status": "deprecated",
     "description": "Original SZ algorithm using curve-fitting prediction with separate outlier handling path. Uses flat, linear, or quadratic fitting. DEPRECATED - use newer versions.",
@@ -322,6 +650,7 @@
     "id": "sz-1.4",
     "name": "SZ 1.4",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Error-bounded lossy compressor for scientific floating-point data. Uses Lorenzo prediction, error-controlled quantization, and Huffman encoding, with optional Zstandard post-compression.",
     "pipeline": [
@@ -330,7 +659,7 @@
         "name": "Lorenzo Predictor",
         "description": "Spatial prediction based on neighboring values",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "BlockwiseDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
         },
@@ -341,7 +670,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization of prediction residuals",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -351,7 +680,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding of quantized values",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -398,6 +727,7 @@
     "id": "sz-2.0",
     "name": "SZ 2.0",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Enhanced SZ with data blocking and adaptive predictor selection per block between Lorenzo and linear regression. Lorenzo includes classic and mean-integrated modes.",
     "pipeline": [
@@ -405,7 +735,7 @@
         "name": "Data Blocking",
         "description": "Divide data into blocks for localized compression",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "BlockwiseDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
         },
@@ -421,7 +751,7 @@
             "name": "Lorenzo Predictor",
             "description": "Classic or mean-integrated Lorenzo, spatial neighbor-based prediction",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "BlockwiseDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
             }
@@ -431,7 +761,7 @@
             "name": "Linear Regression",
             "description": "Block-wise linear regression fit",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "BlockwiseDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
             }
@@ -443,7 +773,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -453,7 +783,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -464,7 +794,7 @@
         "optional": true,
         "composition": "zstd",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "Lossless_zstd",
           "url": "https://szcompressor.org/SZ3/modules/Lossless_zstd.html"
         }
@@ -512,6 +842,7 @@
     "id": "sz3",
     "name": "SZ3",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Modern SZ with auto-selection between multilevel Lorenzo and dynamic spline interpolation for optimal prediction accuracy.",
     "pipeline": [
@@ -526,7 +857,7 @@
             "name": "Multilevel Lorenzo",
             "description": "Lorenzo prediction across multiple decomposition levels",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "BlockwiseDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
             }
@@ -537,7 +868,7 @@
             "name": "Dynamic Spline Interpolation",
             "description": "Spline-based interpolation with adaptively chosen order",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "InterpolationDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
             }
@@ -549,7 +880,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -559,7 +890,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -570,7 +901,7 @@
         "optional": true,
         "composition": "zstd",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "Lossless_zstd",
           "url": "https://szcompressor.org/SZ3/modules/Lossless_zstd.html"
         }
@@ -597,7 +928,7 @@
         "authors": "Rafael Ballester-Ripoll, Peter Lindstrom, Renato Pajarola",
         "year": 2018,
         "doi": "10.1109/TVCG.2019.2904063",
-        "note": "Cited by FZ Module Library's ALGO_SVD page as the canonical reference/inspiration for HOSVD/Tucker compression, not as shared code (same paper Z-Hub's existing tthresh composition cites)"
+        "note": "Cited by FZ CPU Module Library's ALGO_SVD page as the canonical reference/inspiration for HOSVD/Tucker compression, not as shared code (same paper Z-Hub's existing tthresh composition cites)"
       }
     ],
     "usedIn": [
@@ -646,7 +977,7 @@
             "name": "Interpolation Predictor",
             "description": "Multidimensional cubic-spline interpolation prediction, no Lorenzo fallback",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "InterpolationDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
             }
@@ -656,7 +987,7 @@
             "name": "Quantization",
             "description": "Error-controlled quantization",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "LinearQuantizer",
               "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
             }
@@ -666,7 +997,7 @@
             "name": "Huffman Encoding",
             "description": "Entropy coding",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "HuffmanEncoder",
               "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
             }
@@ -677,7 +1008,7 @@
             "optional": true,
             "composition": "zstd",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "Lossless_zstd",
               "url": "https://szcompressor.org/SZ3/modules/Lossless_zstd.html"
             }
@@ -691,14 +1022,14 @@
       {
         "id": "svd",
         "name": "SVD / Tucker",
-        "description": "Tucker/SVD tensor decomposition algorithm within FZ Module Library/SZ3, for higher-order (3D/4D) tensor data whose energy concentrates in a few dominant singular components. Stores a low-rank core plus a separately-quantized residual. Confirmed as an implementation independent from Z-Hub's existing tthresh composition -- both target HOSVD/Tucker compression but neither shares code with, nor is derived from, the other. Independent implementation from the tthresh composition, which targets the same HOSVD technique.",
+        "description": "Tucker/SVD tensor decomposition algorithm within FZ CPU Module Library/SZ3, for higher-order (3D/4D) tensor data whose energy concentrates in a few dominant singular components. Stores a low-rank core plus a separately-quantized residual. Confirmed as an implementation independent from Z-Hub's existing tthresh composition -- both target HOSVD/Tucker compression but neither shares code with, nor is derived from, the other. Independent implementation from the tthresh composition, which targets the same HOSVD technique.",
         "pipeline": [
           {
             "module": "svd-decomposition",
             "name": "SVD / Tucker Decomposition",
             "description": "Low-rank tensor factorization into a core tensor plus residual",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "SVDDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/SVDDecomposition.html"
             }
@@ -708,7 +1039,7 @@
             "name": "Quantization (core + residual)",
             "description": "Two separately-scaled linear quantization passes, one for the low-rank core and one for the residual",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "LinearQuantizer",
               "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
             }
@@ -718,7 +1049,7 @@
             "name": "Huffman Encoding",
             "description": "Entropy coding",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "HuffmanEncoder",
               "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
             }
@@ -729,7 +1060,7 @@
             "optional": true,
             "composition": "zstd",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "Lossless_zstd",
               "url": "https://szcompressor.org/SZ3/modules/Lossless_zstd.html"
             }
@@ -746,6 +1077,7 @@
     "id": "szauto",
     "name": "SZauto",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "SZ variant featuring second-order Lorenzo predictor for improved handling of curved data patterns.",
     "pipeline": [
@@ -755,7 +1087,7 @@
         "description": "Lorenzo with second-order derivatives",
         "note": "Better for curved patterns",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "BlockwiseDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
         },
@@ -766,7 +1098,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -776,7 +1108,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -814,6 +1146,7 @@
     "id": "qoz",
     "name": "QoZ 1.0",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Quality-oriented compressor using multilevel interpolation with adaptive prediction selection for high-fidelity compression. NOTE: QoZ/QoZ2 has been integrated into SZ3.",
     "pipeline": [
@@ -822,7 +1155,7 @@
         "name": "Multilevel Interpolation",
         "description": "Hierarchical prediction at multiple resolutions",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "InterpolationDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
         }
@@ -837,7 +1170,7 @@
             "name": "Linear Interpolation",
             "description": "Lower-order, faster interpolation",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "InterpolationDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
             }
@@ -848,7 +1181,7 @@
             "name": "Cubic Spline Interpolation",
             "description": "Higher-order, smoother interpolation for complex regions",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "InterpolationDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
             }
@@ -860,7 +1193,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -870,7 +1203,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -915,6 +1248,7 @@
     "id": "hpez",
     "name": "HPEZ / QoZ 2.0",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Auto-tuning compressor that optimizes interpolation parameters (order, dimensionality, spline type) or Lorenzo, then uses SZ3 pipeline.",
     "pipeline": [
@@ -928,7 +1262,7 @@
             "name": "Interpolation",
             "description": "Tunes order, dimensionality, spline type, 1-D vs multi-D, inner-level interpolation",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "InterpolationDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
             }
@@ -938,7 +1272,7 @@
             "name": "Lorenzo Predictor",
             "description": "Falls back to Lorenzo prediction when interpolation doesn't win",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "BlockwiseDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
             },
@@ -951,7 +1285,7 @@
         "name": "Huffman Coding",
         "description": "Entropy coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -1000,6 +1334,7 @@
     "id": "faz",
     "name": "FAZ",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Feature-adaptive compressor with selection between Lorenzo, QoZ interpolation, and wavelets (sym13, CDF9/7). Encoding via adaptive SPECK or Huffman.",
     "pipeline": [
@@ -1013,7 +1348,7 @@
             "name": "Lorenzo Predictor",
             "description": "Spatial neighbor-based prediction",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "BlockwiseDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
             },
@@ -1025,7 +1360,7 @@
             "name": "QoZ Interpolation",
             "description": "Multilevel quality-oriented interpolation",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "InterpolationDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
             }
@@ -1049,7 +1384,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -1064,7 +1399,7 @@
             "name": "SPECK",
             "description": "Set Partitioned Embedded bloCK progressive coding",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "SPERREncoder",
               "url": "https://szcompressor.org/SZ3/modules/SPERREncoder.html"
             }
@@ -1074,7 +1409,7 @@
             "name": "Huffman",
             "description": "Static Huffman entropy coding",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "HuffmanEncoder",
               "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
             }
@@ -1130,6 +1465,7 @@
     "id": "ipcomp",
     "name": "IPComp",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU compressor with interpolation-based prediction and progressive data loading for streaming scenarios.",
     "pipeline": [
@@ -1138,7 +1474,7 @@
         "name": "Interpolation Predictor",
         "description": "Predictive interpolation coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "InterpolationDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
         }
@@ -1148,7 +1484,7 @@
         "name": "Quantization",
         "description": "Error-bounded quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -1201,6 +1537,7 @@
     "id": "sz-pm",
     "name": "SZ-PM",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "SZ with parallel LZ77 string matching using lazy matching strategy for improved compression ratios.",
     "pipeline": [
@@ -1209,7 +1546,7 @@
         "name": "Lorenzo Predictor",
         "description": "Spatial prediction",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "BlockwiseDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/BlockwiseDecomposition.html"
         },
@@ -1220,7 +1557,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -1258,6 +1595,76 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "pastri",
+    "name": "PaSTRI",
+    "aliases": [
+      "SZ-PaSTRI",
+      "PaSTRi"
+    ],
+    "family": "SZ",
+    "category": "CPU",
+    "firstParty": true,
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "Error-bounded lossy compressor for two-electron repulsion integral (ERI) tensors in quantum chemistry (GAMESS), built on the SZ prediction+quantization+encoding framework. Its key departure from general-purpose SZ is the prediction stage: instead of extrapolating from spatial neighbors, it matches each value against a library of previously-seen ERI sub-patterns and predicts it as a scaled copy of the best match, exploiting the physical symmetries that make ERI tensors full of scaled repeats. Reaches far higher compression ratios than general SZ/ZFP on this data type at matched precision.",
+    "dataTypes": [
+      "f64"
+    ],
+    "dims": [
+      4
+    ],
+    "pipeline": [
+      {
+        "module": "pattern-scaling-prediction",
+        "name": "Pattern-Scaling Prediction",
+        "description": "Matches each ERI value against previously-encoded patterns and predicts it as a scaled copy of the closest match."
+      },
+      {
+        "module": "quantizer",
+        "name": "Quantization",
+        "description": "Error-controlled quantization of prediction residuals."
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "Huffman Encoding",
+        "description": "Entropy coding of quantized values."
+      },
+      {
+        "name": "Zstandard",
+        "optional": true,
+        "description": "Optional post-compression pass.",
+        "composition": "zstd"
+      }
+    ],
+    "papers": [
+      {
+        "title": "PaSTRI: Error-Bounded Lossy Compression for Two-Electron Integrals in Quantum Chemistry",
+        "authors": "A. M. Gok, S. Di, Y. Alexeev, D. Tao, V. Mironov, X. Liang, F. Cappello",
+        "doi": "10.1109/CLUSTER.2018.00013",
+        "year": 2018,
+        "venue": "IEEE International Conference on Cluster Computing (CLUSTER 2018)"
+      }
+    ],
+    "usedIn": [
+      "Quantum chemistry (GAMESS)",
+      "Two-electron integral storage"
+    ],
+    "tags": [
+      "lossy",
+      "scientific",
+      "hpc",
+      "pattern-based",
+      "sz"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New composition (2026-07-20), previously an empty stub in staging/notes.md. No confirmed public GitHub repo found — omitted rather than guessed. Pipeline built from the CLUSTER'18 paper's description of the SZ-Pastri prediction+quantization+encoding structure; not cross-checked against source code."
     }
   },
   {
@@ -1406,13 +1813,14 @@
     "fzAlgorithm": {
       "algorithm": "ALGO_SVD",
       "url": "https://szcompressor.org/SZ3/modules/ALGO_SVD.html",
-      "note": "Related algorithm, not TTHRESH's own source: FZ Module Library's ALGO_SVD is an independent SVD/Tucker (HOSVD) implementation inside SZ3, a different codebase from rballester/tthresh."
+      "note": "Related algorithm, not TTHRESH's own source: FZ CPU Module Library's ALGO_SVD is an independent SVD/Tucker (HOSVD) implementation inside SZ3, a different codebase from rballester/tthresh."
     }
   },
   {
     "id": "hyz",
     "name": "HyZ",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Hybrid compressor combining block-wise regression with sampling-based error checking and SZx ultra-fast prediction.",
     "pipeline": [
@@ -1463,6 +1871,7 @@
     "id": "cliz",
     "name": "CliZ",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Climate-data optimized compressor with offline training (analyzes masks, dimensions, periodicity, topography) and adapted SZ3 online compression.",
     "pipeline": [
@@ -1518,6 +1927,7 @@
     "id": "roibin-sz",
     "name": "ROIBIN-SZ",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Hybrid",
     "description": "ROI-aware compressor with peak detection. Applies binning+SZ3 lossy compression to background and lossless fpzip to regions of interest.",
     "pipeline": [
@@ -1535,7 +1945,7 @@
         "name": "Interpolation",
         "description": "Reconstruct full-resolution values from the binned data",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "InterpolationDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/InterpolationDecomposition.html"
         }
@@ -1545,7 +1955,7 @@
         "name": "Quantization",
         "description": "Error-controlled quantization of interpolation residuals",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -1555,7 +1965,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding of quantized values",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoder",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
         }
@@ -1606,6 +2016,7 @@
     "id": "mdz",
     "name": "MDZ",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Error-bounded lossy compressor for molecular dynamics (MD) trajectory data, adaptively selecting between three snapshot-buffer prediction strategies based on spatial/temporal smoothness. Also known as MMD-SZ. Has been integrated into SZ3.",
     "pipeline": [
@@ -1634,18 +2045,18 @@
           }
         ],
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "SZBioMDDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/ALGO_BIOMD.html"
         },
-        "details": "FZ Module Library's ALGO_BIOMD page describes this VQ/VQT/MT selection at the algorithm level; SZBioMDDecomposition has no separate catalog page of its own, so the link above points at ALGO_BIOMD.html rather than a dedicated module page."
+        "details": "FZ CPU Module Library's ALGO_BIOMD page describes this VQ/VQT/MT selection at the algorithm level; SZBioMDDecomposition has no separate catalog page of its own, so the link above points at ALGO_BIOMD.html rather than a dedicated module page."
       },
       {
         "module": "quantizer",
         "name": "Quantization",
         "description": "Error-controlled quantization",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -1655,7 +2066,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy coding",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "HuffmanEncoderV2",
           "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoderV2.html"
         },
@@ -1667,7 +2078,7 @@
         "optional": true,
         "composition": "zstd",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "Lossless_zstd",
           "url": "https://szcompressor.org/SZ3/modules/Lossless_zstd.html"
         }
@@ -1716,15 +2127,16 @@
     "id": "mdz-xtc",
     "name": "MDZ-XTC",
     "category": "CPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GROMACS XTC-format-compatible variant of MDZ, for molecular dynamics trajectory data that needs to interoperate with GROMACS' own libxdrf-based XTC compression. Shares MDZ's top-level source file but instantiates a dedicated decomposition and a format-specific encoder instead of MDZ's general Huffman + Zstd path.",
     "pipeline": [
       {
         "name": "Coordinate Prediction (XTC-tuned)",
         "description": "Per-atom coordinate prediction tuned to GROMACS' XTC radius-based bin spacing",
-        "details": "FZ Module Library's SZBioMDXtcDecomposition is a distinct class from MDZ's SZBioMDDecomposition, but the catalog page doesn't break down its internal strategy the way ALGO_BIOMD's VQ/VQT/MT alternatives are documented -- not asserting the same three-strategy structure here.",
+        "details": "FZ CPU Module Library's SZBioMDXtcDecomposition is a distinct class from MDZ's SZBioMDDecomposition, but the catalog page doesn't break down its internal strategy the way ALGO_BIOMD's VQ/VQT/MT alternatives are documented -- not asserting the same three-strategy structure here.",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "SZBioMDXtcDecomposition",
           "url": "https://szcompressor.org/SZ3/modules/ALGO_BIOMDXTC.html"
         }
@@ -1734,7 +2146,7 @@
         "name": "Quantization",
         "description": "XTC-radius bin spacing, absolute-error guarantee",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "LinearQuantizer",
           "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
         }
@@ -1744,7 +2156,7 @@
         "description": "GROMACS libxdrf-compatible bitstream encoder",
         "note": "Format-specific structural adapter -- no general Z-Hub module match",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "XtcBasedEncoder",
           "url": "https://szcompressor.org/SZ3/modules/XtcBasedEncoder.html"
         }
@@ -1753,7 +2165,7 @@
         "name": "Bitstream Passthrough",
         "description": "Encoder already emits a self-contained, optimally-packed bitstream -- no further lossless wrap",
         "implementation": {
-          "library": "FZ Module Library",
+          "library": "FZ CPU Module Library",
           "stage": "Lossless_bypass",
           "url": "https://szcompressor.org/SZ3/modules/Lossless_bypass.html"
         }
@@ -1770,7 +2182,7 @@
         "authors": "K. Zhao, et al.",
         "year": 2022,
         "doi": "10.1109/ICDE53745.2022.00007",
-        "note": "Parent MDZ paper; FZ Module Library's ALGO_BIOMDXTC page cites TNG/HRTC as XTC-derived baselines but no XTC-specific paper"
+        "note": "Parent MDZ paper; FZ CPU Module Library's ALGO_BIOMDXTC page cites TNG/HRTC as XTC-derived baselines but no XTC-specific paper"
       }
     ],
     "usedIn": [
@@ -1790,7 +2202,7 @@
       "confidence": "low",
       "reviewed_by": null,
       "reviewed_on": null,
-      "notes": "New composition created 2026-07-13 from FZ Module Library's ALGO_BIOMDXTC catalog page."
+      "notes": "New composition created 2026-07-13 from FZ CPU Module Library's ALGO_BIOMDXTC catalog page."
     },
     "fzAlgorithm": {
       "algorithm": "ALGO_BIOMDXTC",
@@ -1798,9 +2210,1461 @@
     }
   },
   {
+    "id": "lcp",
+    "name": "LCP",
+    "category": "CPU",
+    "firstParty": true,
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "Error-bounded lossy compressor for particle/point data (molecular dynamics, cosmology, CFD, geology) that has no regular array structure for neighbor-based predictors to exploit. LCP-S, its single-frame spatial compressor, partitions 3D space into fixed-size grid cells sized directly from the error bound and represents each particle as (cell id, quantized in-cell offset) rather than a predicted residual; block metadata (ids, particle counts, relative coordinates) is then delta-coded, entropy-coded, and Zstd-compressed. For multi-frame data, LCP additionally offers a temporal mode (LCP-T) and picks between the two per frame via a finite-state machine that estimates compressed size — only the spatial (LCP-S) path is modeled here in detail.",
+    "dataTypes": [
+      "f32",
+      "f64"
+    ],
+    "dims": [
+      3
+    ],
+    "pipeline": [
+      {
+        "module": "spatial-binning-decomposition",
+        "name": "Spatial Binning + Coordinate Quantization",
+        "description": "Quantizes each coordinate via error-bound-sized floor division, which simultaneously assigns particles to fixed-size 3D grid cells and bounds each coordinate's reconstruction error to the target bound."
+      },
+      {
+        "module": "delta-encoding",
+        "name": "Block Metadata Coding",
+        "description": "Delta-codes each non-empty block's id, particle count, and its particles' relative in-cell coordinates."
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "Entropy Coding",
+        "description": "Huffman- or fixed-length-codes the delta-coded metadata streams."
+      },
+      {
+        "name": "Zstandard",
+        "optional": true,
+        "description": "Final dictionary-compression pass over the encoded streams.",
+        "composition": "zstd"
+      }
+    ],
+    "papers": [
+      {
+        "title": "LCP: Enhancing Scientific Data Management with Lossy Compression for Particles",
+        "authors": "Longtao Zhang, Ruoyu Li, Congrong Ren, Sheng Di, Jinyang Liu, Jiajun Huang, Robert Underwood, Pascal Grosset, Dingwen Tao, Xin Liang, Hanqi Guo, Franck Cappello, Kai Zhao",
+        "doi": "10.1145/3709700",
+        "year": 2025,
+        "venue": "Proceedings of the ACM on Management of Data (SIGMOD 2025)"
+      }
+    ],
+    "usedIn": [
+      "Molecular dynamics",
+      "Cosmology (N-body simulations)",
+      "Computational fluid dynamics",
+      "Geology"
+    ],
+    "capabilities": [
+      {
+        "name": "Multi-frame temporal mode (LCP-T)",
+        "description": "For multi-frame particle trajectories, LCP additionally offers a temporal predictor and selects between it and the spatial (LCP-S) path per frame via a finite-state machine that estimates compressed size, adding under 5% overhead versus always testing both."
+      }
+    ],
+    "tags": [
+      "lossy",
+      "scientific",
+      "particle-data",
+      "hpc"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New composition (2026-07-20). No public GitHub repo found in search — omitted rather than guessed. Pipeline built from the SIGMOD'25 paper's description of LCP-S specifically; LCP-T (temporal mode) is only noted in capabilities since its algorithm wasn't detailed in the fetched source."
+    }
+  },
+  {
+    "id": "png",
+    "name": "PNG (Portable Network Graphics)",
+    "family": "PNG",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "status": "active",
+    "description": "Lossless raster image format. Each scanline is predicted by one of five per-pixel filter types (None, Sub, Up, Average, Paeth), chosen per row by the encoder to minimize residual magnitude, then the filtered byte stream is compressed with DEFLATE (LZ77 + Huffman).",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "paeth-predictor",
+        "name": "Scanline Filtering",
+        "variant": "1 of 5 per-scanline filter types (None/Sub/Up/Average/Paeth); Paeth is the general 3-neighbor case",
+        "description": "Predicts each byte from its left/above/upper-left neighbors within the same channel plane; the encoder picks whichever filter type minimizes the row's residual magnitude, on a per-scanline basis."
+      },
+      {
+        "name": "DEFLATE",
+        "description": "Compresses the filtered byte stream with LZ77 dictionary matching followed by Huffman entropy coding.",
+        "composition": "deflate"
+      }
+    ],
+    "github": "https://github.com/pnggroup/libpng",
+    "papers": [
+      {
+        "title": "PNG (Portable Network Graphics) Specification, Version 1.2",
+        "year": 2003,
+        "note": "RFC 2083 / ISO/IEC 15948"
+      }
+    ],
+    "usedIn": [
+      "Web images",
+      "Screenshots",
+      "Icons",
+      "Lossless archival of raster graphics"
+    ],
+    "tags": [
+      "lossless",
+      "raster",
+      "image",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New image/video-domain entry (Phase 1a, see docs/image-video-codec-scoping.md). GitHub URL best-effort, not yet maintainer-verified."
+    }
+  },
+  {
+    "id": "gif",
+    "name": "GIF (Graphics Interchange Format)",
+    "family": "GIF",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "status": "active",
+    "description": "Palette-indexed raster/animation format. Pixels are stored as indices into a palette of at most 256 colors, then the index stream is compressed with LZW (Lempel-Ziv-Welch) dictionary coding. Compression of the index stream itself is lossless; converting a full-color source image down to a 256-color palette (when needed) is a separate, optional lossy step.",
+    "dataTypes": [
+      "u8"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "vector-quantization",
+        "name": "Palette / Color Quantization",
+        "optional": true,
+        "note": "Only needed when the source has more than 256 colors; skipped for images already palette-indexed",
+        "description": "Maps each pixel to the nearest color in a palette of at most 256 entries, via nearest-color matching or dithering."
+      },
+      {
+        "module": "dictionary-encoding",
+        "name": "LZW Coding",
+        "variant": "LZW (Lempel-Ziv-Welch)",
+        "description": "Encodes the palette-index stream with a growing dictionary of previously-seen substrings, each replaced by a code whose bit width increases as the dictionary fills."
+      }
+    ],
+    "papers": [
+      {
+        "title": "Graphics Interchange Format, Version 89a",
+        "authors": "CompuServe Incorporated",
+        "year": 1990,
+        "note": "GIF89a specification"
+      },
+      {
+        "title": "A Technique for High-Performance Data Compression",
+        "authors": "Terry A. Welch",
+        "doi": "10.1109/MC.1984.1659158",
+        "year": 1984,
+        "note": "Original LZW algorithm"
+      }
+    ],
+    "usedIn": [
+      "Web animations",
+      "Icons",
+      "Simple graphics with limited color palettes"
+    ],
+    "tags": [
+      "lossless",
+      "raster",
+      "image",
+      "palette"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New image/video-domain entry (Phase 1a, see docs/image-video-codec-scoping.md)."
+    }
+  },
+  {
+    "id": "webp-lossless",
+    "name": "WebP (Lossless)",
+    "family": "WebP",
+    "category": "CPU",
+    "compressionType": "Lossless",
+    "status": "active",
+    "description": "Google's lossless raster format. Predicts each pixel from a per-block-selected spatial predictor (one of 14 modes), applies a reversible color transform (subtract-green plus optional cross-channel decorrelation), matches repeated pixel runs with a custom LZ77-style 'backward reference' stage, then entropy-codes the result with multiple adaptively-built Huffman trees.",
+    "dataTypes": [
+      "u8"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "lorenzo-predictor",
+        "name": "Spatial Prediction",
+        "variant": "1 of 14 per-block predictor modes (WebP's own mode set; several are 2-neighbor blends in the same spirit as Lorenzo)",
+        "description": "Predicts each pixel from nearby already-decoded pixels; the encoder selects the best-fitting mode per block."
+      },
+      {
+        "module": "color-space-transform",
+        "name": "Subtract-Green Transform",
+        "variant": "subtract-green ± cross-channel decorrelation",
+        "description": "Reversible integer transform (red -= green, blue -= green) that removes redundancy between color channels ahead of entropy coding."
+      },
+      {
+        "module": "lz77",
+        "name": "Backward Reference Coding",
+        "description": "Custom LZ77-style match stage exploiting repeated pixel runs, with its own match/distance encoding distinct from DEFLATE's."
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "Huffman Coding",
+        "description": "Per-image, multiple adaptively-built Huffman trees (up to 5 symbol groups) encode the literal/length/distance/color-cache symbol stream."
+      }
+    ],
+    "github": "https://github.com/webmproject/libwebp",
+    "papers": [
+      {
+        "title": "WebP Lossless Bitstream Specification",
+        "authors": "Google",
+        "year": 2016,
+        "url": "https://developers.google.com/speed/webp/docs/webp_lossless_bitstream_specification"
+      }
+    ],
+    "usedIn": [
+      "Web images (Chrome, Android)",
+      "Lossless alternative to PNG at smaller file sizes"
+    ],
+    "tags": [
+      "lossless",
+      "raster",
+      "image"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New image/video-domain entry (Phase 1a, see docs/image-video-codec-scoping.md). Predictor stage reuses lorenzo-predictor as the closest existing module — WebP's own mode set is its own thing, not literally Lorenzo; reconsider if a dedicated module is wanted later."
+    }
+  },
+  {
+    "id": "webp-lossy",
+    "name": "WebP (Lossy)",
+    "family": "WebP",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "Google's lossy raster format, built on VP8's intra-frame coding tools applied to a single still image. Converts to a fixed 4:2:0 YUV, predicts each block from its top/left neighbors using one of several directional intra modes, transforms residuals with a 4×4 DCT (plus a Walsh-Hadamard pass over the DC coefficients of 16×16-mode luma blocks), quantizes, zigzag-scans, and entropy-codes with a boolean arithmetic coder — then runs an in-loop deblocking filter whose output becomes the reference for any dependent blocks.",
+    "dataTypes": [
+      "u8"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "description": "Converts source pixels to a luma/chroma representation."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0 (fixed, not configurable)",
+        "description": "Reduces chroma (U/V) resolution relative to luma (Y); unlike JPEG's optional subsampling ratios, WebP lossy always uses 4:2:0."
+      },
+      {
+        "name": "Block Partitioning",
+        "description": "Splits each frame into 16×16 macroblocks, each further splittable into 4×4 luma sub-blocks for prediction and transform."
+      },
+      {
+        "module": "directional-intra-prediction",
+        "name": "Intra Prediction",
+        "variant": "~10 modes across 16×16 luma, 4×4 luma, and 8×8 chroma block sizes",
+        "description": "Predicts each block from its already-decoded top/left neighbor edge; the encoder signals the best-fitting mode per block."
+      },
+      {
+        "module": "dct-transform",
+        "name": "4×4 DCT",
+        "description": "Transforms each 4×4 residual block into frequency coefficients."
+      },
+      {
+        "module": "hadamard-transform",
+        "name": "Luma DC Hadamard",
+        "optional": true,
+        "note": "Only for 16×16-mode luma blocks",
+        "description": "A second 4×4 Walsh-Hadamard pass over the grid of 16 luma DC coefficients, exploiting correlation between neighboring blocks' average intensity when the whole macroblock uses one prediction mode."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes DCT/Hadamard coefficients against an index-selected step size — the format's lossy step."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Zigzag Scan",
+        "description": "Reorders each 4×4 block's quantized coefficients from low to high frequency."
+      },
+      {
+        "module": "arithmetic-coding",
+        "name": "Boolean Entropy Coding",
+        "variant": "binary (boolean) arithmetic coder with per-context adaptive probabilities",
+        "description": "Entropy-codes coefficients and mode decisions as a sequence of binary decisions under adaptively-estimated probabilities."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Loop Filter",
+        "variant": "VP8 deblocking filter (simple or normal mode)",
+        "description": "Smooths 4×4/16×16 block-boundary discontinuities; the filtered frame is what any block predicted from it will actually reference."
+      }
+    ],
+    "github": "https://github.com/webmproject/libwebp",
+    "papers": [
+      {
+        "title": "VP8 Data Format and Decoding Guide",
+        "authors": "J. Bankoski, J. Koleszar, L. Quillio, J. Salonen, P. Wilkins, Y. Xu",
+        "year": 2011,
+        "note": "RFC 6386 — the VP8 bitstream WebP-lossy's intra tools are drawn from"
+      }
+    ],
+    "usedIn": [
+      "Web images (Chrome, Android)",
+      "Lossy alternative to JPEG at comparable or smaller file sizes"
+    ],
+    "tags": [
+      "lossy",
+      "raster",
+      "image"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New image/video-domain entry (Phase 1c, see docs/image-video-codec-scoping.md). Stage descriptions best-effort from RFC 6386, not yet cross-checked against libwebp source. First use of the new Filter category (in-loop-filter)."
+    }
+  },
+  {
+    "id": "jpeg",
+    "name": "JPEG (Baseline Sequential)",
+    "family": "JPEG",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "The classic lossy raster codec (ITU-T T.81 / ISO/IEC 10918-1), baseline profile. Converts to YCbCr and optionally subsamples chroma, splits into 8×8 blocks, applies a 2D DCT, quantizes coefficients against a quality-scaled table, reorders coefficients in zigzag scan order, differentially codes the DC coefficient against the previous block, run-length-codes zero AC coefficients, and entropy-codes the result with Huffman coding.",
+    "dataTypes": [
+      "u8"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YCbCr",
+        "description": "Converts source pixels to luma/chroma before subsampling and transform."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "optional": true,
+        "variant": "4:2:0 / 4:2:2 / 4:4:4",
+        "description": "Reduces chroma (Cb/Cr) resolution relative to luma (Y); human vision is far less sensitive to color resolution than brightness resolution."
+      },
+      {
+        "name": "8×8 Block Splitting",
+        "description": "Partitions each channel plane into non-overlapping 8×8 pixel blocks, processed independently by the stages below."
+      },
+      {
+        "module": "dct-transform",
+        "name": "Discrete Cosine Transform",
+        "description": "2D 8×8 DCT decorrelates each block into frequency coefficients, concentrating energy into a few low-frequency terms."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Divides each frequency coefficient by a quality-scaled step from an 8×8 quantization table (finer steps at low frequency, coarser at high) and rounds — the format's lossy step."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Zigzag Scan",
+        "description": "Reorders the 8×8 quantized coefficients from low to high frequency into a 1D sequence, clustering the trailing zeros the run-length stage below exploits."
+      },
+      {
+        "module": "delta-encoding",
+        "name": "DC Prediction",
+        "description": "Codes each block's DC (average-intensity) coefficient as the difference from the previous block's DC value, since neighboring blocks' average brightness is usually similar."
+      },
+      {
+        "module": "run-length-encoding",
+        "name": "AC Run-Length Coding",
+        "description": "Encodes each nonzero AC coefficient as a (run-of-zeros, value) pair, exploiting the long zero runs zigzag ordering produces toward the high-frequency end."
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "Entropy Coding",
+        "description": "Huffman-codes the (run, value) symbol stream; JPEG also defines an optional arithmetic-coding mode that saw little real-world adoption."
+      }
+    ],
+    "github": "https://github.com/libjpeg-turbo/libjpeg-turbo",
+    "papers": [
+      {
+        "title": "Information technology — Digital compression and coding of continuous-tone still images — Requirements and guidelines",
+        "authors": "ITU-T / ISO/IEC JTC1",
+        "year": 1992,
+        "note": "ITU-T T.81 / ISO/IEC 10918-1 — the JPEG baseline standard"
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "Quality-tunable",
+        "description": "A single scalar quality factor (1–100) scales the quantization table, trading file size against fidelity; typical web use targets roughly quality 75–85."
+      }
+    ],
+    "usedIn": [
+      "Digital photography",
+      "Web images",
+      "JFIF/Exif file interchange"
+    ],
+    "tags": [
+      "lossy",
+      "raster",
+      "image",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New image/video-domain entry (Phase 1a, see docs/image-video-codec-scoping.md). errorModes intentionally omitted — JPEG is QP/quality-driven, not error-bounded; see the scoping doc's open question on reconciling errorModes with rate/quality-controlled codecs."
+    }
+  },
+  {
+    "id": "jpeg2000",
+    "name": "JPEG 2000",
+    "family": "JPEG",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "Wavelet-based raster codec (ISO/IEC 15444-1) offering both a lossy and a lossless profile from largely the same pipeline shape. The lossy (default) profile converts color with an irreversible transform, applies a multi-level 9/7 wavelet decomposition, quantizes each subband independently, then codes the result with EBCOT's context-adaptive embedded bitplane coder — producing a scalable bitstream a rate-distortion step can truncate to any target size. The lossless profile (see variants) swaps in an integer-exact reversible color transform and wavelet filter and skips quantization entirely.",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2
+    ],
+    "pipelineName": "Lossy (9/7 Irreversible)",
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "Color Transform (ICT)",
+        "variant": "Irreversible Component Transform (ICT)",
+        "description": "Floating-point YCbCr-like color decorrelation ahead of the wavelet transform."
+      },
+      {
+        "name": "Tiling",
+        "description": "Partitions the image into independent rectangular tiles, each compressed separately."
+      },
+      {
+        "module": "wavelet-transform",
+        "name": "Discrete Wavelet Transform",
+        "variant": "9/7 irreversible (CDF 9/7)",
+        "description": "Multi-level 2D wavelet decomposition into frequency subbands; the 9/7 filter is not integer-exact, trading exact reversibility for better energy compaction than the lossless profile's 5/3 filter."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Subband Quantization",
+        "variant": "scalar deadzone quantization, independent step size per subband",
+        "description": "Uniformly quantizes each subband's coefficients with its own step size and a widened deadzone bin around zero — the format's lossy step."
+      },
+      {
+        "module": "ebcot-coding",
+        "name": "EBCOT",
+        "description": "Codes each subband's code-blocks bitplane-by-bitplane with context-adaptive arithmetic coding, producing an embedded bitstream.",
+        "note": "Post-compression rate-distortion optimization (PCRD-opt) selects how many bitplanes of each code-block to keep to hit a target size/quality."
+      }
+    ],
+    "variants": [
+      {
+        "id": "jpeg2000-lossless",
+        "name": "Lossless (5/3 Reversible)",
+        "description": "Swaps the irreversible 9/7 wavelet and color transform for integer-exact reversible equivalents and skips quantization entirely, at a lower compression ratio than the lossy profile.",
+        "pipeline": [
+          {
+            "module": "color-space-transform",
+            "name": "Color Transform (RCT)",
+            "variant": "Reversible Component Transform (RCT)",
+            "description": "Integer-exact, bit-reversible color decorrelation (as opposed to the primary pipeline's floating-point ICT)."
+          },
+          {
+            "name": "Tiling",
+            "description": "Partitions the image into independent rectangular tiles, each compressed separately."
+          },
+          {
+            "module": "wavelet-transform",
+            "name": "Discrete Wavelet Transform",
+            "variant": "5/3 reversible (LeGall 5/3)",
+            "description": "Integer lifting-scheme wavelet transform that is exactly invertible; no quantization stage follows."
+          },
+          {
+            "module": "ebcot-coding",
+            "name": "EBCOT",
+            "description": "Same embedded bitplane coder as the lossy pipeline, run to full bitplane depth (no rate truncation) for exact reconstruction."
+          }
+        ]
+      }
+    ],
+    "github": "https://github.com/uclouvain/openjpeg",
+    "papers": [
+      {
+        "title": "JPEG2000 Image Compression Fundamentals, Standards and Practice",
+        "authors": "David S. Taubman, Michael W. Marcellin",
+        "year": 2002,
+        "note": "Standard reference text"
+      },
+      {
+        "title": "High Performance Scalable Image Compression with EBCOT",
+        "authors": "David Taubman",
+        "doi": "10.1109/83.847830",
+        "year": 2000,
+        "venue": "IEEE Transactions on Image Processing"
+      }
+    ],
+    "usedIn": [
+      "Digital cinema (DCP)",
+      "Medical imaging (DICOM)",
+      "Archival/preservation"
+    ],
+    "tags": [
+      "lossy",
+      "raster",
+      "image",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New image/video-domain entry (Phase 1b, see docs/image-video-codec-scoping.md). EBCOT/wavelet-stage descriptions are best-effort from the standard/EBCOT paper, not yet cross-checked against a specific implementation (e.g. OpenJPEG source)."
+    }
+  },
+  {
+    "id": "ebcc",
+    "name": "EBCC",
+    "aliases": [
+      "Error Bounded Climate-data Compression"
+    ],
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "description": "Error-bounded lossy compressor for weather and climate data, built as two layers: a JPEG 2000 base layer does the bulk lossy compression, then a residual layer wavelet-transforms and SPIHT-codes what JPEG 2000 got wrong, truncating that embedded bitstream once the target pointwise-absolute or range-relative error bound is met.",
+    "pipeline": [
+      {
+        "name": "JPEG 2000 Base Layer",
+        "description": "Wavelet-based lossy compression of the full array, providing the bulk of the size reduction",
+        "composition": "jpeg2000"
+      },
+      {
+        "module": "wavelet-transform",
+        "name": "Residual Discrete Wavelet Transform",
+        "description": "Applies a DWT to the residual (original data minus the JPEG 2000-reconstructed base layer) to decorrelate the remaining error before coding it"
+      },
+      {
+        "module": "spiht-coding",
+        "name": "SPIHT Residual Coding",
+        "description": "Encodes the residual's wavelet coefficients into a bitplane-ordered, hierarchically-partitioned embedded bitstream",
+        "note": "The bitstream is truncated once the target pointwise-absolute or range-relative error bound is met — the same embedded/early-stop principle as ZFP's group-tested RLE, achieved here via SPIHT's tree partitioning instead of bitplane run-length coding"
+      }
+    ],
+    "github": "https://github.com/spcl/EBCC",
+    "papers": [
+      {
+        "title": "Error bounded compression for weather and climate applications",
+        "doi": "10.48550/arXiv.2510.22265",
+        "year": 2026,
+        "venue": "arXiv"
+      }
+    ],
+    "errorModes": [
+      "ABS",
+      "REL"
+    ],
+    "usedIn": [
+      "Weather and climate datasets",
+      "Energy-budget and trajectory-simulation analyses"
+    ],
+    "tags": [
+      "lossy",
+      "wavelet",
+      "scientific",
+      "climate",
+      "error-bounded"
+    ],
+    "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Two-layer structure (JPEG2000 base + DWT/SPIHT residual) sourced from the arXiv paper's description; not cross-checked against the spcl/EBCC source directly."
+    }
+  },
+  {
+    "id": "mpeg2",
+    "name": "MPEG-2 Video",
+    "family": "MPEG",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "ISO/IEC 13818-2 / ITU-T H.262, the video codec behind DVD and digital broadcast television. Each macroblock is predicted either directly (intra, I-frames — the raw pixel block is DCT-coded with no spatial predictor) or via block motion compensation from a previous and/or future reference frame (inter, P/B-frames); the residual is DCT-transformed, quantized, zigzag-scanned, and entropy-coded with fixed Huffman-style VLC tables. Unlike every later codec in this family, MPEG-2 has no in-loop filter — visible block edges are a well-known artifact of the format, and directional intra prediction (introduced with H.264) doesn't exist here either.",
+    "dataTypes": [
+      "u8"
+    ],
+    "dims": [
+      2,
+      3
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0 (4:2:2 in some professional profiles)",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "Macroblock Partitioning",
+        "description": "Splits each frame into 16×16 macroblocks, each holding four 8×8 luma blocks plus associated chroma blocks."
+      },
+      {
+        "name": "Block Prediction",
+        "description": "I-frame macroblocks are coded with no spatial predictor at all; P/B-frame macroblocks are motion-compensated against reference frames.",
+        "alternatives": [
+          {
+            "name": "None (Intra)",
+            "description": "I-frame macroblocks are DCT-coded directly from raw pixels — MPEG-2 predates directional intra prediction entirely."
+          },
+          {
+            "module": "motion-compensated-prediction",
+            "name": "Motion Compensation (Inter)",
+            "description": "P-frame macroblocks predict from one previous reference frame; B-frame macroblocks predict from a weighted combination of a previous and a future reference frame."
+          }
+        ]
+      },
+      {
+        "module": "dct-transform",
+        "name": "8×8 DCT",
+        "description": "Transforms each 8×8 luma/chroma block — the raw pixel block for intra, the motion-compensated residual for inter — into frequency coefficients."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Uniformly quantizes DCT coefficients against a step size derived from a per-macroblock quantizer scale."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Zigzag Scan",
+        "description": "Reorders each block's quantized coefficients from low to high frequency."
+      },
+      {
+        "module": "delta-encoding",
+        "name": "Intra DC Prediction",
+        "optional": true,
+        "note": "Intra macroblocks only",
+        "description": "Differentially codes each intra block's DC coefficient against the previous block's DC value, the same DC-prediction trick JPEG uses; inter blocks' DCT is already applied to a near-zero-mean residual and skip this."
+      },
+      {
+        "module": "run-length-encoding",
+        "name": "Run-Level Coding",
+        "description": "Encodes each nonzero coefficient as a (run-of-zeros, level) pair."
+      },
+      {
+        "module": "huffman-encoding",
+        "name": "VLC Entropy Coding",
+        "variant": "fixed Huffman-style variable-length code tables",
+        "description": "Entropy-codes the (run, level) symbol stream and motion vectors with standard fixed VLC tables — no adaptive/context-based coding, unlike every later codec here."
+      }
+    ],
+    "github": "https://github.com/FFmpeg/FFmpeg",
+    "papers": [
+      {
+        "title": "Generic Coding of Moving Pictures and Associated Audio Information: Video",
+        "authors": "ISO/IEC JTC1 / ITU-T",
+        "year": 1996,
+        "note": "ISO/IEC 13818-2 / ITU-T H.262 — the MPEG-2 Video standard"
+      }
+    ],
+    "usedIn": [
+      "DVD-Video",
+      "Digital broadcast television (ATSC, DVB)",
+      "Legacy video archives"
+    ],
+    "tags": [
+      "lossy",
+      "video",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 (video) entry, see docs/image-video-codec-scoping.md. Deliberately omits directional-intra-prediction and in-loop-filter — MPEG-2 predates both; verified against the standard's own I-frame/no-deblocking design, not against a specific implementation."
+    }
+  },
+  {
+    "id": "h264",
+    "name": "H.264 / AVC",
+    "family": "H.26x",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "ITU-T H.264 / ISO/IEC 14496-10 (AVC), the dominant deployed video codec. Each macroblock is predicted either from decoded spatial neighbors (directional intra prediction, introduced with this standard) or via motion compensation from a previously-decoded reference frame (inter); the residual is transformed with a 4×4 or 8×8 integer DCT-like transform (plus a Hadamard pass over luma/chroma DC coefficients for whole-macroblock intra modes), quantized, scanned, and entropy-coded. The Main/High profiles use context-adaptive binary arithmetic coding (CABAC); the Baseline profile (see variants) instead uses simpler context-adaptive VLC (CAVLC). An in-loop deblocking filter smooths block edges before the frame is stored as a prediction reference.",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2,
+      3
+    ],
+    "pipelineName": "Main/High Profile (CABAC)",
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "Macroblock Partitioning",
+        "description": "Splits each frame into 16×16 macroblocks, further splittable down to 4×4 sub-partitions for prediction and transform."
+      },
+      {
+        "name": "Block Prediction",
+        "description": "Each block is predicted either spatially from decoded neighbors in the same frame (intra) or via motion compensation from a previously-decoded reference frame (inter); the encoder signals which per block.",
+        "alternatives": [
+          {
+            "module": "directional-intra-prediction",
+            "name": "Intra Prediction",
+            "description": "Up to 9 directional modes for 4×4/8×8 luma blocks, 4 modes for 16×16 luma and chroma — the format that introduced directional intra prediction."
+          },
+          {
+            "module": "motion-compensated-prediction",
+            "name": "Motion Compensation (Inter)",
+            "description": "Quarter-pixel-precision block matching against one or more reference frames, with per-block motion vector prediction."
+          }
+        ]
+      },
+      {
+        "module": "dct-transform",
+        "name": "4×4/8×8 Integer Transform",
+        "description": "Integer approximation of the DCT, exactly invertible in integer arithmetic (unlike JPEG's floating-point DCT)."
+      },
+      {
+        "module": "hadamard-transform",
+        "name": "Luma/Chroma DC Hadamard",
+        "optional": true,
+        "note": "16×16 intra luma and all chroma DC blocks only",
+        "description": "A second Hadamard pass over the block of DC coefficients from a whole macroblock's 4×4 sub-blocks."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes transform coefficients against a step size selected by the quantization parameter (QP)."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Coefficient Scan",
+        "variant": "zigzag (frame) or field-adaptive alternate scan",
+        "description": "Reorders each block's coefficients from low to high frequency."
+      },
+      {
+        "module": "arithmetic-coding",
+        "name": "CABAC",
+        "variant": "context-adaptive binary arithmetic coding",
+        "description": "Codes every syntax element (coefficients, modes, motion vectors) as a binary decision under a context model adapted from neighboring already-coded elements."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Deblocking Filter",
+        "variant": "H.264 in-loop deblocking filter",
+        "description": "Smooths 4×4/8×8/16×16 block-boundary discontinuities; the filtered frame becomes the reference for future motion compensation."
+      }
+    ],
+    "variants": [
+      {
+        "id": "h264-cavlc",
+        "name": "Baseline Profile (CAVLC)",
+        "description": "The Baseline profile (common in low-complexity or older encoders and some real-time applications) replaces CABAC with simpler context-adaptive variable-length coding, at a lower compression ratio for the same quality.",
+        "pipeline": [
+          {
+            "module": "color-space-transform",
+            "name": "RGB to YUV",
+            "optional": true,
+            "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+          },
+          {
+            "module": "downsampling",
+            "name": "Chroma Subsampling",
+            "variant": "4:2:0",
+            "description": "Reduces chroma resolution relative to luma."
+          },
+          {
+            "name": "Macroblock Partitioning",
+            "description": "Splits each frame into 16×16 macroblocks, further splittable down to 4×4 sub-partitions for prediction and transform."
+          },
+          {
+            "name": "Block Prediction",
+            "description": "Each block is predicted either spatially from decoded neighbors in the same frame (intra) or via motion compensation from a previously-decoded reference frame (inter); the encoder signals which per block.",
+            "alternatives": [
+              {
+                "module": "directional-intra-prediction",
+                "name": "Intra Prediction",
+                "description": "Up to 9 directional modes for 4×4/8×8 luma blocks, 4 modes for 16×16 luma and chroma — the format that introduced directional intra prediction."
+              },
+              {
+                "module": "motion-compensated-prediction",
+                "name": "Motion Compensation (Inter)",
+                "description": "Quarter-pixel-precision block matching against one or more reference frames, with per-block motion vector prediction."
+              }
+            ]
+          },
+          {
+            "module": "dct-transform",
+            "name": "4×4/8×8 Integer Transform",
+            "description": "Integer approximation of the DCT, exactly invertible in integer arithmetic (unlike JPEG's floating-point DCT)."
+          },
+          {
+            "module": "hadamard-transform",
+            "name": "Luma/Chroma DC Hadamard",
+            "optional": true,
+            "note": "16×16 intra luma and all chroma DC blocks only",
+            "description": "A second Hadamard pass over the block of DC coefficients from a whole macroblock's 4×4 sub-blocks."
+          },
+          {
+            "module": "linear-quantization",
+            "name": "Coefficient Quantization",
+            "description": "Quantizes transform coefficients against a step size selected by the quantization parameter (QP)."
+          },
+          {
+            "module": "zigzag-ordering",
+            "name": "Coefficient Scan",
+            "variant": "zigzag (frame) or field-adaptive alternate scan",
+            "description": "Reorders each block's coefficients from low to high frequency."
+          },
+          {
+            "module": "run-length-encoding",
+            "name": "Run-Level Coding",
+            "description": "Encodes each nonzero coefficient as a (run-of-zeros, level) pair, ahead of CAVLC's table selection."
+          },
+          {
+            "module": "huffman-encoding",
+            "name": "CAVLC",
+            "variant": "context-adaptive VLC (table selected by neighboring nonzero-coefficient counts)",
+            "description": "Entropy-codes the (run, level) stream with one of several VLC tables, selected per block from how many nonzero coefficients its already-coded neighbors had."
+          },
+          {
+            "module": "in-loop-filter",
+            "name": "Deblocking Filter",
+            "variant": "H.264 in-loop deblocking filter",
+            "description": "Same in-loop deblocking filter as the CABAC pipeline."
+          }
+        ]
+      }
+    ],
+    "github": "https://github.com/cisco/openh264",
+    "papers": [
+      {
+        "title": "Overview of the H.264/AVC Video Coding Standard",
+        "authors": "T. Wiegand, G. J. Sullivan, G. Bjøntegaard, A. Luthra",
+        "doi": "10.1109/TCSVT.2003.815165",
+        "year": 2003,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology"
+      },
+      {
+        "title": "Context-Based Adaptive Binary Arithmetic Coding in the H.264/AVC Video Compression Standard",
+        "authors": "D. Marpe, H. Schwarz, T. Wiegand",
+        "doi": "10.1109/TCSVT.2003.815173",
+        "year": 2003,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "CABAC"
+      }
+    ],
+    "usedIn": [
+      "Streaming video (broad compatibility tier)",
+      "Blu-ray",
+      "Video conferencing",
+      "Mobile video capture"
+    ],
+    "tags": [
+      "lossy",
+      "video",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 (video) entry, see docs/image-video-codec-scoping.md. First composition using the alternatives[] intra/inter prediction stage and a real CABAC/CAVLC profile variants[] branch. Not yet cross-checked against a specific implementation (e.g. OpenH264 source)."
+    }
+  },
+  {
+    "id": "hevc",
+    "name": "H.265 / HEVC",
+    "family": "H.26x",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "ITU-T H.265 / ISO/IEC 23008-2, H.264's successor, targeting roughly half the bitrate at equal quality. Replaces H.264's fixed 16×16 macroblock with a recursively-splittable coding tree unit (CTU, up to 64×64) and a much richer 35-mode directional intra predictor; motion-compensated inter prediction, quantization, and CABAC entropy coding follow the same shape as H.264 but with finer-grained context modeling. Two in-loop filters run in sequence: deblocking, then Sample Adaptive Offset (SAO).",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2,
+      3
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0 (4:2:2/4:4:4 in higher profiles)",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "CTU Partitioning",
+        "description": "Recursively splits each frame into coding tree units (up to 64×64) and, within each, coding/prediction/transform units via a quad-tree, adapting block size to local content complexity."
+      },
+      {
+        "name": "Block Prediction",
+        "description": "Each block is predicted either spatially from decoded neighbors in the same frame (intra) or via motion compensation from a previously-decoded reference frame (inter); the encoder signals which per block.",
+        "alternatives": [
+          {
+            "module": "directional-intra-prediction",
+            "name": "Intra Prediction",
+            "description": "35 directional modes (33 angular + DC + planar), versus H.264's 9 — the added modes chiefly improve prediction of smoothly-varying gradients."
+          },
+          {
+            "module": "motion-compensated-prediction",
+            "name": "Motion Compensation (Inter)",
+            "description": "Quarter/eighth-pixel-precision block matching with an expanded motion vector prediction (merge/AMVP) scheme."
+          }
+        ]
+      },
+      {
+        "module": "dct-transform",
+        "name": "Variable-Size Integer Transform",
+        "variant": "4×4 to 32×32, DCT-II (and DST-VII for 4×4 luma intra)",
+        "description": "A larger range of transform block sizes than H.264, chosen per transform unit; 4×4 intra luma blocks use a discrete sine transform variant instead of DCT for a better fit to directional residuals."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes transform coefficients against a QP-derived step size."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Coefficient Scan",
+        "variant": "diagonal, horizontal, or vertical scan (selected by intra mode)",
+        "description": "Reorders each transform unit's coefficients from low to high frequency."
+      },
+      {
+        "module": "arithmetic-coding",
+        "name": "CABAC",
+        "variant": "context-adaptive binary arithmetic coding, refined context set vs. H.264",
+        "description": "Codes every syntax element as a binary decision under an adapted context model, as in H.264 but with a larger, more refined context set."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Deblocking + SAO",
+        "variant": "deblocking filter followed by Sample Adaptive Offset",
+        "description": "Deblocking smooths block edges as in H.264; SAO then adds or subtracts a per-pixel offset (band- or edge-classified) to better match the original signal, before the frame is stored as a reference."
+      }
+    ],
+    "github": "https://github.com/videolan/x265",
+    "papers": [
+      {
+        "title": "Overview of the High Efficiency Video Coding (HEVC) Standard",
+        "authors": "G. J. Sullivan, J.-R. Ohm, W.-J. Han, T. Wiegand",
+        "doi": "10.1109/TCSVT.2012.2221191",
+        "year": 2012,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology"
+      },
+      {
+        "title": "Sample Adaptive Offset in the HEVC Standard",
+        "authors": "C.-M. Fu, E. Alshina, A. Alshin, Y.-W. Huang, C.-Y. Chen, C.-Y. Tsai, C.-W. Hsu, S.-M. Lei, J.-H. Park, W.-J. Han",
+        "doi": "10.1109/TCSVT.2012.2223052",
+        "year": 2012,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology"
+      }
+    ],
+    "usedIn": [
+      "4K/UHD streaming",
+      "Blu-ray UHD",
+      "Broadcast (ATSC 3.0)"
+    ],
+    "tags": [
+      "lossy",
+      "video",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 (video) entry, see docs/image-video-codec-scoping.md. github URL (videolan/x265 mirror) best-effort, not yet confirmed as canonical — x265's primary repo is hosted on Bitbucket."
+    }
+  },
+  {
+    "id": "heic",
+    "name": "HEIC / HEIF",
+    "family": "H.26x",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "relatedTo": [
+      "hevc"
+    ],
+    "description": "The High Efficiency Image File Format (ISO/IEC 23008-12) wraps a single HEVC intra-coded frame (or a small independently-decodable grid of them, for very large images) in a still-image container. The compression pipeline is exactly HEVC's intra path — CTU partitioning, 35-mode directional intra prediction, variable-size transform, quantization, CABAC, and deblocking+SAO — with no inter/motion-compensated prediction, since there is only one frame.",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "CTU Partitioning",
+        "description": "Same recursive coding tree unit partitioning as HEVC video."
+      },
+      {
+        "module": "directional-intra-prediction",
+        "name": "Intra Prediction",
+        "description": "HEVC's 35-mode directional intra predictor; there is no inter alternative since HEIC encodes a single frame."
+      },
+      {
+        "module": "dct-transform",
+        "name": "Variable-Size Integer Transform",
+        "variant": "4×4 to 32×32, DCT-II (and DST-VII for 4×4 luma)",
+        "description": "Same transform kit as HEVC video."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes transform coefficients against a QP-derived step size."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Coefficient Scan",
+        "description": "Reorders each transform unit's coefficients from low to high frequency."
+      },
+      {
+        "module": "arithmetic-coding",
+        "name": "CABAC",
+        "variant": "context-adaptive binary arithmetic coding",
+        "description": "Same entropy coder as HEVC video."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Deblocking + SAO",
+        "description": "Same two-stage filter as HEVC video, applied once since there's no reference-frame chain to feed."
+      }
+    ],
+    "papers": [
+      {
+        "title": "Overview of the High Efficiency Video Coding (HEVC) Standard",
+        "authors": "G. J. Sullivan, J.-R. Ohm, W.-J. Han, T. Wiegand",
+        "doi": "10.1109/TCSVT.2012.2221191",
+        "year": 2012,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "HEIC reuses HEVC's intra coding tools directly"
+      }
+    ],
+    "usedIn": [
+      "Default photo format on iOS/macOS"
+    ],
+    "tags": [
+      "lossy",
+      "raster",
+      "image"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 entry, see docs/image-video-codec-scoping.md. Pipeline mirrors hevc's intra alternative exactly; relatedTo hevc rather than a variant since HEIC is an independently-named/adopted still-image format, not a build mode of the video codec (same reasoning as mdz-xtc vs. mdz)."
+    }
+  },
+  {
+    "id": "vp9",
+    "name": "VP9",
+    "family": "VPx",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "Google's royalty-free successor to VP8 (WebP-lossy's basis), roughly competitive with HEVC. Splits each frame into 64×64 superblocks recursively partitioned down to 4×4, predicts each block via directional intra prediction or motion compensation (with up to 3 reference frames), transforms residuals with a selectable DCT/ADST combination, quantizes, and entropy-codes with a non-adaptive-within-frame boolean coder whose probabilities are updated between frames. A single in-loop deblocking filter runs before the frame is stored as a reference.",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2,
+      3
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0 (4:4:4 in Profile 1+)",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "Superblock Partitioning",
+        "description": "Recursively splits each frame into 64×64 superblocks down to 4×4 blocks via a quad-tree, adapting block size to local content."
+      },
+      {
+        "name": "Block Prediction",
+        "description": "Each block is predicted either spatially from decoded neighbors in the same frame (intra) or via motion compensation from a previously-decoded reference frame (inter); the encoder signals which per block.",
+        "alternatives": [
+          {
+            "module": "directional-intra-prediction",
+            "name": "Intra Prediction",
+            "description": "10 directional modes plus DC/TrueMotion, inherited and extended from VP8's set."
+          },
+          {
+            "module": "motion-compensated-prediction",
+            "name": "Motion Compensation (Inter)",
+            "description": "Eighth-pixel-precision block matching against up to 3 simultaneous reference frames (last, golden, alt-ref)."
+          }
+        ]
+      },
+      {
+        "module": "dct-transform",
+        "name": "Selectable Block Transform",
+        "variant": "4×4 to 32×32 DCT, or a DCT/ADST combination for smaller intra blocks",
+        "description": "Transform size adapts to the prediction block size; an asymmetric discrete sine transform (ADST) is available on smaller intra-predicted blocks for a better fit to directional residuals."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes transform coefficients against a QP-derived step size."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Coefficient Scan",
+        "variant": "zigzag, column, or row scan (selected by transform/prediction mode)",
+        "description": "Reorders each block's coefficients from low to high frequency."
+      },
+      {
+        "module": "arithmetic-coding",
+        "name": "Boolean Entropy Coding",
+        "variant": "non-adaptive-within-frame boolean coder, probabilities updated between frames (VP8/VP9 lineage)",
+        "description": "Entropy-codes coefficients and mode decisions as a sequence of binary decisions; unlike CABAC, probabilities are fixed within a frame and only updated between frames."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Loop Filter",
+        "variant": "VP9 deblocking filter",
+        "description": "Smooths block-boundary discontinuities; the filtered frame becomes the reference for future motion compensation."
+      }
+    ],
+    "github": "https://github.com/webmproject/libvpx",
+    "papers": [
+      {
+        "title": "A Technical Overview of VP9 - The Latest Open-Source Video Codec",
+        "authors": "D. Mukherjee, J. Bankoski, A. Grange, J. Han, J. Koleszar, P. Wilkins, Y. Xu, R. Bultje",
+        "year": 2013,
+        "venue": "SMPTE Motion Imaging Journal"
+      }
+    ],
+    "usedIn": [
+      "YouTube",
+      "WebM"
+    ],
+    "tags": [
+      "lossy",
+      "video",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 (video) entry, see docs/image-video-codec-scoping.md. Not yet cross-checked against libvpx source."
+    }
+  },
+  {
+    "id": "av1",
+    "name": "AV1",
+    "family": "AV1",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "The Alliance for Open Media's royalty-free codec, roughly 30% more efficient than HEVC/VP9. Splits each frame into 128×128 superblocks recursively partitioned via an extended tree, predicts each block via a much richer directional intra mode set or motion compensation (with up to 7 reference frames and warped/OBMC prediction), applies an extensible transform kit (DCT/ADST/flip-ADST/identity, size- and mode-dependent) chosen per block, quantizes, and entropy-codes with a multi-symbol adaptive range coder whose per-context probabilities update continuously. Three in-loop filters run in sequence: deblocking, CDEF (a directional deringing filter), and loop restoration.",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2,
+      3
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0 (4:4:4 supported)",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "Superblock Partitioning",
+        "description": "Recursively splits each frame into 128×128 superblocks down to 4×4 blocks via an extended partition tree (including T-shaped and 4-way splits beyond a simple quad-tree), the richest partitioning scheme of the codecs here."
+      },
+      {
+        "name": "Block Prediction",
+        "description": "Each block is predicted either spatially from decoded neighbors in the same frame (intra) or via motion compensation from a previously-decoded reference frame (inter); the encoder signals which per block.",
+        "alternatives": [
+          {
+            "module": "directional-intra-prediction",
+            "name": "Intra Prediction",
+            "description": "Directional modes plus additional tools (recursive-filter intra, chroma-from-luma, palette prediction for screen content) — the richest intra tool set of the codecs here."
+          },
+          {
+            "module": "motion-compensated-prediction",
+            "name": "Motion Compensation (Inter)",
+            "description": "Eighth-pixel-precision block matching against up to 7 simultaneous reference frames, with optional affine warped motion and overlapped block motion compensation (OBMC) at block edges."
+          }
+        ]
+      },
+      {
+        "module": "dct-transform",
+        "name": "Extensible Transform Kit",
+        "variant": "DCT/ADST/flip-ADST/identity, size- and mode-dependent, up to 64×64",
+        "description": "Chooses among multiple transform kernels per block depending on the prediction mode and residual statistics — the widest transform selection of the codecs here."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes transform coefficients against a QP-derived step size."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Coefficient Scan",
+        "variant": "mode-dependent scan order",
+        "description": "Reorders each block's coefficients from low to high frequency."
+      },
+      {
+        "module": "range-coding",
+        "name": "Symbol Entropy Coding",
+        "variant": "multi-symbol adaptive range coder with continuously-updated per-context CDFs",
+        "description": "Entropy-codes coefficients and mode decisions with a range coder whose per-context symbol probabilities update after every coded symbol, not just between frames."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Deblocking + CDEF + Loop Restoration",
+        "variant": "three sequential in-loop filters",
+        "description": "Deblocking smooths block edges; CDEF (Constrained Directional Enhancement Filter) then removes ringing along detected edge directions; loop restoration applies a final Wiener or self-guided filter — the most elaborate in-loop filter chain of the codecs here."
+      }
+    ],
+    "github": "https://github.com/AOMediaCodec/libaom",
+    "papers": [
+      {
+        "title": "An Overview of Core Coding Tools in the AV1 Video Codec",
+        "authors": "Y. Chen, D. Mukherjee, J. Han, A. Grange, Y. Xu, Z. Liu, S. Parker, C. Chen, H. Su, U. Joshi, et al.",
+        "year": 2018,
+        "venue": "Picture Coding Symposium (PCS)"
+      },
+      {
+        "title": "The AV1 Constrained Directional Enhancement Filter (CDEF)",
+        "authors": "S. Midtskogen, J.-M. Valin",
+        "doi": "10.1109/ICASSP.2018.8461732",
+        "year": 2018,
+        "venue": "IEEE ICASSP"
+      }
+    ],
+    "usedIn": [
+      "YouTube",
+      "Netflix",
+      "Chrome/Firefox video playback"
+    ],
+    "tags": [
+      "lossy",
+      "video",
+      "standard"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 (video) entry, see docs/image-video-codec-scoping.md. First composition using range-coding (rather than arithmetic-coding) for its entropy stage — AV1's coder is documented as a multi-symbol range coder, distinct from H.264/HEVC's binary CABAC. Not yet cross-checked against libaom source."
+    }
+  },
+  {
+    "id": "avif",
+    "name": "AVIF",
+    "family": "AV1",
+    "category": "CPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "relatedTo": [
+      "av1"
+    ],
+    "description": "AV1 Image File Format wraps a single AV1 intra-coded frame in a still-image container (built on the same HEIF-derived ISOBMFF base as HEIC). The compression pipeline is exactly AV1's intra path — superblock partitioning, AV1's rich directional/palette intra tool set, the extensible transform kit, quantization, and the adaptive range coder — with no inter/motion-compensated prediction, since there is only one frame; the in-loop filter chain still runs since it improves the single reconstructed frame's own fidelity even with no future reference to serve.",
+    "dataTypes": [
+      "u8",
+      "u16"
+    ],
+    "dims": [
+      2
+    ],
+    "pipeline": [
+      {
+        "module": "color-space-transform",
+        "name": "RGB to YUV",
+        "optional": true,
+        "description": "Converts to a luma/chroma representation; broadcast/production sources are typically captured directly in YUV, making this an implicit rather than an explicit encoder stage."
+      },
+      {
+        "module": "downsampling",
+        "name": "Chroma Subsampling",
+        "variant": "4:2:0 (4:4:4 supported)",
+        "description": "Reduces chroma resolution relative to luma."
+      },
+      {
+        "name": "Superblock Partitioning",
+        "description": "Same extended partition tree as AV1 video."
+      },
+      {
+        "module": "directional-intra-prediction",
+        "name": "Intra Prediction",
+        "description": "AV1's full intra tool set (directional modes, recursive-filter intra, chroma-from-luma, palette); there is no inter alternative since AVIF encodes a single frame."
+      },
+      {
+        "module": "dct-transform",
+        "name": "Extensible Transform Kit",
+        "variant": "DCT/ADST/flip-ADST/identity, size- and mode-dependent",
+        "description": "Same transform kit as AV1 video."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Coefficient Quantization",
+        "description": "Quantizes transform coefficients against a QP-derived step size."
+      },
+      {
+        "module": "zigzag-ordering",
+        "name": "Coefficient Scan",
+        "description": "Reorders each block's coefficients from low to high frequency."
+      },
+      {
+        "module": "range-coding",
+        "name": "Symbol Entropy Coding",
+        "variant": "multi-symbol adaptive range coder",
+        "description": "Same entropy coder as AV1 video."
+      },
+      {
+        "module": "in-loop-filter",
+        "name": "Deblocking + CDEF + Loop Restoration",
+        "description": "Same three-stage filter as AV1 video, still applied to improve the single reconstructed frame's own fidelity."
+      }
+    ],
+    "papers": [
+      {
+        "title": "An Overview of Core Coding Tools in the AV1 Video Codec",
+        "authors": "Y. Chen, D. Mukherjee, J. Han, A. Grange, Y. Xu, Z. Liu, S. Parker, C. Chen, H. Su, U. Joshi, et al.",
+        "year": 2018,
+        "venue": "Picture Coding Symposium (PCS)",
+        "note": "AVIF reuses AV1's intra coding tools directly"
+      }
+    ],
+    "usedIn": [
+      "Modern web images (Chrome, Android)"
+    ],
+    "tags": [
+      "lossy",
+      "raster",
+      "image"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New Phase 2 entry, see docs/image-video-codec-scoping.md. Pipeline mirrors av1's intra alternative exactly; relatedTo av1 rather than a variant, same reasoning as heic/hevc."
+    }
+  },
+  {
     "id": "szx",
     "name": "SZx",
     "category": "Mixed",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Ultra-fast compressor using smoothness detection. Constant blocks stored as single value; non-constant blocks use normalize-truncate-XOR pipeline. Designed to be performant on modern CPUs and GPUs.",
     "pipeline": [
@@ -1860,6 +3724,7 @@
     "id": "pfpl",
     "name": "PFPL",
     "category": "Mixed",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Cross-platform compressor using quantization, delta coding, bitshuffle, and recursive zero elimination. Flexible error bound support, and a portable efficient implementation on both GPU and CPU.",
     "pipeline": [
@@ -1868,7 +3733,7 @@
         "name": "Quantization",
         "description": "ABS/REL/NOA error bound modes with outlier handling",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -1879,7 +3744,7 @@
         "name": "Difference Encoding",
         "description": "First-order difference of quantized integer codes",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "DifferenceStage",
           "card": "fzgm-diff",
           "url": "https://szcompressor.org/FZGPUModules/stage_diff.html"
@@ -1890,7 +3755,7 @@
         "name": "Bitshuffle",
         "description": "Bit-level rearrangement across elements for better compressibility",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "BitshuffleStage",
           "card": "fzgm-bitshuffle",
           "url": "https://szcompressor.org/FZGPUModules/stage_bitshuffle.html"
@@ -1902,7 +3767,7 @@
         "description": "Multi-level iterative removal of zero runs",
         "variant": "zero-specialized (RZE)",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "RZEStage",
           "card": "fzgm-rze",
           "url": "https://szcompressor.org/FZGPUModules/stage_rze.html"
@@ -1965,24 +3830,25 @@
       {
         "module": "zigzag-ordering",
         "name": "Zigzag Coefficient Ordering",
-        "description": "Order signed integer coefficients by frequency",
+        "description": "Reorders each block's coefficients by i+j+k, then by i²+j²+k² (3D), so low-frequency, larger-magnitude coefficients come first",
         "note": "Creates roughly monotonically decreasing magnitudes"
       },
       {
-        "module": "tcms-mutator",
-        "name": "Magnitude-Sign Conversion",
-        "description": "Convert to magnitude-sign representation",
-        "note": "Equivalent to negabinary for compression purposes"
+        "module": "negabinary",
+        "name": "Negabinary Conversion",
+        "description": "Converts each two's-complement coefficient to negabinary (base −2) with one addition and one XOR per value",
+        "note": "The leftmost one-bit in negabinary simultaneously encodes sign and approximate magnitude, so small values (regardless of sign) get many leading zeros — this is what the bitplane/RLE step below exploits. Not the same representation as tcms-mutator's magnitude-sign split (fixed 2026-07-20; the two aren't equivalent despite an earlier note here claiming so)."
       },
       {
         "module": "bit-shuffle",
         "name": "Bit Transpose",
-        "description": "Transpose bits across values for better compressibility"
+        "description": "Transposes the block's coefficients into bitplanes, ordered from most to least significant bit"
       },
       {
         "module": "run-length-encoding",
-        "name": "RLE of Zeros",
-        "description": "Run-length encode zero runs with unary representation"
+        "name": "Group-Tested Bitplane RLE",
+        "variant": "group testing: emit the lowest already-confirmed-significant bits verbatim, then unary-code the run of leading zeros up to the next one-bit",
+        "description": "Encodes each bitplane by emitting its already-significant low bits directly and unary run-length-coding the zero runs above them, stopping once the accuracy/bitrate target is met — this early-stop is what makes the coding embedded/progressive."
       }
     ],
     "github": "https://github.com/LLNL/zfp",
@@ -2167,7 +4033,7 @@
       {
         "id": "mgard-x",
         "name": "MGARD-X (FZ / bitplane)",
-        "description": "FZ Module Library's ALGO_MGARD pipeline: the vendored, portable MGARD-X implementation, terminating in level-wise bitplane encoding then Zstandard rather than the reference Huffman path. Same multilevel-decomposition technique, different lossless coding.",
+        "description": "FZ CPU Module Library's ALGO_MGARD pipeline: the vendored, portable MGARD-X implementation, terminating in level-wise bitplane encoding then Zstandard rather than the reference Huffman path. Same multilevel-decomposition technique, different lossless coding.",
         "fzAlgorithm": {
           "algorithm": "ALGO_MGARD",
           "url": "https://szcompressor.org/SZ3/modules/ALGO_MGARD.html"
@@ -2178,7 +4044,7 @@
             "name": "Multilevel Decomposition",
             "description": "Multigrid hierarchical decomposition",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "MGARDDecomposition",
               "url": "https://szcompressor.org/SZ3/modules/ALGO_MGARD.html"
             }
@@ -2188,7 +4054,7 @@
             "name": "Quantization",
             "description": "Per-multigrid-level error-controlled quantization under a geometry-driven schedule",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "LinearQuantizer",
               "url": "https://szcompressor.org/SZ3/modules/LinearQuantizer.html"
             }
@@ -2198,7 +4064,7 @@
             "name": "Bitplane Encoding",
             "description": "Level-wise MSB-to-LSB bitplane output, enabling progressive retrieval",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "BitplaneEncoder",
               "url": "https://szcompressor.org/SZ3/modules/BitplaneEncoder.html"
             }
@@ -2208,7 +4074,7 @@
             "description": "Final lossless stage",
             "composition": "zstd",
             "implementation": {
-              "library": "FZ Module Library",
+              "library": "FZ CPU Module Library",
               "stage": "Lossless_zstd",
               "url": "https://szcompressor.org/SZ3/modules/Lossless_zstd.html"
             }
@@ -2270,6 +4136,7 @@
     "id": "cusz",
     "name": "cuSZ",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU compressor which adopts and parallelizes the SZ algorithm. Uses a dual-quantization scheme to parallelize the prediction and quantization steps and implements an optimized GPU Huffman implementation.",
     "pipeline": [
@@ -2278,7 +4145,7 @@
         "name": "Quantization",
         "description": "Divide the raw value by 2×error_bound and round to an integer code",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "LorenzoQuantStage",
           "card": "fzgm-lorenzo-quant",
           "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo_quant.html"
@@ -2290,7 +4157,7 @@
         "description": "Dual-quantization spatial prediction",
         "moreInfo": "Pre-quantizes the raw value, predicts q from its quantized integer neighbors, and the resulting residual is the final code.",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "LorenzoQuantStage",
           "card": "fzgm-lorenzo-quant",
           "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo_quant.html"
@@ -2302,7 +4169,7 @@
         "description": "Lossless entropy coding of the residual codes",
         "moreInfo": "FZGM's Huffman stage is a port of PHF (parallel Huffman) with two encode paths: a coarse multi-kernel path that syncs its prefix sum on the CPU, and a fine single-kernel path that stays fully GPU-async.",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "HuffmanStage",
           "card": "fzgm-huffman",
           "url": "https://szcompressor.org/FZGPUModules/stage_huffman.html"
@@ -2352,6 +4219,7 @@
     "id": "cusz-i",
     "name": "cuSZ-i",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU compressor with auto-tuning GPU-optimized interpolation (G-Interp) and a NVIDIA nvCOMP Bitcomp lossless back-end.",
     "pipeline": [
@@ -2360,7 +4228,7 @@
         "name": "G-Interp",
         "description": "GPU-optimized auto-tuning interpolation kernel",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "GInterpStage",
           "card": "fzgm-ginterp",
           "url": "https://szcompressor.org/FZGPUModules/stage_ginterp.html"
@@ -2371,7 +4239,7 @@
         "name": "Quantization",
         "description": "Divide the raw value by 2×error_bound and round to an integer code",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -2382,7 +4250,7 @@
         "name": "Huffman Encoding",
         "description": "Lossless entropy coding of the residual codes",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "HuffmanStage",
           "card": "fzgm-huffman",
           "url": "https://szcompressor.org/FZGPUModules/stage_huffman.html"
@@ -2426,6 +4294,7 @@
     "id": "cusz-hi",
     "name": "cuSZ-Hi",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Dual-mode GPU compressor: G-Interp spline interpolation with integrated quantization, then a lossless back-end in one of two modes utilizing LC components.",
     "pipeline": [
@@ -2435,7 +4304,7 @@
         "name": "G-Interp",
         "description": "Multi-level GPU spline interpolation with integrated error-bounded quantization and outlier handling",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "GInterpStage",
           "card": "fzgm-ginterp",
           "url": "https://szcompressor.org/FZGPUModules/stage_ginterp.html"
@@ -2452,7 +4321,7 @@
         "name": "Huffman Encoding",
         "description": "Entropy-code the interpolation residual codes",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "HuffmanStage",
           "card": "fzgm-huffman",
           "url": "https://szcompressor.org/FZGPUModules/stage_huffman.html"
@@ -2463,7 +4332,7 @@
         "name": "Merge",
         "description": "Concatenate [Huffman output | anchor | outlier values | outlier indices] into one blob",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "MergeStage",
           "card": "fzgm-merge",
           "url": "https://szcompressor.org/FZGPUModules/stage_merge.html"
@@ -2479,7 +4348,7 @@
         "name": "Repetition Reduction",
         "description": "Eliminate repeated words in the merged blob",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "RREStage",
           "card": "fzgm-rre",
           "url": "https://szcompressor.org/FZGPUModules/stage_rre.html"
@@ -2491,7 +4360,7 @@
         "name": "Zigzag Encoding",
         "description": "Byte-transparent zigzag mapping of the RRE output",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "ZigzagStage",
           "card": "fzgm-zigzag",
           "url": "https://szcompressor.org/FZGPUModules/stage_zigzag.html"
@@ -2504,7 +4373,7 @@
         "name": "Zero Elimination",
         "description": "Final zero-run elimination pass",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "RZEStage",
           "card": "fzgm-rze",
           "url": "https://szcompressor.org/FZGPUModules/stage_rze.html"
@@ -2563,7 +4432,7 @@
             "name": "G-Interp",
             "description": "Multi-level GPU spline interpolation with integrated error-bounded quantization and outlier handling",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "GInterpStage",
               "card": "fzgm-ginterp",
               "url": "https://szcompressor.org/FZGPUModules/stage_ginterp.html"
@@ -2576,7 +4445,7 @@
             "description": "Byte-transparent zigzag mapping of the interpolation residual codes",
             "lane": "main",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "ZigzagStage",
               "card": "fzgm-zigzag",
               "url": "https://szcompressor.org/FZGPUModules/stage_zigzag.html"
@@ -2588,7 +4457,7 @@
             "description": "1-byte-element bitplane shuffle of the code stream",
             "lane": "main",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "BitshuffleStage",
               "card": "fzgm-bitshuffle",
               "url": "https://szcompressor.org/FZGPUModules/stage_bitshuffle.html"
@@ -2601,7 +4470,7 @@
             "description": "Eliminate repeated words in the shuffled code stream",
             "lane": "main",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "RREStage",
               "card": "fzgm-rre",
               "url": "https://szcompressor.org/FZGPUModules/stage_rre.html"
@@ -2612,7 +4481,7 @@
             "description": "Anchor points and prediction outliers, concatenated into one blob",
             "lane": "outlier",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "MergeStage",
               "card": "fzgm-merge",
               "url": "https://szcompressor.org/FZGPUModules/stage_merge.html"
@@ -2624,7 +4493,7 @@
             "description": "4-byte-element bitplane shuffle",
             "lane": "outlier",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "BitshuffleStage",
               "card": "fzgm-bitshuffle",
               "url": "https://szcompressor.org/FZGPUModules/stage_bitshuffle.html"
@@ -2637,7 +4506,7 @@
             "description": "Eliminate repeated words",
             "lane": "outlier",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "RREStage",
               "card": "fzgm-rre",
               "url": "https://szcompressor.org/FZGPUModules/stage_rre.html"
@@ -2650,7 +4519,7 @@
             "description": "Final zero-run elimination",
             "lane": "outlier",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "RZEStage",
               "card": "fzgm-rze",
               "url": "https://szcompressor.org/FZGPUModules/stage_rze.html"
@@ -2669,6 +4538,7 @@
     "id": "fz-gpu",
     "name": "FZ-GPU",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU compressor using error-bounded quantization followed by a fused single-kernel lossless back-end: bitplane transpose (bitshuffle at 32-bit granularity) then zero-group elimination.",
     "pipeline": [
@@ -2677,7 +4547,7 @@
         "name": "Quantization",
         "description": "Error-bounded quantization to uint16 codes",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "LorenzoQuantStage",
           "card": "fzgm-lorenzo-quant",
           "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo_quant.html"
@@ -2689,7 +4559,7 @@
         "description": "Transpose bits across a 32×32 word block (bitshuffle at 4-byte element width)",
         "note": "Fused in-kernel with zero-group elimination; no intermediate global-memory write",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "BitplaneRZEStage",
           "card": "fzgm-bitplane-rze",
           "url": "https://szcompressor.org/FZGPUModules/stage_bitplane_rze.html"
@@ -2701,7 +4571,7 @@
         "description": "Compact out all-zero 4-byte groups using a per-chunk bitflag bitmap and prefix-sum compaction",
         "variant": "zero-specialized (RZE)",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "BitplaneRZEStage",
           "card": "fzgm-bitplane-rze",
           "url": "https://szcompressor.org/FZGPUModules/stage_bitplane_rze.html"
@@ -2746,6 +4616,7 @@
     "id": "cuszp",
     "name": "cuSZp",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU-accelerated compressor using fused Lorenzo-quantization and bit-packing for ultra-fast parallel compression.",
     "pipeline": [
@@ -2754,7 +4625,7 @@
         "name": "Quantization",
         "description": "Error-bounded quantization",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -2765,7 +4636,7 @@
         "name": "Lorenzo Predictor",
         "description": "Dual-quantization spatial prediction with block_size=32",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "LorenzoStage",
           "card": "fzgm-lorenzo",
           "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo.html"
@@ -2776,7 +4647,7 @@
         "name": "Bit-Packing",
         "description": "Compact storage of quantized values",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "AdaptiveBitpackStage",
           "card": "fzgm-adaptive-bitpack",
           "url": "https://szcompressor.org/FZGPUModules/stage_adaptive_bitpack.html"
@@ -2819,6 +4690,7 @@
     "id": "cuszp2",
     "name": "cuSZp2",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Enhanced cuSZp with outlier/plain modes and GPU throughput optimizations including prefix sum with decoupled lookback.",
     "pipeline": [
@@ -2827,7 +4699,7 @@
         "name": "Quantization",
         "description": "Error-bounded linear quantization",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -2838,7 +4710,7 @@
         "name": "Lorenzo Predictor",
         "description": "Dual-level quantization and spatial prediction, block_size=32",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "LorenzoStage",
           "card": "fzgm-lorenzo",
           "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo.html"
@@ -2849,7 +4721,7 @@
         "name": "Bit-Packing",
         "description": "GPU-optimized packing with prefix sum, per-block outlier selection",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "AdaptiveBitpackStage",
           "card": "fzgm-adaptive-bitpack",
           "url": "https://szcompressor.org/FZGPUModules/stage_adaptive_bitpack.html"
@@ -2899,7 +4771,7 @@
             "name": "Quantization",
             "description": "Error-bounded linear quantization",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "QuantizerStage",
               "card": "fzgm-quantizer",
               "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -2910,7 +4782,7 @@
             "name": "Lorenzo Predictor",
             "description": "GPU-optimized spatial prediction, block_size=32",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "LorenzoStage",
               "card": "fzgm-lorenzo",
               "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo.html"
@@ -2921,7 +4793,7 @@
             "name": "Bit-Packing",
             "description": "Compact storage of quantized values, no outlier path",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "AdaptiveBitpackStage",
               "card": "fzgm-adaptive-bitpack",
               "url": "https://szcompressor.org/FZGPUModules/stage_adaptive_bitpack.html"
@@ -2940,6 +4812,7 @@
     "id": "aatrox",
     "name": "Aatrox",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Highly GPU-optimized compressor using quantization, delta coding, and bit-packing for massive throughput and high compression ratios.",
     "pipeline": [
@@ -2948,7 +4821,7 @@
         "name": "Quantization",
         "description": "Error-bounded linear quantization",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -2959,7 +4832,7 @@
         "name": "Delta Coding",
         "description": "Compute differences between values",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "DeltaCodingStage",
           "card": "fzgm-delta-coding",
           "url": "https://szcompressor.org/FZGPUModules/stage_diff.html"
@@ -2970,7 +4843,7 @@
         "name": "Bit-Packing",
         "description": "Compact storage",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "BitpackStage",
           "card": "fzgm-bitpack",
           "url": "https://szcompressor.org/FZGPUModules/stage_bitpack.html"
@@ -3007,6 +4880,7 @@
     "id": "vgc",
     "name": "VGC / cuSZp3",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Versatile GPU compressor with dimension-aware tiled Lorenzo prediction (1-D/2-D/3-D), adaptive bit-packing, outlier preservation, and memory-efficient/selective decompression modes.",
     "pipeline": [
@@ -3015,7 +4889,7 @@
         "name": "Quantization",
         "description": "Convert to integer representation",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "QuantizerStage",
           "card": "fzgm-quantizer",
           "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -3026,7 +4900,7 @@
         "name": "Tiled Lorenzo (Dimension-Aware Delta)",
         "description": "Separable tiled delta prediction in 1-D, 2-D, or 3-D tile-major layout",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "TiledLorenzoStage",
           "card": "fzgm-tiled-lorenzo",
           "url": "https://szcompressor.org/FZGPUModules/stage_tiled_lorenzo.html"
@@ -3038,7 +4912,7 @@
         "name": "Adaptive Bit-Packing",
         "description": "Fixed-width bit-packing with per-block width selection, no outlier path",
         "implementation": {
-          "library": "FZGPUModules",
+          "library": "FZ GPU Module Library",
           "stage": "AdaptiveBitpackStage",
           "card": "fzgm-adaptive-bitpack",
           "url": "https://szcompressor.org/FZGPUModules/stage_adaptive_bitpack.html"
@@ -3089,7 +4963,7 @@
             "name": "Integer Quantization",
             "description": "Convert to integer representation",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "QuantizerStage",
               "card": "fzgm-quantizer",
               "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -3100,7 +4974,7 @@
             "name": "Tiled Lorenzo (Dimension-Aware Delta)",
             "description": "Separable tiled delta prediction in 1-D, 2-D, or 3-D tile-major layout",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "TiledLorenzoStage",
               "card": "fzgm-tiled-lorenzo",
               "url": "https://szcompressor.org/FZGPUModules/stage_tiled_lorenzo.html"
@@ -3112,7 +4986,7 @@
             "description": "Fixed-width bit-packing with per-block width selection, per-tile outlier selection",
             "note": "outlier_selection=true",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "AdaptiveBitpackStage",
               "card": "fzgm-adaptive-bitpack",
               "url": "https://szcompressor.org/FZGPUModules/stage_adaptive_bitpack.html"
@@ -3134,7 +5008,7 @@
             "name": "Integer Quantization",
             "description": "Convert to integer representation",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "QuantizerStage",
               "card": "fzgm-quantizer",
               "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
@@ -3145,7 +5019,7 @@
             "name": "Adaptive Bit-Packing",
             "description": "Per-block rate byte + sign bitmap + bit-planes, applied directly to quantized codes",
             "implementation": {
-              "library": "FZGPUModules",
+              "library": "FZ GPU Module Library",
               "stage": "AdaptiveBitpackStage",
               "card": "fzgm-adaptive-bitpack",
               "url": "https://szcompressor.org/FZGPUModules/stage_adaptive_bitpack.html"
@@ -3164,6 +5038,7 @@
     "id": "srnn-sz",
     "name": "SRNN-SZ",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU compressor using neural network-based prediction coupled with interpolation for complex pattern recognition.",
     "pipeline": [
@@ -3230,6 +5105,7 @@
     "id": "frsz2",
     "name": "FRSZ2",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "GPU compressor using a block-floating-point representation (shared max exponent per block, sign-prefixed normalized significands) with a fixed per-block truncation length.",
     "pipeline": [
@@ -3293,6 +5169,7 @@
     "id": "lscomp",
     "name": "lsCOMP",
     "category": "GPU",
+    "firstParty": true,
     "compressionType": "Lossy",
     "description": "Large-scale lossy compressor optimized for scientific data compression at scale with adaptive prediction and error control.",
     "pipeline": [
@@ -3331,6 +5208,64 @@
       "hpc"
     ],
     "status": "active",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "tz",
+    "name": "TZ",
+    "family": "TZ",
+    "firstParty": true,
+    "category": "GPU",
+    "compressionType": "Lossy",
+    "status": "active",
+    "description": "GPU-native error-bounded lossy compressor that replaces the block-wise spatial decomposition used by other GPU compressors with a single global Tucker decomposition, computed using an adaptive randomized SVD engine. By prioritizing global spectral energy compaction over local, per-block approximation, TZ captures correlations that block-decomposed methods fragment, and its global processing enables a unified quantization/coding scheme with no block artifacts or per-block metadata overhead.",
+    "pipeline": [
+      {
+        "module": "svd-decomposition",
+        "name": "Adaptive Randomized ST-HOSVD",
+        "moreInfo": "Iteratively unfolds the input tensor and adaptively extracts singular values with respect to the error bound using a randomized SVD with rank finding, to produce one global core tensor plus one factor matrix per dimension."
+      },
+      {
+        "module": "normalization",
+        "name": "Equivalent Weighting",
+        "moreInfo": "Scales the factor matrices by their singular-value energy contribution ahead of quantization, so a uniform quantization step afterward distributes error proportionally to each component's significance."
+      },
+      {
+        "module": "linear-quantization",
+        "name": "Quantization"
+      },
+      {
+        "module": "bit-shuffle",
+        "name": "Bitshuffle (4-byte)"
+      },
+      {
+        "module": "repeat-elimination",
+        "name": "Repeated Zero Elimination (RZE)"
+      }
+    ],
+    "papers": [
+      {
+        "title": "TZ: Achieving High-Ratio Scientific Data Compression on GPUs with Global Data Decomposition",
+        "authors": "Zhuoxun Yang, Ruoyu Li, Amit Subrahmanya, Vishwas Rao, Sheng Di, Robert Underwood, Longtao Zhang, Jinyang Liu, Franck Cappello, Kai Zhao",
+        "doi": "10.1145/3806645.3807811",
+        "year": 2026
+      }
+    ],
+    "tags": [
+      "lossy",
+      "gpu",
+      "svd",
+      "tucker",
+      "tensor",
+      "scientific",
+      "global-decomposition"
+    ],
     "verification": {
       "status": "unverified",
       "confidence": "low",

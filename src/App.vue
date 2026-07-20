@@ -49,6 +49,9 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll));
               <RouterLink class="nav-link" to="/compositions">Compositions</RouterLink>
             </li>
             <li class="nav-item">
+              <RouterLink class="nav-link" to="/ecosystem">Ecosystem</RouterLink>
+            </li>
+            <li class="nav-item">
               <RouterLink class="nav-link" to="/datasets">Datasets</RouterLink>
             </li>
           </ul>

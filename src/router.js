@@ -3,12 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from './pages/Home.vue';
 import Modules from './pages/Modules.vue';
 import Compositions from './pages/Compositions.vue';
+import Ecosystem from './pages/Ecosystem.vue';
 import Datasets from './pages/Datasets.vue';
 
 const routes = [
   { path: '/', name: 'home', component: Home },
   { path: '/modules', name: 'modules', component: Modules },
   { path: '/compositions', name: 'compositions', component: Compositions },
+  { path: '/ecosystem', name: 'ecosystem', component: Ecosystem },
   { path: '/datasets', name: 'datasets', component: Datasets },
 ];
 

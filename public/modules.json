@@ -68,7 +68,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "DifferenceStage",
         "cardId": "fzgm-diff",
         "algorithm": "delta",
@@ -132,7 +132,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "LorenzoQuantStage",
         "cardId": "fzgm-lorenzo-quant",
         "algorithm": "lorenzo",
@@ -145,7 +145,7 @@
         "doi": "10.1145/3410463.3414624"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "LorenzoStage",
         "cardId": "fzgm-lorenzo",
         "algorithm": "lorenzo",
@@ -157,7 +157,7 @@
         "url": "https://szcompressor.org/FZGPUModules/stage_lorenzo.html"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "TiledLorenzoStage",
         "cardId": "fzgm-tiled-lorenzo",
         "algorithm": "tiled-lorenzo",
@@ -170,7 +170,7 @@
         "doi": "10.1145/3712285.3759817"
       },
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "BlockwiseDecomposition",
         "algorithm": "lorenzo",
         "relationship": "original",
@@ -187,6 +187,216 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "paeth-predictor",
+    "name": "Paeth Predictor",
+    "category": "Predictor",
+    "description": "Spatial predictor that estimates each pixel from the byte immediately to its left (a), directly above (b), and upper-left (c), then selects whichever of a, b, or c is numerically closest to the linear estimate a + b − c as the actual prediction — a simple heuristic for picking the best local edge direction. Unlike lorenzo-predictor's fixed weighted-sum extrapolation, Paeth selects among three candidate neighbors per pixel rather than computing a blend of them.",
+    "features": [
+      "Selects among 3 neighbor candidates (left, above, upper-left) rather than computing a fixed weighted sum",
+      "Implicitly adapts to local edge direction (horizontal/vertical/diagonal gradients)",
+      "One of PNG's 5 per-scanline filter types (None, Sub, Up, Average, Paeth)",
+      "Lossless: residual (actual minus predicted) is always exactly invertible"
+    ],
+    "tags": [
+      "prediction",
+      "spatial",
+      "adaptive",
+      "lossless"
+    ],
+    "origin": [
+      "png"
+    ],
+    "papers": [
+      {
+        "title": "Image File Compression Made Easy",
+        "authors": "Alan W. Paeth",
+        "year": 1991,
+        "venue": "Graphics Gems II",
+        "note": "Introduces the Paeth predictor"
+      },
+      {
+        "title": "PNG (Portable Network Graphics) Specification, Version 1.2",
+        "year": 2003,
+        "note": "RFC 2083 / ISO/IEC 15948 — standardizes Paeth as one of PNG's five per-scanline filter types"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module drafted for the image/video codec expansion (see docs/image-video-codec-scoping.md, Phase 1a). Not yet cross-checked against a specific implementation."
+    }
+  },
+  {
+    "id": "directional-intra-prediction",
+    "name": "Directional Intra Prediction",
+    "category": "Predictor",
+    "description": "Predicts each block from its already-decoded top and/or left neighbor edge by extrapolating along one of several fixed directions (e.g. horizontal, vertical, diagonal, DC/average), rather than fitting a continuous model to the block's own content. The encoder tries each candidate direction and signals whichever gives the smallest residual. Introduced in H.264/AVC (9 modes for 4×4 luma) and used with progressively richer mode sets in VP8/WebP, HEVC (35 modes), and AV1.",
+    "features": [
+      "Predicts from already-decoded top/left edge pixels, not the block's own content",
+      "Mode-selected: the encoder tries several fixed directions and signals the best-fitting one per block",
+      "Mode count has grown across codec generations (9 in H.264, up to 35 in HEVC)",
+      "Distinct from curve-fitting's regression-fit continuous model and lorenzo-predictor's fixed weighted sum"
+    ],
+    "tags": [
+      "prediction",
+      "spatial",
+      "adaptive",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Overview of the H.264/AVC Video Coding Standard",
+        "authors": "T. Wiegand, G. J. Sullivan, G. Bjøntegaard, A. Luthra",
+        "doi": "10.1109/TCSVT.2003.815165",
+        "year": 2003,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "Introduces H.264's directional intra prediction modes"
+      },
+      {
+        "title": "Overview of the High Efficiency Video Coding (HEVC) Standard",
+        "authors": "G. J. Sullivan, J.-R. Ohm, W.-J. Han, T. Wiegand",
+        "doi": "10.1109/TCSVT.2012.2221191",
+        "year": 2012,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "Expands to 35 directional intra prediction modes"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module drafted for the image/video codec expansion, Phase 1b (see docs/image-video-codec-scoping.md). Needed by webp-lossy (not yet drafted — also blocked on the in-loop-filter open question) and, later, HEVC/AV1/H.264 in Phase 2."
+    }
+  },
+  {
+    "id": "motion-compensated-prediction",
+    "name": "Motion-Compensated Prediction",
+    "category": "Predictor",
+    "description": "Predicts each block from a matching block in a previously-decoded reference frame, found by searching for the best-matching offset (motion vector) within a search window rather than assuming zero motion. The residual is the difference between the current block and its motion-compensated match; the motion vector itself is predicted from neighboring vectors and coded differentially rather than sent raw. The first genuinely temporal (cross-frame) predictor in this catalog — every other Predictor operates within a single frame/array using spatial or sequential-index neighbors. Reference frames are typically the in-loop-filtered reconstruction rather than the raw unfiltered decode, and matches can be refined to sub-pixel precision via interpolation.",
+    "features": [
+      "Searches previously-decoded reference frame(s) for the best-matching block, rather than assuming a fixed spatial relationship",
+      "First temporal (cross-frame) predictor in the catalog — every other Predictor works within a single frame/array",
+      "Motion vectors are themselves predicted from neighboring blocks and coded differentially, not sent raw",
+      "Supports sub-pixel-precision matches via interpolation (quarter-pixel and finer in modern codecs)",
+      "Reference frames are typically the in-loop-filtered reconstruction, not the raw unfiltered decode"
+    ],
+    "tags": [
+      "prediction",
+      "temporal",
+      "adaptive",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Motion Compensated Interframe Coding for Video Conferencing",
+        "authors": "A. N. Netravali, J. D. Robbins",
+        "year": 1979,
+        "venue": "National Telecommunications Conference",
+        "note": "Early foundational block motion-compensated prediction scheme for video"
+      },
+      {
+        "title": "Overview of the H.264/AVC Video Coding Standard",
+        "authors": "T. Wiegand, G. J. Sullivan, G. Bjøntegaard, A. Luthra",
+        "doi": "10.1109/TCSVT.2003.815165",
+        "year": 2003,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "Describes H.264's quarter-pixel motion-compensated prediction and motion vector prediction"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module for Phase 2 (video codecs, see docs/image-video-codec-scoping.md). Uncontested — no existing Predictor fits a temporal/cross-frame predictor; all others operate within a single frame/array."
+    }
+  },
+  {
+    "id": "spatial-binning-decomposition",
+    "name": "Spatial Binning Decomposition",
+    "category": "Predictor",
+    "description": "Partitions unstructured point/particle data into fixed-size spatial grid cells sized directly from the error bound, then represents each particle by (cell id, quantized offset within the cell) instead of a residual from neighboring values. Suited to particle data (molecular dynamics, cosmology, CFD) that has no regular array structure for neighbor-based predictors like lorenzo-predictor to exploit — the cell partitioning plays the role a fixed grid plays for array-based predictors, with the offset quantization folded directly into this step rather than left to a separate downstream Quantizer.",
+    "features": [
+      "For unstructured/irregularly-scattered point data, not regular arrays — the particle-data counterpart to grid-based predictors",
+      "Cell size is derived directly from the error bound, coupling decomposition and precision in one step",
+      "Represents each particle as (cell id, quantized in-cell offset) rather than a predicted-value residual",
+      "Deliberately simple fixed-grid partitioning (O(N)) rather than tree-based schemes (k-d tree, octree), for speed"
+    ],
+    "tags": [
+      "prediction",
+      "spatial",
+      "block-based",
+      "lossy"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "LCP: Enhancing Scientific Data Management with Lossy Compression for Particles",
+        "authors": "Longtao Zhang, Ruoyu Li, Congrong Ren, Sheng Di, Jinyang Liu, Jiajun Huang, Robert Underwood, Pascal Grosset, Dingwen Tao, Xin Liang, Hanqi Guo, Franck Cappello, Kai Zhao",
+        "doi": "10.1145/3709700",
+        "year": 2025,
+        "venue": "Proceedings of the ACM on Management of Data (SIGMOD 2025)",
+        "note": "Introduces LCP-S's fixed-size spatial block decomposition for particle data"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module (2026-07-20) for the lcp composition. Description sourced from the SIGMOD'25 paper's LCP-S section (fixed-size blocking, block size = 2×errorbound×p, no sorting/space-filling curve); LCP-T's temporal mode is a separate technique not modeled here."
+    }
+  },
+  {
+    "id": "pattern-scaling-prediction",
+    "name": "Pattern-Scaling Prediction",
+    "category": "Predictor",
+    "description": "Predicts each value by matching it against a library of previously-encountered data patterns and scaling the best match, rather than extrapolating from spatial or temporal neighbors — exploits datasets whose values recur as scaled copies of earlier ones due to underlying structure (e.g. physical symmetries), rather than smooth local continuity. Introduced for quantum-chemistry two-electron integral (ERI) tensors, where many entries are exact or near-exact scaled repeats of already-seen sub-patterns.",
+    "features": [
+      "Matches against previously-seen patterns and predicts via a learned scale factor, not neighbor extrapolation",
+      "Targets data with repeated-but-rescaled structure rather than smooth spatial/temporal continuity",
+      "Reaches much higher compression than neighbor-based predictors on data where it applies (e.g. ~16.8× vs. ~6-7× for general SZ/ZFP on the same ERI data at matched precision, per the original paper)",
+      "Domain-specific: introduced for quantum chemistry ERI tensors, not a general-purpose predictor"
+    ],
+    "tags": [
+      "prediction",
+      "pattern-matching",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "PaSTRI: Error-Bounded Lossy Compression for Two-Electron Integrals in Quantum Chemistry",
+        "authors": "A. M. Gok, S. Di, Y. Alexeev, D. Tao, V. Mironov, X. Liang, F. Cappello",
+        "doi": "10.1109/CLUSTER.2018.00013",
+        "year": 2018,
+        "venue": "IEEE International Conference on Cluster Computing (CLUSTER 2018)"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module (2026-07-20) for the pastri composition."
     }
   },
   {
@@ -229,7 +439,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "BlockwiseDecomposition",
         "algorithm": "regression",
         "relationship": "original",
@@ -283,7 +493,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "GInterpStage",
         "cardId": "fzgm-ginterp",
         "algorithm": "interpolation-spline",
@@ -296,7 +506,7 @@
         "doi": "10.1145/3712285.3759798"
       },
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "InterpolationDecomposition",
         "algorithm": "interpolation-spline",
         "relationship": "original",
@@ -346,6 +556,43 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "implicit-neural-representation",
+    "name": "Implicit Neural Representation (Fourier Features)",
+    "category": "Predictor",
+    "description": "Fits a small coordinate-based neural network (a multilayer perceptron mapping position → value) to an entire array, then keeps only the trained network weights as the compressed representation — decompression re-evaluates the network at every coordinate. Raw MLPs are biased toward low-frequency functions, so coordinates are first passed through a fixed random Fourier feature mapping (sin/cos of scaled coordinates) to let the network fit high-frequency detail. A distinct technique from generic neural-network-prediction: the network replaces the array outright rather than predicting residuals for a separate quantizer.",
+    "features": [
+      "Data becomes a function (network weights), not a residual-corrected sample grid",
+      "Random Fourier feature coordinate mapping overcomes MLPs' low-frequency spectral bias",
+      "Naturally resolution-independent / continuously queryable",
+      "Encoding is expensive (per-array training); decoding is comparatively cheap network evaluation"
+    ],
+    "tags": [
+      "prediction",
+      "machine-learning",
+      "implicit-neural-representation",
+      "lossy"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Fourier Features Let Networks Learn High Frequency Functions in Low Dimensional Domains",
+        "authors": "Matthew Tancik, Pratul Srinivasan, Ben Mildenhall, Sara Fridovich-Keil, Nithin Raghavan, Utkarsh Singhal, Ravi Ramamoorthi, Jonathan Barron, Ren Ng",
+        "doi": "10.48550/arXiv.2006.10739",
+        "year": 2020,
+        "venue": "NeurIPS 2020"
+      }
+    ],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the technique behind numcodecs_wasm_fourier_network; no specific implementation confirmed beyond that codec."
     }
   },
   {
@@ -424,6 +671,51 @@
     }
   },
   {
+    "id": "hadamard-transform",
+    "name": "Hadamard Transform",
+    "category": "Transform",
+    "description": "Orthogonal block transform whose basis functions take only ±1 values (square waves) rather than DCT's cosine waves, so it can be computed with only additions and subtractions and no multiplications. Used as a lightweight secondary transform over already-transformed DC coefficients (e.g. H.264's 4×4/2×2 Hadamard pass over luma/chroma DC values) or as the primary luma-DC block transform in VP8/WebP.",
+    "features": [
+      "Multiplication-free: basis functions are ±1 square waves, not cosines",
+      "Cheaper to compute than DCT, at the cost of coarser energy compaction",
+      "Used as a secondary transform over a block of DC coefficients in H.264",
+      "Also used as WebP/VP8's luma-DC block transform"
+    ],
+    "tags": [
+      "transform",
+      "frequency-domain",
+      "block-based",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "A Closed Set of Normal Orthogonal Functions",
+        "authors": "J. L. Walsh",
+        "year": 1923,
+        "venue": "American Journal of Mathematics",
+        "note": "Foundational Walsh/Hadamard basis functions"
+      },
+      {
+        "title": "Overview of the H.264/AVC Video Coding Standard",
+        "authors": "T. Wiegand, G. J. Sullivan, G. Bjøntegaard, A. Luthra",
+        "doi": "10.1109/TCSVT.2003.815165",
+        "year": 2003,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "Describes H.264's 4×4 Hadamard pass over luma DC coefficients"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module drafted for the image/video codec expansion, Phase 1b (see docs/image-video-codec-scoping.md). Kept separate from dct-transform: different basis functions (±1 square waves vs. cosines), matching the precedent of one module per mathematically distinct transform family (dct/wavelet/multilevel/svd)."
+    }
+  },
+  {
     "id": "wavelet-transform",
     "name": "Wavelet Transform",
     "category": "Transform",
@@ -432,7 +724,7 @@
       "Multi-resolution analysis",
       "Good for non-smooth data",
       "Progressive reconstruction",
-      "Various wavelet families (Haar, Daubechies, CDF)"
+      "Many wavelet families, each with multiple variants to choose from: CDF 9/7 (JPEG 2000/SPERR's default), biorthogonal (bior, 15 variants), coiflets (coif, 17 variants), Daubechies (db, 38 variants), reverse biorthogonal (rbio, 15 variants), symlets (sym, 19 variants)"
     ],
     "tags": [
       "transform",
@@ -493,12 +785,19 @@
         "year": 2000,
         "doi": "10.1137/S0895479896305696",
         "note": "Foundational HOSVD paper — Tucker/HOSVD generalization of SVD to tensors"
+      },
+      {
+        "title": "TZ: Achieving High-Ratio Scientific Data Compression on GPUs with Global Data Decomposition",
+        "authors": "Zhuoxun Yang, Ruoyu Li, Amit Subrahmanya, Vishwas Rao, Sheng Di, Robert Underwood, Longtao Zhang, Jinyang Liu, Franck Cappello, Kai Zhao",
+        "doi": "10.1145/3806645.3807811",
+        "year": 2026,
+        "note": "HPDC '26 — GPU compressor using global Tucker decomposition (ST-HOSVD) via an adaptive randomized SVD, in place of block-wise spatial decomposition"
       }
     ],
     "referenceOnly": true,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "SVDDecomposition",
         "algorithm": "tucker",
         "relationship": "original",
@@ -513,7 +812,42 @@
       "confidence": "low",
       "reviewed_by": null,
       "reviewed_on": null,
-      "notes": "renamed from tucker-decomposition and generalized to SVD, 2026-07-05; TZ compressor citation pending (preprint)"
+      "notes": "renamed from tucker-decomposition and generalized to SVD, 2026-07-05; TZ compressor citation added 2026-07-15 (HPDC '26, DOI 10.1145/3806645.3807811)"
+    }
+  },
+  {
+    "id": "random-projection",
+    "name": "Random Projection",
+    "category": "Transform",
+    "description": "Projects high-dimensional data onto a lower-dimensional subspace using a random projection matrix, exploiting the Johnson–Lindenstrauss lemma: with high probability, pairwise distances between points are approximately preserved by a projection into a much lower dimension than the data's original size suggests is possible. Unlike SVD/PCA, the projection matrix is fixed and data-independent, so it costs nothing to compute per-array — only to generate once and store/regenerate from a seed.",
+    "features": [
+      "Data-independent projection matrix (no fitting step, unlike SVD/PCA)",
+      "Approximately preserves pairwise distances (Johnson–Lindenstrauss lemma)",
+      "Much cheaper to compute than SVD for high-dimensional data",
+      "Dimensionality reduction is inherently lossy — original data is not recoverable exactly"
+    ],
+    "tags": [
+      "transform",
+      "dimensionality-reduction",
+      "lossy"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Extensions of Lipschitz mappings into a Hilbert space",
+        "authors": "W. B. Johnson, J. Lindenstrauss",
+        "year": 1984,
+        "note": "Foundational Johnson–Lindenstrauss lemma underlying random projection's distance-preservation guarantee"
+      }
+    ],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the technique behind numcodecs_wasm_random_projection; no specific implementation confirmed beyond that codec."
     }
   },
   {
@@ -556,7 +890,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "MGARDDecomposition",
         "algorithm": "multilevel-decomposition",
         "relationship": "original",
@@ -602,7 +936,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "BitTruncationQuantizer",
         "algorithm": "truncation",
         "relationship": "original",
@@ -618,6 +952,42 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "stochastic-rounding",
+    "name": "Stochastic Rounding",
+    "category": "Quantizer",
+    "description": "Rounds each value to one of its two nearest representable values (e.g. quantization bins, or lower-precision floats) with probability proportional to its distance from each — rather than always rounding to the nearest one deterministically. Unbiased in expectation: rounding error doesn't accumulate a systematic drift the way deterministic round-to-nearest can under repeated/iterative application, at the cost of adding per-value variance.",
+    "features": [
+      "Probabilistic (distance-weighted) rather than deterministic rounding",
+      "Unbiased in expectation — no systematic drift under repeated application",
+      "Trades a variance increase for eliminating rounding bias",
+      "Common in low-precision ML training (gradient accumulation) and iterative solvers"
+    ],
+    "tags": [
+      "quantization",
+      "rounding",
+      "lossy"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Deep Learning with Limited Numerical Precision",
+        "authors": "Suyog Gupta, Ankur Agrawal, Kailash Gopalakrishnan, Pritish Narayanan",
+        "doi": "10.48550/arXiv.1502.02551",
+        "year": 2015,
+        "note": "Popularized stochastic rounding for low-precision training; the bias-avoidance argument applies equally to compression quantizers"
+      }
+    ],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the technique behind numcodecs_wasm_stochastic_rounding; no specific implementation confirmed beyond that codec."
     }
   },
   {
@@ -687,7 +1057,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "GInterpStage",
         "cardId": "fzgm-ginterp",
         "algorithm": "interpolation-spline",
@@ -700,7 +1070,7 @@
         "doi": "10.1145/3712285.3759798"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "LorenzoQuantStage",
         "cardId": "fzgm-lorenzo-quant",
         "algorithm": "lorenzo",
@@ -713,7 +1083,7 @@
         "doi": "10.1145/3410463.3414624"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "QuantizerStage",
         "cardId": "fzgm-quantizer",
         "algorithm": "quant",
@@ -725,7 +1095,7 @@
         "url": "https://szcompressor.org/FZGPUModules/stage_quantizer.html"
       },
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "QuadraticLevelQuantizer",
         "algorithm": "quant",
         "relationship": "original",
@@ -772,7 +1142,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "LinearQuantizer",
         "algorithm": "linear-quant",
         "relationship": "original",
@@ -788,6 +1158,42 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "log-scale-quantization",
+    "name": "Log-Scale Quantization",
+    "category": "Quantizer",
+    "description": "Quantizes values into bins whose width grows logarithmically with magnitude rather than staying constant — coarser steps for large values, finer steps near zero — so relative precision stays roughly constant across a wide dynamic range instead of a fixed linear step size wasting bits on small values. Classic form: companding (compress logarithmically, quantize uniformly, then expand on decode), as in μ-law/A-law telephony (ITU-T G.711).",
+    "features": [
+      "Bin width grows with magnitude (roughly constant *relative* precision) rather than a constant absolute step size",
+      "Well-suited to wide-dynamic-range data where small values matter as much as large ones",
+      "Classic real-world form: companding — compress logarithmically, quantize uniformly, expand back on decode",
+      "Distinct from log-scaling (a Mutator/rescaling preprocessing step) — this module is itself the lossy quantization step, not a preprocessing pass ahead of a separate quantizer"
+    ],
+    "tags": [
+      "quantization",
+      "logarithmic",
+      "dynamic-range",
+      "lossy"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Pulse Code Modulation (PCM) of Voice Frequencies",
+        "authors": "ITU-T",
+        "year": "Classical",
+        "note": "ITU-T Recommendation G.711 — standardizes μ-law and A-law logarithmic companding, the canonical real-world example of log-scale quantization"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module (2026-07-20), requested directly rather than surfaced from a specific composition. Primary citation (G.711 companding) is from telecom/audio, not scientific HPC compression — flag if a more domain-specific citation is preferred; the technique itself is a legitimate general Quantizer distinct from linear-quantization."
     }
   },
   {
@@ -894,7 +1300,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "ZigzagStage",
         "cardId": "fzgm-zigzag",
         "algorithm": "zigzag-encoding",
@@ -932,7 +1338,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "NegabinaryStage",
         "cardId": "fzgm-negabinary",
         "algorithm": "negabinary",
@@ -1009,7 +1415,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "FixedPointQuantizer",
         "algorithm": "fixed-point",
         "relationship": "original",
@@ -1024,7 +1430,7 @@
       "confidence": "low",
       "reviewed_by": null,
       "reviewed_on": null,
-      "notes": "New module created 2026-07-13 from FZ Module Library's catalog (FixedPointQuantizer page); no exact prior Z-Hub module matched."
+      "notes": "New module created 2026-07-13 from FZ CPU Module Library's catalog (FixedPointQuantizer page); no exact prior Z-Hub module matched."
     }
   },
   {
@@ -1060,6 +1466,71 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "asinh-scaling",
+    "name": "Inverse Hyperbolic Sine (asinh) Scaling",
+    "category": "Mutator",
+    "description": "Applies asinh(x) = ln(x + sqrt(x^2 + 1)) to compress dynamic range, the same way log-scaling does — but asinh is defined and smooth across all real numbers (positive, negative, and zero), where plain log-scaling breaks down (undefined for x <= 0). Behaves like a signed log for large |x| while staying linear near zero.",
+    "features": [
+      "Dynamic range compression, like log-scaling",
+      "Defined for negative values and zero, unlike a plain log transform",
+      "Approximately linear near zero, approximately logarithmic for large |x|",
+      "Reversible via sinh"
+    ],
+    "tags": [
+      "logarithmic",
+      "dynamic-range",
+      "preprocessing",
+      "near-lossless"
+    ],
+    "origin": [],
+    "papers": [],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the technique behind numcodecs_wasm_asinh; no dedicated paper found (a standard signed generalization of log-scaling), no specific implementation confirmed beyond that codec."
+    }
+  },
+  {
+    "id": "uniform-noise-dithering",
+    "name": "Uniform Noise Dithering",
+    "category": "Mutator",
+    "description": "Adds independent, uniformly-distributed noise to each value before quantization. The added noise decorrelates the quantization error from the input signal, converting the structured, signal-dependent error patterns (banding, contouring) a deterministic quantizer produces into unstructured noise — at the cost of a small increase in overall error magnitude.",
+    "features": [
+      "Decorrelates quantization error from the input signal",
+      "Trades structured error (banding/contouring) for unstructured noise",
+      "Applied before quantization, not as a replacement for it",
+      "Classic technique from audio/image dithering, applicable to scientific quantizers too"
+    ],
+    "tags": [
+      "preprocessing",
+      "dithering",
+      "near-lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Theory of Dithered Quantization",
+        "authors": "Robert M. Gray, Thomas G. Stockham Jr.",
+        "doi": "10.1109/18.335895",
+        "year": 1993,
+        "note": "Foundational analysis of dithering's effect on quantization error"
+      }
+    ],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the technique behind numcodecs_wasm_uniform_noise; no specific implementation confirmed beyond that codec."
     }
   },
   {
@@ -1172,6 +1643,41 @@
     }
   },
   {
+    "id": "color-space-transform",
+    "name": "Color-Space Transform",
+    "category": "Mutator",
+    "description": "Converts each pixel's color representation between spaces (e.g. RGB ↔ YCbCr/YUV) via a fixed matrix applied independently to every pixel. Separates luma (brightness) from chroma (color-difference) so downstream stages can allocate less precision to the channels human vision is least sensitive to — the standard first step in most image and video codecs.",
+    "features": [
+      "Per-pixel: transforms each pixel's channels independently of neighboring pixels",
+      "Decorrelates luma from chroma ahead of chroma subsampling and quantization",
+      "Reversible integer variants (e.g. subtract-green, JPEG 2000's RCT) vs. lossy floating-point variants (e.g. JPEG/ITU-R BT.601 YCbCr)",
+      "Standard first stage in JPEG, JPEG 2000, WebP, and most video codecs"
+    ],
+    "tags": [
+      "representation",
+      "preprocessing",
+      "near-lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Studio encoding parameters of digital television for standard 4:3 and wide-screen 16:9 aspect ratios",
+        "authors": "ITU-R",
+        "year": "Classical",
+        "note": "BT.601 — defines the RGB↔YCbCr conversion most image/video codecs use as their color-space transform"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module drafted for the image/video codec expansion (see docs/image-video-codec-scoping.md, Phase 1a). Not yet cross-checked against a specific implementation."
+    }
+  },
+  {
     "id": "adm",
     "name": "Adaptive Data Mapping",
     "category": "Mutator",
@@ -1203,7 +1709,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "ADMStage",
         "cardId": "fzgm-adm",
         "algorithm": "adm",
@@ -1251,7 +1757,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "BitplaneRZEStage",
         "cardId": "fzgm-bitplane-rze",
         "algorithm": "bitplane-rze",
@@ -1263,7 +1769,7 @@
         "doi": "10.1145/3588195.3592994"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "BitshuffleStage",
         "cardId": "fzgm-bitshuffle",
         "algorithm": "bitshuffle",
@@ -1394,6 +1900,35 @@
     }
   },
   {
+    "id": "swizzle-reshape",
+    "name": "Axis Swizzle & Reshape",
+    "category": "Shuffler",
+    "description": "Permutes an array's axis order (e.g. transposing a [time, y, x] array to [y, x, time]) and/or reshapes it into a different rank/shape with the same element count, without touching any values. A pure layout change: it exists purely to place elements that later stages correlate well against (e.g. neighboring bytes, matching tuple positions) adjacent in memory ahead of them.",
+    "features": [
+      "Pure layout change — no value modification, fully reversible",
+      "Axis permutation (transpose) and/or reshape to a different rank",
+      "Positions data for whatever correlation the next pipeline stage exploits",
+      "Configurable per target axis order / shape"
+    ],
+    "tags": [
+      "shuffling",
+      "layout",
+      "multi-dimensional",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the technique behind numcodecs_wasm_swizzle_reshape; no dedicated paper (a general array-layout operation), no specific implementation confirmed beyond that codec."
+    }
+  },
+  {
     "id": "sorting",
     "name": "Sorting",
     "category": "Shuffler",
@@ -1457,7 +1992,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "RLEStage",
         "cardId": "fzgm-rle",
         "algorithm": "rle",
@@ -1468,7 +2003,7 @@
         "url": "https://szcompressor.org/FZGPUModules/stage_rle.html"
       },
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "BitplaneRLEEncoder",
         "algorithm": "rle",
         "relationship": "original",
@@ -1517,7 +2052,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "BitplaneRZEStage",
         "cardId": "fzgm-bitplane-rze",
         "algorithm": "bitplane-rze",
@@ -1529,7 +2064,7 @@
         "doi": "10.1145/3588195.3592994"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "RREStage",
         "cardId": "fzgm-rre",
         "algorithm": "rre",
@@ -1541,7 +2076,7 @@
         "url": "https://szcompressor.org/FZGPUModules/stage_rre.html"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "RZEStage",
         "cardId": "fzgm-rze",
         "algorithm": "rze",
@@ -1591,7 +2126,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "AdaptiveBitpackStage",
         "cardId": "fzgm-adaptive-bitpack",
         "algorithm": "adaptive-bitpack",
@@ -1603,7 +2138,7 @@
         "doi": "10.1145/3581784.3607048"
       },
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "BitpackStage",
         "cardId": "fzgm-bitpack",
         "algorithm": "bitpack",
@@ -1642,14 +2177,14 @@
     "papers": [
       {
         "title": "Progressive/Adaptable Retrieval via Multigrid Decomposition (PMGARD)",
-        "note": "Cited by FZ Module Library as relying on MSB-to-LSB bitplane order for progressive retrieval",
+        "note": "Cited by FZ CPU Module Library as relying on MSB-to-LSB bitplane order for progressive retrieval",
         "year": 2021
       }
     ],
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "BitplaneEncoder",
         "algorithm": "bitplane-pack",
         "relationship": "original",
@@ -1664,7 +2199,7 @@
       "confidence": "low",
       "reviewed_by": null,
       "reviewed_on": null,
-      "notes": "New module created 2026-07-13 from FZ Module Library's catalog (BitplaneEncoder page); no exact prior Z-Hub module matched."
+      "notes": "New module created 2026-07-13 from FZ CPU Module Library's catalog (BitplaneEncoder page); no exact prior Z-Hub module matched."
     }
   },
   {
@@ -1807,7 +2342,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "HuffmanStage",
         "cardId": "fzgm-huffman",
         "algorithm": "huffman",
@@ -1819,7 +2354,7 @@
         "doi": "10.1145/3410463.3414624"
       },
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "HuffmanEncoder",
         "algorithm": "huffman",
         "relationship": "original",
@@ -1829,7 +2364,7 @@
         "url": "https://szcompressor.org/SZ3/modules/HuffmanEncoder.html"
       },
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "HuffmanEncoderV2",
         "algorithm": "huffman",
         "relationship": "original",
@@ -1876,7 +2411,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "ArithmeticEncoder",
         "algorithm": "arithmetic",
         "relationship": "original",
@@ -1964,7 +2499,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZGPUModules",
+        "library": "FZ GPU Module Library",
         "stage": "ANSStage",
         "cardId": "fzgm-ans",
         "algorithm": "ans",
@@ -1975,6 +2510,45 @@
         "url": "https://szcompressor.org/FZGPUModules/stage_ans.html"
       }
     ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "adaptive-binning",
+    "name": "Adaptive Binning (ANS)",
+    "category": "Encoder",
+    "description": "Entropy codes a stream of integers by grouping them into adaptively-sized bins (each covering a contiguous range with roughly equal probability mass), ANS-coding the bin index, then storing each value's offset within its bin as fixed-width bits. Converges quickly to the true entropy of smoothly, independently, identically distributed data without needing a full frequency table.",
+    "features": [
+      "Converges close to true entropy for smooth i.i.d. integer distributions",
+      "Avoids building/transmitting a full per-symbol frequency table",
+      "Bin index coded with ANS; in-bin offset stored as raw bits",
+      "Core novel component of Pcodec (Pco)"
+    ],
+    "tags": [
+      "entropy-coding",
+      "ans",
+      "numeric",
+      "lossless"
+    ],
+    "origin": [
+      "pcodec"
+    ],
+    "papers": [
+      {
+        "title": "Pcodec: Better Compression for Numerical Sequences",
+        "authors": "Martin Loncaric",
+        "year": 2025,
+        "doi": "10.48550/arXiv.2502.06112",
+        "note": "Introduces the binning algorithm as Pco's core novel component"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
     "verification": {
       "status": "unverified",
       "confidence": "low",
@@ -2027,7 +2601,7 @@
     "referenceOnly": false,
     "implementations": [
       {
-        "library": "FZ Module Library",
+        "library": "FZ CPU Module Library",
         "stage": "SPERREncoder",
         "algorithm": "speck",
         "relationship": "original",
@@ -2043,6 +2617,144 @@
       "reviewed_by": null,
       "reviewed_on": null,
       "notes": ""
+    }
+  },
+  {
+    "id": "spiht-coding",
+    "name": "SPIHT Coding",
+    "category": "Encoder",
+    "description": "Set Partitioning in Hierarchical Trees: codes wavelet coefficients by exploiting the tree structure across subbands (a coefficient's \"descendants\" at finer scales tend to be insignificant if it is), recursively partitioning sets of coefficients into significant/insignificant groups at descending bitplane thresholds and only subdividing sets that test significant. Predates and directly inspired SPECK's simpler rectangular-region variant.",
+    "features": [
+      "Exploits parent-child insignificance correlation across wavelet subbands",
+      "Embedded/progressive bitstream — can be truncated at any point for a graceful quality/size tradeoff",
+      "No explicit tree pointers needed; decoder reconstructs the same partitioning",
+      "Predecessor to SPECK (see speck-coding)"
+    ],
+    "tags": [
+      "encoding",
+      "wavelet",
+      "embedded",
+      "lossless"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "A new, fast, and efficient image codec based on set partitioning in hierarchical trees",
+        "authors": "A. Said, W. A. Pearlman",
+        "doi": "10.1109/76.499834",
+        "year": 1996,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology"
+      }
+    ],
+    "referenceOnly": true,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added as the residual-layer coder used by EBCC (see the ebcc composition); no specific Z-Hub-tracked implementation confirmed beyond that."
+    }
+  },
+  {
+    "id": "ebcot-coding",
+    "name": "EBCOT",
+    "category": "Encoder",
+    "description": "Context-adaptive embedded bitplane coder used by JPEG 2000. Partitions each wavelet subband into small, independently-coded code-blocks, then codes each bitplane in three passes (significance propagation, magnitude refinement, cleanup) where each bit's coding probability context is derived from the states of its already-coded neighbors and fed to a binary MQ arithmetic coder. Produces an embedded, quality-scalable bitstream that a post-compression rate-distortion optimization step can truncate per code-block to hit a target size or quality. Architecturally distinct from SPECK's set-partitioning approach (see speck-coding) — EBCOT uses fixed code-blocks with per-bit context modeling rather than SPECK's adaptive region-splitting.",
+    "features": [
+      "3-pass-per-bitplane coding (significance propagation, magnitude refinement, cleanup)",
+      "Context-adaptive: each bit's coding probability depends on already-coded neighbor states",
+      "Fixed, independently-coded code-blocks (typically 64×64 or smaller), not global bitplane sets",
+      "Embeds a binary (MQ) arithmetic coder internally",
+      "Produces an embedded/scalable bitstream, truncatable per code-block for rate-distortion control"
+    ],
+    "tags": [
+      "encoding",
+      "context",
+      "bitplane",
+      "adaptive",
+      "lossless"
+    ],
+    "origin": [
+      "jpeg2000"
+    ],
+    "papers": [
+      {
+        "title": "High Performance Scalable Image Compression with EBCOT",
+        "authors": "David Taubman",
+        "doi": "10.1109/83.847830",
+        "year": 2000,
+        "venue": "IEEE Transactions on Image Processing",
+        "note": "Original EBCOT algorithm, later adopted into JPEG 2000"
+      },
+      {
+        "title": "JPEG2000 Image Compression Fundamentals, Standards and Practice",
+        "authors": "David S. Taubman, Michael W. Marcellin",
+        "year": 2002,
+        "note": "Standard reference text covering EBCOT's role in JPEG 2000"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New module drafted for the image/video codec expansion, Phase 1b (see docs/image-video-codec-scoping.md). Kept separate from speck-coding: speck-coding's own description is written narrowly around SPECK's set-partitioning mechanism; EBCOT's context-adaptive per-bit arithmetic coding over fixed code-blocks is a genuinely different algorithm, not a parameterization of SPECK. Marked lossless by the same reasoning as speck-coding: exact if run to full bitplane depth, lossy only if the rate-distortion step truncates it."
+    }
+  },
+  {
+    "id": "in-loop-filter",
+    "name": "In-Loop Filter",
+    "category": "Filter",
+    "description": "Smooths reconstructed-frame artifacts (block-boundary discontinuities, ringing) using neighboring already-reconstructed pixels, running inside the compression loop itself: the filtered frame, not the raw decoded one, becomes the reference for future intra/inter prediction. Doesn't reduce data size and doesn't decorrelate for coding — its role is reference/output-quality repair rather than compression. Concrete forms vary by codec: H.264's deblocking filter, HEVC's deblocking + Sample Adaptive Offset (SAO), AV1's Constrained Directional Enhancement Filter (CDEF) + loop restoration, and H.266/VVC's Adaptive Loop Filter (ALF).",
+    "features": [
+      "Operates on already-reconstructed pixels using their neighbors, after the transform/quantize/entropy stages",
+      "In-loop: filtered output feeds back as the reference for future prediction, not just decoder-side cosmetic cleanup",
+      "Doesn't compress and doesn't decorrelate for coding — a distinct pipeline role from the other six categories",
+      "Concrete form varies by codec (deblocking, SAO, CDEF, loop restoration, ALF)"
+    ],
+    "tags": [
+      "spatial",
+      "block-based",
+      "lossy"
+    ],
+    "origin": [],
+    "papers": [
+      {
+        "title": "Adaptive deblocking filter",
+        "authors": "P. List, A. Joch, J. Lainema, G. Bjøntegaard, M. Karczewicz",
+        "doi": "10.1109/TCSVT.2003.815175",
+        "year": 2003,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "H.264/AVC's in-loop deblocking filter"
+      },
+      {
+        "title": "Sample Adaptive Offset in the HEVC Standard",
+        "authors": "C.-M. Fu, E. Alshina, A. Alshin, Y.-W. Huang, C.-Y. Chen, C.-Y. Tsai, C.-W. Hsu, S.-M. Lei, J.-H. Park, W.-J. Han",
+        "doi": "10.1109/TCSVT.2012.2223052",
+        "year": 2012,
+        "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+        "note": "HEVC's second in-loop filter, applied after deblocking"
+      },
+      {
+        "title": "The AV1 Constrained Directional Enhancement Filter (CDEF)",
+        "authors": "S. Midtskogen, J.-M. Valin",
+        "doi": "10.1109/ICASSP.2018.8461732",
+        "year": 2018,
+        "venue": "IEEE ICASSP",
+        "note": "AV1's in-loop directional deringing filter"
+      }
+    ],
+    "referenceOnly": false,
+    "implementations": [],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "First module in the new Filter category (added 2026-07-19 for the image/video codec expansion, see docs/image-video-codec-scoping.md and docs/vocabulary.md's taxonomy note). Doesn't fit Transform (not decorrelating for coding) or Mutator (uses neighbors) — resolved via explicit user sign-off, not inferred from an existing module description the way earlier Phase 1b modules were."
     }
   }
 ]

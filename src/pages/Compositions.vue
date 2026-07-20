@@ -27,7 +27,7 @@ const displayedPipeline = (comp) => activeVariant(comp)?.pipeline || comp.pipeli
 
 const displayedReproduce = (comp) => activeVariant(comp)?.reproduce || comp.reproduce;
 
-// CPU counterpart to reproduce: a link to the composition's FZ Module Library
+// CPU counterpart to reproduce: a link to the composition's FZ CPU Module Library
 // (SZ3) algorithm page. Follows the active SZ3 branch when the variant sets its
 // own (default SZ3 -> ALGO_INTERP_LORENZO, SVD branch -> ALGO_SVD, ...).
 const displayedFzAlgorithm = (comp) => activeVariant(comp)?.fzAlgorithm || comp.fzAlgorithm;
@@ -185,6 +185,16 @@ onMounted(() => {
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
                 <h5 class="card-title mb-2">{{ composition.name }}</h5>
+                <a
+                  v-if="composition.firstParty"
+                  href="https://fzframework.org"
+                  target="_blank"
+                  rel="noopener"
+                  class="badge fz-badge text-decoration-none me-2"
+                  title="Developed as part of the FZ project — fzframework.org"
+                >
+                  <i class="bi bi-patch-check-fill me-1"></i>FZ
+                </a>
                 <span :class="`badge bg-${getCategoryColor(composition.category)} me-2`">
                   {{ composition.category }}
                 </span>
@@ -298,7 +308,7 @@ onMounted(() => {
               <span class="small">{{ composition.usedIn.join(', ') }}</span>
             </div>
 
-            <!-- GitHub Link / Reproduce Preset (GPU) / FZ Module Library page (CPU) -->
+            <!-- GitHub Link / Reproduce Preset (GPU) / FZ CPU Module Library page (CPU) -->
             <div v-if="composition.github || displayedReproduce(composition) || displayedFzAlgorithm(composition)" class="mb-3">
               <a
                 v-if="composition.github"
@@ -314,16 +324,16 @@ onMounted(() => {
                 target="_blank"
                 class="btn btn-sm btn-outline-primary me-2"
               >
-                View FZGPUModules Preset
+                View FZ GPU Module Library Preset
               </a>
               <a
                 v-if="displayedFzAlgorithm(composition)"
                 :href="displayedFzAlgorithm(composition).url"
                 target="_blank"
                 class="btn btn-sm btn-outline-primary"
-                :title="`FZ Module Library: ${displayedFzAlgorithm(composition).algorithm}`"
+                :title="`FZ CPU Module Library: ${displayedFzAlgorithm(composition).algorithm}`"
               >
-                <i class="bi bi-book"></i> View in FZ Module Library
+                <i class="bi bi-book"></i> View in FZ CPU Module Library
               </a>
               <div v-if="displayedReproduce(composition)?.note" class="small text-muted fst-italic mt-1">
                 {{ displayedReproduce(composition).note }}
@@ -432,5 +442,12 @@ onMounted(() => {
 .capability-badge .badge strong {
   display: block;
   font-size: 0.9rem;
+}
+
+.fz-badge {
+  background-color: var(--bs-success);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 </style>

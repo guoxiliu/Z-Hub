@@ -1,9 +1,39 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const sdrbenchDatasets = ref([]);
 const loading = ref(false);
 const sdrError = ref('');
+
+// Shared slugging logic with Ecosystem.vue's application-entry dataset links —
+// keep these in sync if either changes.
+function slug(name) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Dataset names can't contain dots the way composition ids can, but use
+// getElementById (not querySelector) anyway for consistency with the rest
+// of the site's cross-page anchor links.
+function scrollToHash() {
+  if (!route.hash) return;
+  const targetId = decodeURIComponent(route.hash.slice(1));
+  setTimeout(() => {
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.classList.add('highlight-row');
+      setTimeout(() => element.classList.remove('highlight-row'), 2000);
+    }
+  }, 300);
+}
+
+watch(() => route.hash, scrollToHash);
 
 // Helper function to linkify URLs in text
 function linkifySource(text) {
@@ -36,6 +66,7 @@ async function loadSdrbenchDatasets() {
     }
     const data = await response.json();
     sdrbenchDatasets.value = data;
+    scrollToHash();
   } catch (err) {
     console.error('Error loading SDRBench datasets:', err);
     sdrError.value = `Failed to load SDRBench datasets: ${err.message}`;
@@ -139,7 +170,7 @@ onMounted(loadAll);
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="dataset in sdrbenchDatasets" :key="dataset.name">
+                  <tr v-for="dataset in sdrbenchDatasets" :id="slug(dataset.name)" :key="dataset.name">
                     <!-- Name column -->
                     <td>
                       <div class="fw-bold text-center">{{ dataset.name }}</div>
@@ -434,4 +465,21 @@ onMounted(loadAll);
   border-radius: 5px;
 }
 
+.highlight-row {
+  animation: highlight-row-flash 1s ease-in-out;
+}
+
+.highlight-row > td {
+  animation: highlight-row-flash 1s ease-in-out;
+}
+
+@keyframes highlight-row-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(13, 110, 253, 0.15);
+  }
+}
 </style>

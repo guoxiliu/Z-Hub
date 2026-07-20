@@ -162,6 +162,7 @@ const categoryDescriptions = {
   Mutator: "Changes each value's representation independently of its neighbors (rescaling, format conversion). Doesn't look at other values and doesn't compress on its own.",
   Shuffler: "Reorders values, or the bits/bytes within them, without doing any computation. Doesn't compress on its own, it just arranges data so a later stage compresses it better.",
   Encoder: "The only category that actually reduces size, by exploiting redundancy.",
+  Filter: "Smooths already-reconstructed values using their neighbors to repair artifacts from earlier lossy stages. Unlike a Transform it isn't decorrelating for compression, and unlike a Mutator it does use neighboring values — in codecs where it appears, the filtered output feeds back as the reference for future prediction rather than just being decoder-side cleanup.",
 };
 
 // Get category color
@@ -173,6 +174,7 @@ function getCategoryColor(category) {
     'Transform': 'info',
     'Mutator': 'dark',
     'Shuffler': 'secondary',
+    'Filter': 'danger',
   };
   return colors[category] || 'secondary';
 }
