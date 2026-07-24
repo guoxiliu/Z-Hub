@@ -1,0 +1,77 @@
+name: "Module submission"
+description: "Propose a compression module/algorithm to be listed on Z-Hub"
+title: "Module: <name>"
+labels: ["module"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a module! Z-Hub modules are kept general and
+        hardware-neutral (implementation-specific detail like tiling,
+        precision, or a particular library's variant belongs on a
+        **composition**, not here — see `docs/compositions.md` if that's
+        what you're describing instead).
+
+        A maintainer will review this, map it into the module schema
+        (`docs/vocabulary.md` has the taxonomy/tag conventions), and open
+        the PR — you don't need to write JSON yourself.
+  - type: input
+    id: name
+    attributes:
+      label: Module name
+      placeholder: e.g., Lorenzo Predictor
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: See docs/vocabulary.md for the full definitions if you're unsure.
+      options:
+        - Predictor
+        - Transform
+        - Quantizer
+        - Mutator
+        - Shuffler
+        - Encoder
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this module do, in general (algorithm-level, not tied to one implementation)?
+    validations:
+      required: true
+  - type: textarea
+    id: features
+    attributes:
+      label: Key features
+      description: One per line. What makes this technique useful or distinct?
+  - type: dropdown
+    id: lossy
+    attributes:
+      label: Lossy, lossless, or near-lossless?
+      description: See the Pass 3 write-up in docs/vocabulary.md for how Z-Hub defines these.
+      options:
+        - Lossless
+        - Near-lossless (small, bounded error)
+        - Lossy
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: origin
+    attributes:
+      label: Origin / prior art
+      description: Where did this technique come from? Field, library, or compressor it's known from (one per line).
+  - type: textarea
+    id: papers
+    attributes:
+      label: Papers
+      description: Title, authors, year, and a DOI or URL if available (one per line).
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else the maintainer should know?

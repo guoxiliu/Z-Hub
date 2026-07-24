@@ -1,13 +1,51 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, RouterLink } from 'vue-router';
 
 const route = useRoute();
 const modules = ref([]);
+const compositions = ref([]);
 const loading = ref(false);
 const error = ref('');
 const searchQuery = ref('');
 const selectedCategory = ref('all');
+
+// module id -> [{ id, name }] of compositions whose pipeline (including
+// variant pipelines and per-stage adaptive-selection alternatives) uses it.
+// Derived client-side from compositions.json so it never goes stale.
+const appearsIn = computed(() => {
+  const map = {};
+  for (const comp of compositions.value) {
+    const seen = new Set();
+    const record = (moduleId) => {
+      if (moduleId && !seen.has(moduleId)) {
+        seen.add(moduleId);
+        (map[moduleId] ||= []).push({ id: comp.id, name: comp.name });
+      }
+    };
+    const pipelines = [comp.pipeline, ...(comp.variants || []).map(v => v.pipeline)];
+    for (const pipeline of pipelines) {
+      for (const stage of pipeline || []) {
+        record(stage.module);
+        for (const alt of stage.alternatives || []) {
+          record(alt.module);
+        }
+      }
+    }
+  }
+  return map;
+});
+
+async function loadCompositions() {
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/g, '/').replace(/^$/g, '/');
+  try {
+    const res = await fetch(`${base}compositions.json`, { cache: 'no-store' });
+    compositions.value = res.ok ? await res.json() : [];
+  } catch (e) {
+    console.warn('compositions.json fetch failed (Appears In will be empty):', e);
+    compositions.value = [];
+  }
+}
 
 async function loadModules() {
   loading.value = true;
@@ -73,7 +111,10 @@ async function loadModules() {
   }
 }
 
-onMounted(loadModules);
+onMounted(() => {
+  loadModules();
+  loadCompositions();
+});
 
 // Group modules by category
 const modulesByCategory = computed(() => {
@@ -112,17 +153,28 @@ const categories = computed(() => {
   return ['all', ...Array.from(cats).sort()];
 });
 
+// What distinguishes each category, on the axis of "how a stage touches the
+// data" (see docs/vocabulary.md for the full rationale behind the split).
+const categoryDescriptions = {
+  Predictor: "Guesses each value from its neighbors, then keeps only the residual (actual minus predicted). Good predictions cluster residuals near zero, which compresses well downstream.",
+  Transform: "Mixes many values together with a cross-value mathematical transform (frequency, multi-resolution, tensor) to decorrelate them. Unlike a Mutator, it doesn't touch values independently.",
+  Quantizer: "Reduces per-value precision.",
+  Mutator: "Changes each value's representation independently of its neighbors (rescaling, format conversion). Doesn't look at other values and doesn't compress on its own.",
+  Shuffler: "Reorders values, or the bits/bytes within them, without doing any computation. Doesn't compress on its own, it just arranges data so a later stage compresses it better.",
+  Encoder: "The only category that actually reduces size, by exploiting redundancy.",
+  Filter: "Smooths already-reconstructed values using their neighbors to repair artifacts from earlier lossy stages. Unlike a Transform it isn't decorrelating for compression, and unlike a Mutator it does use neighboring values — in codecs where it appears, the filtered output feeds back as the reference for future prediction rather than just being decoder-side cleanup.",
+};
+
 // Get category color
 function getCategoryColor(category) {
   const colors = {
     'Predictor': 'primary',
     'Encoder': 'success',
     'Quantizer': 'warning',
-    'Transformer': 'info',
-    'Filter': 'secondary',
-    'Mutator': 'purple',
-    'Shuffler': 'cyan',
-    'Verifier': 'dark',
+    'Transform': 'info',
+    'Mutator': 'dark',
+    'Shuffler': 'secondary',
+    'Filter': 'danger',
   };
   return colors[category] || 'secondary';
 }
@@ -162,9 +214,14 @@ function getCategoryColor(category) {
         <span v-if="!loading">Reload</span>
         <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       </button>
-      <button class="btn btn-primary">
+      <a
+        href="https://github.com/skyler-ruiter/Z-Hub/issues/new?template=module_submission.yml"
+        target="_blank"
+        rel="noopener"
+        class="btn btn-primary"
+      >
         Submit a Module
-      </button>
+      </a>
     </div>
 
     <!-- Error Message -->
@@ -184,10 +241,13 @@ function getCategoryColor(category) {
       </div>
 
       <div v-for="(categoryModules, category) in modulesByCategory" :key="category" class="mb-5">
-        <h3 class="mb-3">
+        <h3 class="mb-1">
           {{ category }}s
           <span class="badge bg-secondary ms-2">{{ categoryModules.length }}</span>
         </h3>
+        <p v-if="categoryDescriptions[category]" class="text-muted small mb-3">
+          {{ categoryDescriptions[category] }}
+        </p>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           <div v-for="module in categoryModules" :key="module.id" class="col">
@@ -195,7 +255,9 @@ function getCategoryColor(category) {
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                   <h5 class="card-title mb-0">{{ module.name }}</h5>
-                  <span :class="`badge bg-${getCategoryColor(category)}`">
+                  <span
+                    :class="`badge bg-${getCategoryColor(category)} flex-shrink-0 ms-2`"
+                  >
                     {{ module.category }}
                   </span>
                 </div>
@@ -203,7 +265,7 @@ function getCategoryColor(category) {
                 <p class="card-text text-muted small mb-3">{{ module.description }}</p>
 
                 <!-- Features -->
-                <div class="mb-3">
+                <div v-if="module.features && module.features.length" class="mb-3">
                   <h6 class="small fw-bold mb-2">Key Features:</h6>
                   <ul class="small mb-0">
                     <li v-for="(feature, idx) in module.features.slice(0, 3)" :key="idx">
@@ -221,6 +283,35 @@ function getCategoryColor(category) {
                   >
                     {{ tag }}
                   </span>
+                </div>
+
+                <!-- Implementations -->
+                <div v-if="module.implementations && module.implementations.length" class="mb-3">
+                  <h6 class="small fw-bold mb-2">Available in:</h6>
+                  <a
+                    v-for="impl in module.implementations"
+                    :key="`${impl.library}-${impl.stage}`"
+                    :href="impl.url"
+                    target="_blank"
+                    rel="noopener"
+                    class="badge bg-success-subtle text-success-emphasis border border-success-subtle text-decoration-none me-1 mb-1"
+                    :title="`${impl.stage}${impl.variant ? ' — ' + impl.variant : ''} · ${impl.relationship}${impl.hardware ? ' · ' + impl.hardware.toUpperCase() : ''}`"
+                  >
+                    {{ impl.library }} · {{ impl.stage }}
+                  </a>
+                </div>
+
+                <!-- Appears In -->
+                <div v-if="appearsIn[module.id] && appearsIn[module.id].length" class="mb-3">
+                  <h6 class="small fw-bold mb-2">Appears in:</h6>
+                  <RouterLink
+                    v-for="comp in appearsIn[module.id]"
+                    :key="comp.id"
+                    :to="`/compositions#${comp.id}`"
+                    class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle text-decoration-none me-1 mb-1"
+                  >
+                    {{ comp.name }}
+                  </RouterLink>
                 </div>
 
                 <!-- Expandable Details -->
@@ -244,11 +335,11 @@ function getCategoryColor(category) {
                       :data-bs-parent="`#accordion-${module.id}`"
                     >
                       <div class="accordion-body p-0 pt-2">
-                        <!-- All Features -->
+                        <!-- Remaining Features (Key Features above already shows the first 3) -->
                         <div v-if="module.features.length > 3" class="mb-3">
-                          <h6 class="small fw-bold mb-2">All Features:</h6>
+                          <h6 class="small fw-bold mb-2">More Features:</h6>
                           <ul class="small mb-0">
-                            <li v-for="(feature, idx) in module.features" :key="idx">
+                            <li v-for="(feature, idx) in module.features.slice(3)" :key="idx">
                               {{ feature }}
                             </li>
                           </ul>
@@ -266,6 +357,11 @@ function getCategoryColor(category) {
                             <div v-if="paper.doi">
                               <a :href="`https://doi.org/${paper.doi}`" target="_blank" rel="noopener">
                                 {{ paper.doi }}
+                              </a>
+                            </div>
+                            <div v-if="paper.url">
+                              <a :href="paper.url" target="_blank" rel="noopener">
+                                {{ paper.url }}
                               </a>
                             </div>
                             <div v-if="paper.note" class="text-muted fst-italic">

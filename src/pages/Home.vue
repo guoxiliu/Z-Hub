@@ -7,14 +7,20 @@
         <h1 class="display-5 fw-bold">Z-Hub for Compression</h1>
         <p class="col-md-8 fs-4">
           Z-Hub is a central resource for developers and users to share new modules, compressor
-          compositions, analysis, and data. The platform promotes collaboration among researchers
-          and developers working on scientific data compression.
+          compositions, the wider surrounding ecosystem, and data. The platform promotes
+          collaboration among researchers and developers working on scientific data compression.
+        </p>
+        <p class="col-md-8">
+          Z-Hub catalogs the techniques and ecosystem around the
+          <a href="https://fzframework.org" target="_blank" rel="noopener">FZ project</a>
+          <i class="bi bi-box-arrow-up-right ms-1 small"></i> — visit its site to learn more about
+          FZ itself.
         </p>
       </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-md-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      <div class="col">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Compression Modules</h5>
@@ -25,7 +31,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Compressor Compositions</h5>
@@ -34,7 +40,18 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Ecosystem</h5>
+            <p class="card-text">
+              Learn abuot the wider ecosystem of tools, libraries, and resources supporting data compression research and development.
+            </p>
+            <RouterLink to="/ecosystem" class="btn btn-info">Explore Ecosystem</RouterLink>
+          </div>
+        </div>
+      </div>
+      <div class="col">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Datasets</h5>

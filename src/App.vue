@@ -1,8 +1,23 @@
-<script setup></script>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const showBackToTop = ref(false);
+
+const onScroll = () => {
+  showBackToTop.value = window.scrollY > 400;
+};
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }));
+onUnmounted(() => window.removeEventListener('scroll', onScroll));
+</script>
 
 <template>
   <div id="app">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
       <div class="container-fluid">
         <RouterLink class="navbar-brand" to="/">
           <img
@@ -34,6 +49,9 @@
               <RouterLink class="nav-link" to="/compositions">Compositions</RouterLink>
             </li>
             <li class="nav-item">
+              <RouterLink class="nav-link" to="/ecosystem">Ecosystem</RouterLink>
+            </li>
+            <li class="nav-item">
               <RouterLink class="nav-link" to="/datasets">Datasets</RouterLink>
             </li>
           </ul>
@@ -44,6 +62,17 @@
     <main class="flex-shrink-0">
       <RouterView />
     </main>
+
+    <button
+      v-if="showBackToTop"
+      type="button"
+      class="btn btn-success back-to-top shadow"
+      aria-label="Back to top"
+      title="Back to top"
+      @click="scrollToTop"
+    >
+      <i class="bi bi-arrow-up"></i>
+    </button>
 
     <footer class="footer mt-auto py-3 bg-light">
       <div class="container text-center">
@@ -61,5 +90,19 @@
 }
 main {
   flex-grow: 1;
+}
+
+.back-to-top {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  z-index: 1030;
 }
 </style>

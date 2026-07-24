@@ -1,0 +1,1158 @@
+[
+  {
+    "id": "fzgpumodules",
+    "name": "FZ GPU Module Library",
+    "aliases": [
+      "FZGPUModules",
+      "FZGM"
+    ],
+    "url": "https://szcompressor.org/FZGPUModules/",
+    "github": "https://github.com/szcompressor/FZGPUModules",
+    "category": "module-library",
+    "firstParty": true,
+    "platform": "C++ / CUDA",
+    "description": "CUDA library for building composable, high-throughput compression pipelines: each pipeline is a directed acyclic graph of stages — predictors, quantizers, entropy coders, transforms — connected and executed entirely on the GPU. Z-Hub's source of truth for GPU stage implementations: module implementations link to its FAIR stage cards, and GPU composition reproduce presets are built on it.",
+    "relatedTo": [
+      "fz-module-library"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "FZModules: A Heterogeneous Computing Framework for Customizable Scientific Data Compression Pipelines",
+        "authors": "Skyler Ruiter, Jiannan Tian, Fengguang Song",
+        "doi": "10.1145/3731599.3767376",
+        "year": 2025,
+        "note": "Describes FZModules, the heterogeneous (GPU+CPU) framework this library and FZ CPU Module Library are both part of"
+      }
+    ]
+  },
+  {
+    "id": "fz-module-library",
+    "name": "FZ CPU Module Library",
+    "aliases": [
+      "FZ Module Library",
+      "SZ3 module catalog"
+    ],
+    "url": "https://szcompressor.org/SZ3/",
+    "github": "https://github.com/szcompressor/SZ3",
+    "category": "module-library",
+    "firstParty": true,
+    "platform": "C++",
+    "description": "A modular, header-only C++17 toolkit for error-bounded scientific data compression, consolidating major lossy algorithms — SZ3, ZFP, SPERR, and MGARD — into one library so pipelines can be built from a shared pool of reusable modules rather than one monolithic compressor. Backs CPU module implementations and composition on Z-Hub.",
+    "relatedTo": [
+      "fzgpumodules"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "SZ3: A Modular Framework for Composing Prediction-Based Error-Bounded Lossy Compressors",
+        "doi": "10.1109/TBDATA.2022.3201176",
+        "year": 2023,
+        "venue": "IEEE Transactions on Big Data",
+        "note": "The modular prediction-based compression framework this library's CPU core descends from"
+      }
+    ]
+  },
+  {
+    "id": "lc-framework",
+    "name": "LC-framework",
+    "aliases": [
+      "LC"
+    ],
+    "github": "https://github.com/burtscher/LC-framework",
+    "category": "module-library",
+    "platform": "CUDA / C++",
+    "description": "Framework of composable, single-purpose components you chain into a pipeline. The conceptual origin of several Z-Hub modules (marked via origin: lc-framework) and used to compose the lossless compression pipelines. Has the ability to do genetic search over pipelines and produce a pareto front of optimal configurations.",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "LC Framework Overview",
+        "url": "https://userweb.cs.txstate.edu/~burtscher/LC/LC_Framework_Overview.pdf",
+        "note": "Design document from the maintainers"
+      }
+    ]
+  },
+  {
+    "id": "openzl",
+    "name": "OpenZL",
+    "url": "https://openzl.org",
+    "github": "https://github.com/facebook/openzl",
+    "category": "module-library",
+    "platform": "C / C++",
+    "description": "Meta's format-aware compression framework: takes a description of your data and builds a specialized compressor for it from a graph of composable components, aiming for compression ratios generic compressors can't reach while preserving high speed. Ships a core library plus tools that generate specialized compressors, all readable by one universal decompressor. Aimed at engineers working with large quantities of specialized datasets (e.g. AI workloads) who need fast processing pipelines.",
+    "note": "Emerging; recently open-sourced by Meta.",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "openzl.org confirmed as a real, working homepage (2026-07-19); github repo (facebook/openzl) confirmed via that page's own links."
+    },
+    "papers": [
+      {
+        "title": "OpenZL: A Graph-Based Model for Compression",
+        "doi": "10.48550/arXiv.2510.03203",
+        "url": "https://arxiv.org/abs/2510.03203",
+        "year": 2025,
+        "venue": "arXiv"
+      }
+    ]
+  },
+  {
+    "id": "libpressio",
+    "name": "libpressio",
+    "github": "https://github.com/robertu94/libpressio",
+    "category": "meta-interface",
+    "firstParty": true,
+    "platform": "C++ / Python / Rust / R / Julia / WebAssembly / Bash",
+    "description": "A uniform interface (meta-compressor) over many scientific compressors — SZ, ZFP, MGARD, blosc, and others — behind one API. The core of a wider plugin family (see libpressio-opt, libpressio-jit, libpressio I/O plugins) maintained by the same FZ-affiliated team.",
+    "relatedTo": [
+      "libpressio-opt",
+      "libpressio-jit",
+      "libpressio-io",
+      "libpressio-tools",
+      "libpressio-errorinjector"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "Productive and Performant Generic Lossy Data Compression with LibPressio",
+        "authors": "Robert Underwood, Victoriana Malvoso, Jon C. Calhoun, Sheng Di, Franck Cappello",
+        "doi": "10.1109/DRBSD754563.2021.00005",
+        "year": 2021,
+        "venue": "DRBSD-7 (7th International Workshop on Data Analysis and Reduction for Big Scientific Data, held with SC21)"
+      }
+    ]
+  },
+  {
+    "id": "libpressio-opt",
+    "name": "libpressio-opt",
+    "aliases": [
+      "OptZConfig"
+    ],
+    "github": "https://github.com/robertu94/libpressio_opt",
+    "category": "optimizer",
+    "firstParty": true,
+    "platform": "C++",
+    "description": "libpressio's autotuning plugin — automatically searches a compressor's settings (like error bound) to hit a target quality or compression ratio, instead of tuning them by hand. Can optionally use a lightweight proxy model to estimate results without running the real compressor, to search faster. Implements OptZConfig, which formulates compressor configuration as a general optimization problem so new search algorithms, compressors, and target metrics can be swapped in with minimal changes.",
+    "relatedTo": [
+      "libpressio"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "OptZConfig: Efficient Parallel Optimization of Lossy Compression Configuration",
+        "authors": "Robert Underwood, Jon C. Calhoun, Sheng Di, Amy Apon, Franck Cappello",
+        "doi": "10.1109/TPDS.2022.3154096",
+        "year": 2022,
+        "venue": "IEEE Transactions on Parallel and Distributed Systems"
+      }
+    ]
+  },
+  {
+    "id": "qpet",
+    "name": "QPET",
+    "github": "https://github.com/JLiu-1/QPET-Artifact",
+    "category": "optimizer",
+    "platform": "C++",
+    "description": "A portable framework layered on top of existing error-bounded lossy compressors (SZ3, ZFP, SPERR, ...) that preserves accuracy on a downstream quantity of interest (QoI) — a derived quantity computed from the data, rather than the raw data's own pointwise error bound. Doesn't replace the underlying compressor's algorithm; wraps its error-bound control so QoI error stays bounded even though pointwise error alone doesn't guarantee that.",
+    "papers": [
+      {
+        "title": "QPET: A Versatile and Portable Quantity-of-Interest-Preservation Framework for Error-Bounded Lossy Compression",
+        "authors": "Jinyang Liu, Sheng Di, Kai Zhao, Xin Liang, Zizhong Chen, Franck Cappello",
+        "doi": "10.48550/arXiv.2412.02799",
+        "year": 2024,
+        "venue": "arXiv"
+      },
+      {
+        "title": "FRaZ: A Generic High-Fidelity Fixed-Ratio Lossy Compression Framework for Scientific Floating-point Data",
+        "authors": "Robert Underwood, Sheng Di, Jon C. Calhoun, Franck Cappello",
+        "doi": "10.48550/arXiv.2001.06139",
+        "year": 2020,
+        "venue": "IPDPS 2020",
+        "note": "Pre-existing work QPET builds on"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "FRaZ predates QPET by ~4 years and shares Sheng Di / Franck Cappello as authors — added per maintainer's direct knowledge of the lineage, not independently verified via a citation in QPET's own paper."
+    }
+  },
+  {
+    "id": "libpressio-jit",
+    "name": "libpressio-jit",
+    "github": "https://github.com/robertu94/libpressio_jit",
+    "category": "module-library",
+    "firstParty": true,
+    "platform": "C++",
+    "description": "Compiles new FZ module combinations into libpressio plugins on the fly, by invoking the system C++ compiler in the background — so new combinations can be tried without rebuilding libpressio itself.",
+    "relatedTo": [
+      "libpressio"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Very early/small repo (2 commits, no README at time of research) — architecture description above is inferred from its poorjit dependency and Spack build flags, not from project documentation. Confirm with maintainer/upstream before treating as authoritative."
+    }
+  },
+  {
+    "id": "libpressio-io",
+    "name": "libpressio I/O plugins",
+    "aliases": [
+      "libpressio-adios1/2",
+      "libpressio_dataset",
+      "libpressio_gfarm"
+    ],
+    "github": "https://github.com/robertu94/libpressio_dataset",
+    "category": "io-integration",
+    "firstParty": true,
+    "platform": "C++",
+    "description": "libpressio's format/filesystem/dataset I/O adapters — ADIOS1 and ADIOS2 file readers/writers (libpressio-adios1, libpressio_adios2), a compression filter for the Gfarm distributed filesystem (libpressio_gfarm), and a loader for collections of benchmark datasets (libpressio_dataset).",
+    "relatedTo": [
+      "libpressio"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Represents 4 separate repos (github.com/robertu94/libpressio-adios1, libpressio_adios2, libpressio_dataset, libpressio_gfarm); grouped as one card rather than split four ways. libpressio_gfarm confirmed only via the GitHub org listing, not Spack."
+    }
+  },
+  {
+    "id": "libpressio-tools",
+    "name": "libpressio-tools",
+    "github": "https://github.com/robertu94/libpressio_tools",
+    "category": "other",
+    "firstParty": true,
+    "platform": "C++ / Bash",
+    "description": "Command-line tools for libpressio — run and compare compressors directly from the shell, without writing any code.",
+    "relatedTo": [
+      "libpressio"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Confirmed via the core libpressio README's list of companion repos; its own Spack package still marks it \"Pre-Release\"."
+    }
+  },
+  {
+    "id": "libpressio-errorinjector",
+    "name": "libpressio-errorinjector",
+    "github": "https://github.com/robertu94/libpressio-errorinjector",
+    "category": "other",
+    "firstParty": true,
+    "platform": "C++",
+    "description": "A libpressio meta-compressor plugin that injects controlled noise into data for error-sensitivity studies — testing how downstream analysis tolerates compression-induced error, rather than compressing data itself.",
+    "relatedTo": [
+      "libpressio"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    }
+  },
+  {
+    "id": "numcodecs",
+    "name": "numcodecs",
+    "url": "https://numcodecs.readthedocs.io/",
+    "github": "https://github.com/zarr-developers/numcodecs",
+    "category": "io-integration",
+    "platform": "Python / Zarr",
+    "description": "Python registry of buffer codecs and filters used by Zarr. Its codecs are ready-made compressors/filters; the numcodecs-wasm build can chain simple codec sequences.",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "supportedCompressors": [
+      "Blosc",
+      "Zstandard",
+      "LZ4",
+      "Gzip",
+      "Zlib",
+      "BZ2",
+      "LZMA",
+      "PCodec",
+      "ZFP (Python)"
+    ],
+    "relatedTo": [
+      "blosc"
+    ],
+    "papers": [
+      {
+        "title": "Zarr: A Cloud-Optimized Storage for Interactive Access of Large Arrays",
+        "doi": "10.5281/zenodo.8340248",
+        "year": 2023,
+        "venue": "Proceedings of the Conference on Research Data Infrastructure (CoRDI)",
+        "note": "Describes Zarr, the array storage format numcodecs supplies codecs for — not a numcodecs-specific paper; none found"
+      }
+    ]
+  },
+  {
+    "id": "numcodecs-wasm",
+    "name": "numcodecs-wasm",
+    "aliases": [
+      "numcodecs_wasm"
+    ],
+    "url": "https://numcodecs-wasm.readthedocs.io/",
+    "category": "io-integration",
+    "platform": "WebAssembly / Python",
+    "description": "A separate package family from numcodecs proper: ships codecs pre-compiled to WebAssembly for deterministic, cross-platform-reproducible execution, and exposes each as its own independently-published PyPI package (numcodecs_wasm_*) that plugs into the numcodecs API. Some wrap codecs Z-Hub already tracks elsewhere (ZFP, SPERR, SZ3, JPEG 2000, LC, PCodec); others are novel single-purpose codecs (asinh, bit rounding, EBCC, Fourier-feature network, QPET-SPERR, random projection, stochastic rounding, swizzle/reshape, uniform noise) tracked as their own Z-Hub modules/compositions.",
+    "relatedTo": [
+      "numcodecs",
+      "lc-framework"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "No paper found; each numcodecs_wasm_* sub-package is its own PyPI release rather than one monolithic project, so 'the' repo is a judgment call (docs site used as the canonical url instead of picking one sub-package's GitHub repo)."
+    }
+  },
+  {
+    "id": "blosc",
+    "name": "Blosc",
+    "aliases": [
+      "c-blosc",
+      "Blosc2"
+    ],
+    "url": "https://blosc.org",
+    "github": "https://github.com/Blosc/c-blosc",
+    "category": "module-library",
+    "platform": "C (bindings for Python, R, Julia, ...)",
+    "description": "A meta-compressor library that splits data into cache-sized blocks and, within each block, applies a byte/bit-shuffle prefilter (rearranging bytes or bits across elements so similar bytes sit next to each other) before handing the block to a swappable backend codec (BloscLZ, LZ4/LZ4HC, Snappy, zlib, or Zstandard). The blocking and shuffle steps plus multithreaded execution are what let it beat memcpy() speed in favorable cases, not the backend codec alone.",
+    "relatedTo": [
+      "numcodecs",
+      "hdf5",
+      "libpressio"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "No formal peer-reviewed paper found for Blosc itself; description sourced from blosc.org and the c-blosc README/blog posts."
+    }
+  },
+  {
+    "id": "btrblocks",
+    "name": "BtrBlocks",
+    "github": "https://github.com/maxi-k/btrblocks",
+    "category": "module-library",
+    "platform": "C++",
+    "description": "A columnar compression framework built on the argument that for analytical data lakes, cascading several fast lightweight encodings (dictionary, frame-of-reference, delta, run-length, FSST for strings, ...) chosen per-chunk via cheap sampling beats reaching for one heavyweight general-purpose codec — trading a little ratio for decompression speeds close to network/memory bandwidth. Primarily a research artifact/reference implementation rather than a maintained production library; its approach is what Vortex's built-in compressor implements.",
+    "relatedTo": [
+      "vortex"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added because the Pcodec paper (arXiv 2502.06112) compares against it directly but notes they could not get it to run without segfaults, using Vortex as a proxy instead."
+    },
+    "papers": [
+      {
+        "title": "BtrBlocks: Efficient Columnar Compression for Data Lakes",
+        "authors": "Maximilian Kuschewski, David Sauerwein, Adnan Alhomssi, Viktor Leis",
+        "doi": "10.1145/3589263",
+        "year": 2023,
+        "venue": "Proceedings of the ACM on Management of Data (SIGMOD 2023)"
+      }
+    ]
+  },
+  {
+    "id": "vortex",
+    "name": "Vortex",
+    "url": "https://vortex.dev",
+    "github": "https://github.com/vortex-data/vortex",
+    "category": "io-integration",
+    "platform": "Rust (bindings for Python, Arrow)",
+    "description": "An extensible columnar file format for compressed Apache Arrow arrays, positioned as a successor to Parquet: optimized for very fast random-access reads and scans by running compute kernels directly on encoded data (skipping decompression for many operations) rather than only on decompressed buffers. Its built-in compressor implements the BtrBlocks cascading-encoding-selection approach, though other compression strategies can be substituted. An Incubation Stage project at LFAI&Data (Linux Foundation).",
+    "relatedTo": [
+      "btrblocks"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "No dedicated peer-reviewed paper found (cites the BtrBlocks paper as its compression-strategy basis); used as a stand-in for BtrBlocks in the Pcodec paper's benchmarks."
+    }
+  },
+  {
+    "id": "parquet",
+    "name": "Apache Parquet",
+    "url": "https://parquet.apache.org/",
+    "github": "https://github.com/apache/parquet-format",
+    "category": "io-integration",
+    "platform": "Cross-language (Java/C++/Rust/...)",
+    "description": "Columnar storage file format for analytical workloads: encodes each column with a column-level encoding (dictionary, delta, or plain/RLE-hybrid) and then optionally compresses the encoded column bytes with a general-purpose backend codec. Delta encoding only applies to integer-typed columns; dictionary encoding is used for other types including floats.",
+    "supportedCompressors": [
+      "Zstandard",
+      "Snappy",
+      "Gzip",
+      "LZ4",
+      "Brotli",
+      "Uncompressed"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "No formal peer-reviewed paper found (Apache project, format spec is the primary source); added because the Pcodec paper benchmarks against it (Dictionary and Delta encodings, paired with Zstd)."
+    }
+  },
+  {
+    "id": "hdf5",
+    "name": "HDF5",
+    "aliases": [
+      "HDF5 filters"
+    ],
+    "url": "https://www.hdfgroup.org/solutions/hdf5/",
+    "github": "https://github.com/HDFGroup/hdf5",
+    "category": "io-integration",
+    "platform": "C library (+ bindings)",
+    "description": "Scientific data format and I/O library. Relevant to compression through its dynamically-loaded filter plugins, which carry compressors (SZ, ZFP, blosc, …) transparently on dataset read/write. An I/O carrier for compressors rather than a compressor itself.",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "supportedCompressors": [
+      "SZ / SZ3",
+      "ZFP",
+      "SPERR",
+      "Blosc / Blosc2",
+      "Zstandard",
+      "LZ4",
+      "BZip2",
+      "Bitshuffle"
+    ],
+    "papers": [
+      {
+        "title": "An overview of the HDF5 technology suite and its applications",
+        "authors": "Mike Folk, Gerd Heber, Quincey Koziol, Elena Pourmal, Dana Robinson",
+        "doi": "10.1145/1966895.1966900",
+        "year": 2011,
+        "venue": "EDBT/ICDT 2011 Workshop on Array Databases"
+      }
+    ]
+  },
+  {
+    "id": "pnetcdf",
+    "name": "PnetCDF",
+    "aliases": [
+      "Parallel netCDF"
+    ],
+    "url": "https://parallel-netcdf.github.io/",
+    "github": "https://github.com/Parallel-NetCDF/PnetCDF",
+    "category": "io-integration",
+    "platform": "C (+ Fortran/C++ bindings, MPI-IO)",
+    "description": "High-performance parallel I/O library for the classic netCDF formats (CDF-1/2/5), giving MPI-based scientific applications collective, parallel read/write access to netCDF data. Unlike HDF5, PnetCDF has no filter-plugin architecture and does not support data compression itself — datasets needing both parallel I/O and compression typically go through NetCDF-4 (which is built on HDF5) instead.",
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Included specifically to record that it does NOT carry compression, unlike the other io-integration entries here — worth stating explicitly since it's otherwise easy to assume from its HDF5-adjacent role."
+    },
+    "papers": [
+      {
+        "title": "Parallel netCDF: A High-Performance Scientific I/O Interface",
+        "authors": "Jianwei Li, Wei-keng Liao, Alok Choudhary, Robert Ross, Rajeev Thakur, William Gropp, Robert Latham, Andrew Siegel, Brad Gallagher, Michael Zingale",
+        "doi": "10.1109/SC.2003.10053",
+        "year": 2003,
+        "venue": "SC 2003"
+      }
+    ]
+  },
+  {
+    "id": "zarr",
+    "name": "Zarr",
+    "url": "https://zarr.dev",
+    "github": "https://github.com/zarr-developers/zarr-python",
+    "category": "io-integration",
+    "platform": "Python (+ implementations in other languages)",
+    "description": "Cloud-optimized storage format for chunked, compressed N-dimensional arrays, designed for interactive access to large arrays without reading them in full. Delegates its actual codec implementations to numcodecs, which supplies the compressors/filters Zarr chunks are encoded with.",
+    "relatedTo": [
+      "numcodecs"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added alongside numcodecs/numcodecs-wasm — numcodecs' own description referenced Zarr as the format it backs, but Zarr itself had no entry of its own."
+    },
+    "papers": [
+      {
+        "title": "Zarr: A Cloud-Optimized Storage for Interactive Access of Large Arrays",
+        "doi": "10.5281/zenodo.8340248",
+        "year": 2023,
+        "venue": "Proceedings of the Conference on Research Data Infrastructure (CoRDI)"
+      }
+    ]
+  },
+  {
+    "id": "adios2",
+    "name": "ADIOS2",
+    "aliases": [
+      "Adaptable Input Output System 2"
+    ],
+    "url": "https://adios2.readthedocs.io/",
+    "github": "https://github.com/ornladios/ADIOS2",
+    "category": "io-integration",
+    "platform": "C++ (+ Python/Fortran/C/MATLAB bindings, MPI)",
+    "description": "High-performance I/O framework for scientific data at exascale, unifying file-based and in-situ (streaming, staging) data movement behind one API with pluggable \"engines\" for the backing transport/storage. Ships its own compression/transform operators (including SZ, ZFP, Blosc, and MGARD) as pluggable stages on write/read.",
+    "relatedTo": [
+      "libpressio-io"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Added because libpressio-io wraps ADIOS1/2 readers/writers but ADIOS2 itself had no standalone entry."
+    },
+    "papers": [
+      {
+        "title": "ADIOS 2: The Adaptable Input Output System. A framework for high-performance data management",
+        "authors": "William F. Godoy, Norbert Podhorszki, et al.",
+        "doi": "10.1016/j.softx.2020.100561",
+        "year": 2020,
+        "venue": "SoftwareX"
+      }
+    ]
+  },
+  {
+    "id": "ocelot",
+    "name": "Ocelot",
+    "category": "io-integration",
+    "firstParty": true,
+    "platform": "Python (Globus SDK)",
+    "description": "A data-transfer framework that integrates error-bounded lossy compression into Globus for wide-area scientific data transfer. Uses an ML-based quality-estimation model to predict compressed size/ratio/distortion ahead of time, plus scheduling strategies that overlap compression with transfer to reduce end-to-end time. Loads NetCDF, HDF5, and binary data.",
+    "papers": [
+      {
+        "title": "Optimizing Scientific Data Transfer on Globus with Error-bounded Lossy Compression",
+        "authors": "Yuanjian Liu, Sheng Di, Kyle Chard, Ian Foster, Franck Cappello",
+        "year": 2023,
+        "url": "https://arxiv.org/abs/2307.05416"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Description now sourced from the 2023 arXiv paper (previously a maintainer-recollection placeholder); still unverified by the Z-Hub maintainer. Platform is a best-effort guess (Globus SDK is Python) — not confirmed against Ocelot's own source."
+    }
+  },
+  {
+    "id": "zccl",
+    "name": "ZCCL",
+    "aliases": [
+      "hZCCL",
+      "gZCCL",
+      "ghZCCL"
+    ],
+    "url": "https://zccl.org/",
+    "github": "https://github.com/ZCCLorg/zccl",
+    "category": "io-integration",
+    "firstParty": true,
+    "platform": "C / C++ (MPI, CUDA)",
+    "description": "A compression-accelerated collective communications library — the first to compute and communicate directly on compressed data, for exascale multi-node MPI collectives. hZCCL adds a homomorphic compressor (operates on compressed data without a decompress-operate-recompress round trip) with a runtime heuristic to pick the compression pipeline; gZCCL/ghZCCL are the GPU-aware variants.",
+    "papers": [
+      {
+        "title": "hZCCL: Accelerating Collective Communication with Co-Designed Homomorphic Compression",
+        "authors": "Jiajun Huang, Sheng Di, Xiaodong Yu, Yujia Zhai, Jinyang Liu, Zizhe Jian, Xin Liang, Kai Zhao, Xiaoyi Lu, Zizhong Chen, Franck Cappello, Yanfei Guo, Rajeev Thakur",
+        "doi": "10.1109/SC41406.2024.00110",
+        "year": 2024,
+        "venue": "SC24"
+      },
+      {
+        "title": "gZCCL: Compression-Accelerated Collective Communication Framework for GPU Clusters",
+        "authors": "Jiajun Huang, Sheng Di, Xiaodong Yu, Yujia Zhai, Jinyang Liu, Yafan Huang, Ken Raffenetti, Hui Zhou, Kai Zhao, Xiaoyi Lu, Zizhong Chen, Franck Cappello, Yanfei Guo, Rajeev Thakur",
+        "doi": "10.1145/3650200.3656636",
+        "year": 2024,
+        "venue": "ICS '24 (38th ACM International Conference on Supercomputing)"
+      },
+      {
+        "title": "ZCCL: Significantly Improving Collective Communication With Error-Bounded Lossy Compression",
+        "authors": "Jiajun Huang, Sheng Di, Xiaodong Yu, Yujia Zhai, Zhaorui Zhang, Jinyang Liu, Xiaoyi Lu, Ken Raffenetti, Hui Zhou, Kai Zhao, Khalid Alharthi, Zizhong Chen, Franck Cappello, Yanfei Guo, Rajeev Thakur",
+        "doi": "10.48550/arXiv.2502.18554",
+        "year": 2025,
+        "venue": "arXiv"
+      },
+      {
+        "title": "ghZCCL: Advancing GPU-aware Collective Communications with Homomorphic Compression",
+        "authors": "Jiajun Huang, Sheng Di, Yafan Huang, Zizhong Chen, Franck Cappello, Yanfei Guo, Rajeev Thakur",
+        "doi": "10.1145/3721145.3733642",
+        "year": 2025,
+        "venue": "ICS '25 (39th ACM International Conference on Supercomputing)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "Category placement is a judgment call — see note field."
+    }
+  },
+  {
+    "id": "z-checker",
+    "name": "Z-checker",
+    "github": "https://github.com/CODARcode/Z-checker",
+    "category": "other",
+    "platform": "C",
+    "description": "A general-purpose framework for characterizing scientific datasets and assessing lossy compression results against them: computes error/quality statistics (PSNR, correlation, distortion, spectral/derivative analysis, ...), compares multiple compressors' outputs, and generates visualization-ready reports, rather than compressing data itself.",
+    "relatedTo": [
+      "cuz-checker",
+      "qcat"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "Z-checker: A framework for assessing lossy compression of scientific data",
+        "authors": "Dingwen Tao, Sheng Di, Hanqi Guo, Zizhong Chen, Franck Cappello",
+        "doi": "10.1177/1094342017737147",
+        "year": 2019,
+        "venue": "The International Journal of High Performance Computing Applications"
+      }
+    ]
+  },
+  {
+    "id": "cuz-checker",
+    "name": "cuZ-Checker",
+    "github": "https://github.com/CODARcode/cuZ-checker",
+    "category": "other",
+    "platform": "CUDA / C++",
+    "description": "GPU port of Z-checker: performs the same compression quality/error assessment entirely on the GPU (rather than transferring data back to the CPU) so it can keep pace with GPU-based lossy compressors, with fused CUDA kernels to cut the cost of metrics like SSIM that are otherwise expensive to compute at scale.",
+    "relatedTo": [
+      "z-checker"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": ""
+    },
+    "papers": [
+      {
+        "title": "cuZ-Checker: A GPU-Based Ultra-Fast Assessment System for Lossy Compressions",
+        "authors": "Xiaodong Yu, Sheng Di, Ali Murat Gok, Dingwen Tao, Franck Cappello",
+        "doi": "10.1109/Cluster48925.2021.00065",
+        "year": 2021,
+        "venue": "IEEE International Conference on Cluster Computing (CLUSTER)"
+      }
+    ]
+  },
+  {
+    "id": "qcat",
+    "name": "QCAT",
+    "aliases": [
+      "Quick Compression Analysis Toolkit"
+    ],
+    "github": "https://github.com/szcompressor/qcat",
+    "category": "other",
+    "firstParty": true,
+    "platform": "C",
+    "description": "A lightweight variant of Z-checker from the szcompressor org: data-type/format conversion, quick slice visualization of raw vs. decompressed data, and fast comparison metrics — trading Z-checker's breadth of analysis for ease of use on quick one-off checks.",
+    "relatedTo": [
+      "z-checker",
+      "fz-module-library"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "No dedicated paper found (positioned by its own README as a lightweight Z-checker variant, not a separately published tool)."
+    }
+  },
+  {
+    "id": "fzvis",
+    "name": "FZ-VIS",
+    "github": "https://github.com/YuxiaoLi1234/fzvis",
+    "category": "other",
+    "firstParty": true,
+    "platform": "Vue / Python",
+    "description": "A visualization tool for interacting with error-bounded compressor configurations (SZ, ZFP), dataset manipulation, and metrics comparison — configure compressors, upload datasets, run compression, and compare results through interactive charts and slice-based data views, rather than scripting each run by hand.",
+    "relatedTo": [
+      "fz-module-library"
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "firstParty not set — team affiliation with the FZ project not confirmed, only inferred from scope (configures SZ/ZFP) and naming. relatedTo fz-module-library is a soft/inferred link for the same reason, not a confirmed integration. No papers found."
+    }
+  },
+  {
+    "id": "climate",
+    "name": "Climate",
+    "category": "application",
+    "description": "Earth system models (ESMs) like CESM and E3SM produce enormous, ever-growing output volumes (CMIP6 alone: ~28 PB from 45 institutes, up from CMIP5's 2 PB and CMIP3's 40 TB) while supercomputing storage capacity hasn't kept pace. Climate scientists are wary of losing information given the scrutiny on climate predictions, so quality preservation (not just ratio) dominates the requirements here.",
+    "simulators": [
+      "CESM ",
+      "E3SM / SCREAM",
+      "DYAMOND"
+    ],
+    "datasets": [
+      "ERA5",
+      "CESM"
+    ],
+    "compositions": [
+      "cliz",
+      "sperr",
+      "ebcc"
+    ],
+    "capabilities": [
+      {
+        "name": "dSSIM quality threshold",
+        "description": "Key metric: a deseasonalized variant of SSIM, normalized to [0,1] (1 = perfect), compared against a desired similarity threshold of 0.99919, or 0.995 for more aggressive compression. Other metrics in use: standard deviation, probability positive, mean absolute error, Pearson correlation, and a Kolmogorov-Smirnov test."
+      },
+      {
+        "name": "Preserve extremes and structure, not just averages",
+        "description": "Scientists specifically want extreme values, subtle shifts in seasonal cycles, and changes in gradients preserved — generic RMSE/PSNR-style metrics don't capture whether these are intact."
+      },
+      {
+        "name": "Uncorrelated dimensions",
+        "description": "Some climate dataset dimensions are spatially/temporally correlated (e.g. latitude) while others (e.g. height) aren't — compressors that assume all dimensions correlate mispredict and lose ratio on these fields. CLISz specifically addresses this by auto-detecting uncorrelated dimensions rather than predicting across them."
+      },
+      {
+        "name": "Long/indefinite data lifetime",
+        "description": "Required data lifetime is possibly indefinite with a very large and growing user base, which makes the community reluctant to adopt compressor technologies that might not remain readable/supported long-term."
+      }
+    ],
+    "relatedTo": [
+      "hdf5",
+      "pnetcdf"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.1 (Climate)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "New 'application' category, first entries added 2026-07-20. compositions[] is a curated judgment call (compositions explicitly relevant to this domain per the report or their own usedIn tags), not an exhaustive list."
+    }
+  },
+  {
+    "id": "cosmology",
+    "name": "Cosmology",
+    "category": "application",
+    "description": "Cosmological N-body/hydrodynamics simulations (e.g. via Nyx, HACC) model the evolution of hundreds of billions to trillions of particles or cells, producing datasets reaching into the petabytes. A single INCITE hydrodynamics-plus-N-body run at 12,288^3 elements allocates 13.5 TB per double-precision checkpoint, with ~14 similar checkpoints kept to track temporal evolution.",
+    "simulators": [
+      "Nyx",
+      "HACC"
+    ],
+    "datasets": [
+      "NYX",
+      "HACC"
+    ],
+    "compositions": [
+      "sz-pm",
+      "lcp"
+    ],
+    "capabilities": [
+      {
+        "name": "Bias-free error for power spectrum",
+        "description": "For the power spectrum QoI, introduced error must be unbiased/randomly distributed — SZ-style prediction-based compressors can incur patterned (non-random) errors, which invalidates the randomness assumption and may need special treatment."
+      },
+      {
+        "name": "AMR-aware compression",
+        "description": "Because these simulations use adaptive mesh refinement (AMR), compression needs to take advantage of the multiresolution/adaptive-partitioning structure rather than treating the grid as uniform — specialized techniques like AMRIC and MultiReZ target this, versus generic SZ3 for regular grids."
+      },
+      {
+        "name": "Other tracked QoIs",
+        "description": "Halo-finding, PDF, and the Gimlet and k-point functions are also treated as analysis metrics that need to stay consistent across the ~5-year horizon the report expects the simulation outputs to remain deterministic and analyzable."
+      }
+    ],
+    "relatedTo": [
+      "hdf5"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.3 (Cosmology)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "compositions[] is a curated judgment call, not exhaustive — AMRIC/MultiReZ/TAC+ are named in the report as specialized AMR techniques but aren't tracked as their own Z-Hub compositions yet."
+    }
+  },
+  {
+    "id": "molecular-dynamics",
+    "name": "Molecular Dynamics",
+    "category": "application",
+    "description": "MD simulations track particle coordinates over time to study proteins, nucleic acids, and materials at the atomic level. Uncompressed trajectory files run hundreds of GB to a few TB for system sizes of 100,000 to a few million atoms over ns-to-µs timescales — small enough that some MD packages already ship built-in lossy trajectory compression, unlike most of the other domains here.",
+    "simulators": [
+      "GROMACS",
+      "AMBER",
+      "CHARMM",
+      "LAMMPS",
+      "NAMD"
+    ],
+    "datasets": [
+      "EXAALT"
+    ],
+    "compositions": [
+      "mdz",
+      "mdz-xtc",
+      "lcp"
+    ],
+    "capabilities": [
+      {
+        "name": "XTC: GROMACS' 25-year-old baseline",
+        "description": "Lossy, ~3-3.5x compression ratio, precision 0.001 nm (max absolute error 0.0005 nm) for water-rich systems. Doesn't store velocities or forces. The existing bar future compressors are measured against."
+      },
+      {
+        "name": "TNG: more advanced, less adopted",
+        "description": "Introduced ~10 years ago with Burrows-Wheeler/LZ/Huffman-based compression and multiframe (temporal) compression across nearby frames — meaningfully better ratio than XTC when frames are written at short intervals, but slower, and hasn't gained much traction since XTC is 'good enough' for most uses."
+      },
+      {
+        "name": "Structural error bounds",
+        "description": "Bond lengths must stay within ~0.1 Å and hydrogen-bond distances within ~0.35 Å of the original — user-specified absolute (and sometimes relative) error limits, not just an aggregate distortion metric, since these directly determine whether reconstructed chemical bonds/angles remain physically valid."
+      },
+      {
+        "name": "Fast decompression over fast compression",
+        "description": "Time spent writing a trajectory is negligible next to the rest of an MD run, but decompression happens repeatedly during analysis/visualization — so decompression speed matters far more than compression speed, the opposite priority from most other domains here."
+      }
+    ],
+    "relatedTo": [
+      "hdf5"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.6 (Molecular Dynamics Simulations)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "EXAALT is SDRBench's molecular dynamics entry, filling the gap this note used to flag (an earlier pass left datasets[] empty since the report itself names MDDB, an aggregator/database effort, rather than a specific benchmark dataset)."
+    }
+  },
+  {
+    "id": "combustion",
+    "name": "Combustion",
+    "category": "application",
+    "description": "Exascale CFD combustion simulations couple turbulence with chemistry across two contrasting workloads: S3D direct numerical simulation (DNS) checkpointing and BlastNet machine-learning super-resolution. A single S3D checkpoint runs 2-3 TB across up to 500 saved files, with meshes of 10-20 billion grid points and 25-150 dependent variables per grid point, run at leadership scale.",
+    "simulators": [
+      "S3D"
+    ],
+    "datasets": [
+      "S3D",
+      "BlastNet"
+    ],
+    "capabilities": [
+      {
+        "name": "Topology preservation",
+        "description": "Merge trees and Morse-Smale complexes characterize critical points (minima/maxima/saddles) that identify burning cells and flame structure — compression must preserve these topological features and spatial discontinuities like shocks, not just minimize pointwise error."
+      }
+    ],
+    "relatedTo": [
+      "hdf5",
+      "adios2"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.2 (Combustion)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "compositions[] is a curated judgment call — the report names SZ2 explicitly as the current primary framework, linked to sz-2.0."
+    }
+  },
+  {
+    "id": "fusion",
+    "name": "Magnetic Confinement Fusion",
+    "aliases": [
+      "Fusion"
+    ],
+    "category": "application",
+    "description": "Tokamaks like DIII-D (San Diego) generate high-frequency multimodal diagnostic data — e.g. ECEi (electron cyclotron emission imaging) at 1 MHz temporal resolution over a coarse 20x8 spatial grid — alongside terabyte-scale first-principles gyrokinetic simulation output, all in service of ITER-scale burning-plasma research (targeting Q>=10 power gain). A growing use case is compressing this data before training machine-learning disruption-prediction models.",
+    "simulators": [
+      "XGC"
+    ],
+    "datasets": [
+      "XGC",
+      "NSTX GPI"
+    ],
+    "capabilities": [
+      {
+        "name": "Performance target",
+        "description": "At least 5x compression ratio is expected for ECEi datasets; reduced precision (single vs. double) for ML training data is being investigated as a further lever."
+      }
+    ],
+    "relatedTo": [
+      "hdf5"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.4 (Magnetic Confinement Fusion)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "compositions[] links sz3 as a stand-in for the report's generic 'SZ compressors via HDF5 filters' phrasing — not version-pinned in the source the way combustion's SZ2 mention is."
+    }
+  },
+  {
+    "id": "light-sources",
+    "name": "Light Sources",
+    "category": "application",
+    "description": "Light source facilities — LCLS and APS are scaling detector rates dramatically (LCLS-II: 1 MHz vs. LCLS-I's 120 Hz), with SLAC's highest-rate detectors already producing ~1 TB/s from a single experimental hutch. Storage and bandwidth costs at this scale make real-time, in-line data reduction a requirement rather than an optimization.",
+    "datasets": [
+      "EXAFEL"
+    ],
+    "compositions": [
+      "roibin-sz",
+      "sz3",
+      "lscomp"
+    ],
+    "capabilities": [
+      {
+        "name": "Uncorrelated dimensions, different cause than climate",
+        "description": "Like climate data, light source data has dimensions that shouldn't be assumed correlated — but here it's caused by a non-contiguous quantity, like the panel id of an area detector assembled from many independent panels, not insufficient resolution."
+      },
+      {
+        "name": "Small buffer compression",
+        "description": "Facilities produce many small images that must be compressed together to hit good ratios and throughput — especially challenging on GPU, since batching needs large simultaneous data volumes to hide movement costs; may need GPUDirect Storage or similar to avoid unnecessary CPU-GPU copies."
+      },
+      {
+        "name": "Hardware-portable decompression",
+        "description": "Compression happens on state-of-the-art beamline hardware, but downstream analysis often runs on older or different hardware farther from the detector — decompression needs to work across that hardware gap."
+      }
+    ],
+    "relatedTo": [
+      "hdf5"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.5 (Light Sources)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "simulators[] omitted — light source facilities are experimental instruments, not simulation codes, so the field doesn't fit cleanly; LCLS/APS are named in the description instead."
+    }
+  },
+  {
+    "id": "quantum-circuit-simulation",
+    "name": "Quantum Circuit Simulation",
+    "category": "application",
+    "description": "Simulating an N-qubit quantum circuit requires representing 2^N numbers, so compression directly trades memory for simulatable circuit size: compressing the state vector by a factor of N effectively adds log2(N) qubits of headroom. State-vector simulators hit a hard memory wall around ~45 qubits on today's supercomputers; tensor-network simulators avoid storing the full state but face their own bottleneck — intermediate contracted tensors that can reach 16 PB at 50 qubits.",
+    "simulators": [
+      "QTensor",
+      "Quimb"
+    ],
+    "capabilities": [
+      {
+        "name": "Compression for tensor-network simulators",
+        "description": "A configurable framework tailored to QTensor integrates with cuSZ/cuSZx and achieves ~10x higher compression ratios than cuSZ alone on an A100 GPU (or 3-4x higher ratios than cuSZx at matched throughput), exploiting the extreme sparsity these tensors develop as amplitudes shrink with problem size — via thresholding near-zero values and separating nonzero values into a compact array plus a position bitmap."
+      },
+      {
+        "name": "Fidelity is the key accuracy metric",
+        "description": "Fidelity measures similarity between the compressed and ideal quantum state, giving a lower bound on the cumulative effect of lossy compression across every gate applied. A compression ratio target should be significantly above 2, ideally around 10x, to be worth the overhead."
+      },
+      {
+        "name": "Overhead can dominate",
+        "description": "Because compression sits directly in the simulation's hot loop, overhead can consume up to 90% of total simulation time for computationally expensive compressors, making homomorphic compression an appealing future direction."
+      }
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.7 (Quantum Circuit Simulation)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "datasets[] and relatedTo omitted — no SDRBench entry or dominant I/O library is named for this domain in the source; input is typically a GPU device pointer to a complex-number buffer rather than a file format."
+    }
+  },
+  {
+    "id": "seismology",
+    "name": "Seismology",
+    "category": "application",
+    "description": "Seismic imaging reconstructs the Earth's subsurface from wave propagation and reflection data — used industrially and scientifically. Two techniques drive the compression need: adjoint tomography (full-waveform inversion via forward/adjoint wavefield snapshots) and reverse time migration (RTM, which backpropagates recorded wavefields through a velocity model). Both generate massive volumetric snapshot data that creates I/O bottlenecks during iterative optimization.",
+    "simulators": [
+      "SPECFEM3D_GLOBE"
+    ],
+    "compositions": [
+      "hyz"
+    ],
+    "capabilities": [
+      {
+        "name": "Domain-expert quality, not SSIM/PSNR",
+        "description": "Unlike general image/video compression, seismic imaging relies on domain-expert analysis rather than SSIM/PSNR. Small visual distortions, phase shifts, or amplitude errors can be unacceptable because they lead to misinterpreting real geological structures. A moderate ratio (5x+ for RTM) is enough as long as I/O burden drops and critical regions stay intact."
+      },
+      {
+        "name": "Dynamic error bounds for a changing time series",
+        "description": "RTM's wavefield behaves as a time series where early timesteps are sparse with a large value range (highly compressible) and later timesteps are dense with a smaller range (harder to compress) — a static error bound doesn't fit both regimes well."
+      }
+    ],
+    "relatedTo": [
+      "hdf5"
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.8 (Seismology)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "datasets[] omitted — none of SDRBench's 14 datasets are seismic."
+    }
+  },
+  {
+    "id": "system-logs",
+    "name": "System Logs",
+    "category": "application",
+    "description": "Scientific workflow systems (Parsl, Ray, TaskVine, Globus Compute) that orchestrate many tasks across parallel/distributed infrastructure generate enormous volumes of monitoring and logging data, captured at subsecond granularity from potentially hundreds of thousands of concurrent workers. This is a newer, less-explored application for lossy compression: monitoring/logging compression today is generally lossless and general-purpose, with no prior work applying lossy compression specifically to task-based monitoring.",
+    "capabilities": [
+      {
+        "name": "Monitoring itself has real overhead",
+        "description": "Parsl workflows have shown up to an order-of-magnitude throughput degradation when monitoring is enabled — compression is one lever to reduce that burden, but delayed or lost monitoring data can itself degrade scheduling decisions"
+      },
+      {
+        "name": "Two use cases with different tolerances",
+        "description": "Real-time monitoring for scheduling decisions needs high-throughput compression with minimal latency; persisting logging data for post hoc analysis is far more tolerant of compression delay, particularly since that data is rarely decompressed at all once stored."
+      },
+      {
+        "name": "Data isn't purely numeric",
+        "description": "Most monitoring data is floating-point (resource usage metrics), but logs also mix in text describing lifecycle events and errors — a compression approach limited to numeric arrays doesn't cover the whole picture."
+      }
+    ],
+    "papers": [
+      {
+        "title": "Lossy Compression of Scientific Data: Applications Constrains and Requirements",
+        "authors": "Franck Cappello, et al.",
+        "doi": "10.48550/arXiv.2503.20031",
+        "year": 2025,
+        "note": "Section 2.9 (System Logs)"
+      }
+    ],
+    "verification": {
+      "status": "unverified",
+      "confidence": "low",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "notes": "simulators[]/datasets[]/compositions[]/relatedTo all omitted — genuinely nothing to link. Parsl/Ray/TaskVine/Globus Compute are workflow orchestrators, not simulators, so they're named in the description rather than forced into simulators[]. No Z-Hub composition targets log/monitoring data, and no SDRBench dataset applies — this is a real, reported gap, not an oversight."
+    }
+  }
+]
