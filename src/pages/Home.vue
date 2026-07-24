@@ -22,43 +22,43 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">Compression Modules</h5>
             <p class="card-text">
               Browse compression modules contributed by the community and upload your own.
             </p>
-            <RouterLink to="/modules" class="btn btn-primary">Check Modules</RouterLink>
+            <RouterLink to="/modules" class="btn btn-primary mt-auto">Check Modules</RouterLink>
           </div>
         </div>
       </div>
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">Compressor Compositions</h5>
             <p class="card-text">Discover and share specific compositions for lossy compressors.</p>
-            <RouterLink to="/compositions" class="btn btn-success">View Compositions</RouterLink>
+            <RouterLink to="/compositions" class="btn btn-success mt-auto">View Compositions</RouterLink>
           </div>
         </div>
       </div>
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">Ecosystem</h5>
             <p class="card-text">
-              Learn abuot the wider ecosystem of tools, libraries, and resources supporting data compression research and development.
+              Learn about the wider ecosystem of tools, libraries, and resources supporting data compression research and development.
             </p>
-            <RouterLink to="/ecosystem" class="btn btn-info">Explore Ecosystem</RouterLink>
+            <RouterLink to="/ecosystem" class="btn btn-info mt-auto">Explore Ecosystem</RouterLink>
           </div>
         </div>
       </div>
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">Datasets</h5>
             <p class="card-text">
               Explore datasets for testing, benchmarking, and experimentation.
             </p>
-            <RouterLink to="/datasets" class="btn btn-secondary">Browse Datasets</RouterLink>
+            <RouterLink to="/datasets" class="btn btn-secondary mt-auto">Browse Datasets</RouterLink>
           </div>
         </div>
       </div>

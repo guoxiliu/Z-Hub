@@ -118,22 +118,9 @@ onMounted(loadAll);
           aria-labelledby="heading-sdr"
         >
           <div class="accordion-body">
-            <div class="alert alert-info">
-              <p class="fw-bold">Important: when publishing results from one or more datasets presented in this webpage, please:</p>
-              <ul>
-                <li><strong>Cite:</strong> SDRBench: <a href="https://sdrbench.github.io" target="_blank" rel="noopener">https://sdrbench.github.io</a></li>
-                <li><strong>Please also cite:</strong> K. Zhao, S. Di, X. Liang, S. Li, D. Tao, J. Bessac, Z. Chen, and F. Cappello, “SDRBench: Scientific Data Reduction Benchmark for Lossy Compressors”, <em>International Workshop on Big Data Reduction (IWBDR2020)</em>, in conjunction with IEEE Bigdata20.</li>
-                <li><strong>Acknowledge:</strong> the source of the dataset you used, the DOE NNSA ECP project, and the ECP CODAR project.</li>
-                <li><strong>Check:</strong> the condition of publications (some dataset sources request prior check)</li>
-                <li><strong>Contact:</strong> the compressor authors to get the correct compressor configuration according to each dataset and each comparison metrics.</li>
-                <li><strong>Dimension:</strong> the order of the dimensions shown in the 'Format' column of the table is in <strong>row-major order</strong> (aka. C order), which is consistent with well-known I/O libraries such as HDF5. For example, for the CESM-ATM dataset (1800 &times; 3600), 1800 is higher dimension (changing slower) and 3600 is lower dimension (changing faster). For most compressors (such as SZ, ZFP and FPZIP), the dimensions should be given in the reverse order (such as -2 3600 1800) for their executables. If you are not sure about the order of dimension, one simple method is trying different dimension orders and selecting the results with highest compression ratios.</li>
-              </ul>
-            </div>
-            <div v-if="sdrError" class="alert alert-warning" role="alert">{{ sdrError }}</div>
-
             <!-- Important Note about SDRBench Usage -->
             <div class="alert alert-info mb-4" role="alert">
-              <h6 class="alert-heading fw-bold mb-3">Important: When publishing results from one or more datasets presented in this webpage, please:</h6>
+              <h6 class="alert-heading fw-bold mb-3">Important: When publishing results from one or more datasets presented on this web page, please:</h6>
               <ul class="mb-0">
                 <li class="mb-2">
                   <strong>Cite:</strong> SDRBench: <a href="https://sdrbench.github.io" target="_blank" rel="noopener" class="alert-link">https://sdrbench.github.io</a>
@@ -148,10 +135,10 @@ onMounted(loadAll);
                   <strong>Check:</strong> the condition of publications (some dataset sources request prior check)
                 </li>
                 <li class="mb-2">
-                  <strong>Contact:</strong> the compressor authors to get the correct compressor configuration according to each dataset and each comparison metrics.
+                  <strong>Contact:</strong> the compressor authors to get the correct compressor configuration for each dataset and comparison metric.
                 </li>
                 <li>
-                  <strong>Dimension:</strong> the order of the dimensions shown in the 'Format' column of the table is in row-major order (aka. C order), which is consistent with well-known I/O libraries such as HDF5. For example, for the CESM-ATM dataset (1800 × 3600), 1800 is higher dimension (changing slower) and 3600 is lower dimension (changing faster). For most compressors (such as SZ, ZFP and FPZIP), the dimensions should be given in the reverse order (such as <code>-2 3600 1800</code>) for their executables. If you are not sure about the order of dimension, one simple method is trying different dimension orders and selecting the results with highest compression ratios.
+                  <strong>Dimension:</strong> the order of the dimensions shown in the 'Format' column of the table is in row-major order (aka. C order), which is consistent with well-known I/O libraries such as HDF5. For example, for the CESM-ATM dataset (1800 × 3600), 1800 is the higher dimension (changing more slowly) and 3600 is the lower dimension (changing more quickly). For most compressors (such as SZ, ZFP, and FPZIP), the dimensions should be given in the reverse order (such as <code>-2 3600 1800</code>) for their executables. If you are not sure about the order of the dimensions, one simple method is to try different dimension orders and select the results with the highest compression ratios.
                 </li>
               </ul>
             </div>
@@ -300,7 +287,7 @@ onMounted(loadAll);
 
             <div class="mt-4">
               <h5>File Extension Convention</h5>
-              <p>In general, the extension of the data file is named in the following convention:</p>
+              <p>In general, data file extensions follow the convention below:</p>
               <ul>
                 <li><code>.f32</code> means single-precision floating point data in little-endian type</li>
                 <li><code>.F32</code> means single-precision floating point data in big-endian type</li>
@@ -365,9 +352,9 @@ onMounted(loadAll);
 
               <h5>Error Controls</h5>
               <ul>
-                <li>[Common] Point wise absolute error bound</li>
-                <li>[Common] Point wise relative error bound</li>
-                <li>[Variation] Value range point wise relative error bound</li>
+                <li>[Common] Pointwise absolute error bound</li>
+                <li>[Common] Pointwise relative error bound</li>
+                <li>[Variation] Value-range pointwise relative error bound</li>
                 <li>[Other] Fixed PSNR</li>
               </ul>
 
